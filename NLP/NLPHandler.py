@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 NLPHandler.py — Handler Utama NLP Chatbot Bahasa Indonesia (v2 - Hybrid)
 ========================================================================
@@ -176,11 +175,11 @@ PRODUCT_KEYWORDS = {
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-words   = pickle.load(open("model/words.pkl", "rb"))
-classes = pickle.load(open("model/classes.pkl", "rb"))
-model   = load_model("model/chatbot.keras")
+words   = pickle.load(open("NLP/model/words.pkl", "rb"))
+classes = pickle.load(open("NLP/model/classes.pkl", "rb"))
+model   = load_model("NLP/model/chatbot.keras")
 
-with open("model/intents.json", "r", encoding="utf-8") as f:
+with open("NLP/model/intents.json", "r", encoding="utf-8") as f:
     intents_data = json.load(f)
 
 
