@@ -130,7 +130,7 @@ KEYWORD_RULES = {
         "cari", "beli", "ingin", "lihat", "tampilkan", "tunjukkan",
         "baju", "celana", "sepatu", "kaos", "jaket", "rok", "dress",
         "hoodie", "sweater", "kemeja", "gamis", "blazer", "sandal",
-        "tas", "topi", "aksesoris", "pakaian",
+        "tas", "topi", "aksesoris", "pakaian","payung"
     ],
     "checkout": [
         "checkout", "bayar", "pembayaran", "transaksi",
@@ -176,11 +176,11 @@ PRODUCT_KEYWORDS = {
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-words   = pickle.load(open("assets/words.pkl", "rb"))
-classes = pickle.load(open("assets/classes.pkl", "rb"))
-model   = load_model("assets/chatbot.keras")
+words   = pickle.load(open("model/words.pkl", "rb"))
+classes = pickle.load(open("model/classes.pkl", "rb"))
+model   = load_model("model/chatbot.keras")
 
-with open("assets/intents.json", "r", encoding="utf-8") as f:
+with open("model/intents.json", "r", encoding="utf-8") as f:
     intents_data = json.load(f)
 
 
