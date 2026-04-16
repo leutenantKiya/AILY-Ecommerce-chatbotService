@@ -84,9 +84,17 @@ class SQLite:
             print("Eror insert")
             return False
 
-    def find(self, query):
-        self.cursor.execute(f"SELECT * FROM {self.table} WHERE {query}")
+    def getTentangToko(self):
+        self.cursor.execute(f"SELECT question, answer FROM tentangToko")
         return self.cursor.fetchall()
+
+    def findUser(self, username):
+        self.cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
+        return self.cursor.fetchone()
+
+    def findUserByPassword(self, hashed_password):
+        self.cursor.execute("SELECT * FROM user WHERE password = ?", (hashed_password,))
+        return self.cursor.fetchone()
 
     def find_one(self, query):
         self.cursor.execute(f"SELECT * FROM {self.table} WHERE {query}")

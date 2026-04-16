@@ -1,16 +1,3 @@
-"""
-NLPHandler.py — Handler Utama NLP Chatbot Bahasa Indonesia (v2 - Hybrid)
-========================================================================
-Sistem hybrid: Rule Engine + ML Model
-
-Perbaikan dari v1:
-  1. Normalisasi bahasa informal sebelum stemming
-  2. Hybrid rule+ML untuk intent detection
-  3. Threshold fleksibel (>= 0.5)
-  4. Atribut (gender) bersifat opsional → default_user
-  5. Smart fallback: jika intent + produk valid → jangan fallback
-"""
-
 import json
 import pickle
 import re

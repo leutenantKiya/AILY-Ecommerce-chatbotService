@@ -29,55 +29,26 @@ def registration(uname, pword, email, phone, add, role):
     else:
         return Response.Error(message = "Gagal Mendaftarkan Diri")
 
-    
-@router.post("/aily/user/{id}/{publicKeyUser}")
-def chat_user(id: str, publicKeyUser: str):
-    # Cetak ke terminal (untuk debugging)
-    print(f"[USER] id={id}, key={publicKeyUser}")
+# login
+@router.post("/aily/login")
+def login(uname: str, pword: str):
+    db = connect()
+    user = db.findUser(uname)
 
-    # Validasi: cek apakah id + publicKey cocok
-    if not validate_key(id, publicKeyUser, role="user"):
-        return Response.NotFound("Key Tidak Sesuai")
+    if user is None:
+        return Response.NotFound("Username tidak ditemukan")
 
-    # Jika valid, lanjutkan (nanti di sini akan ada NLP processing)
-    return Response.Ok(data=
-        [{
-            "role" : "Admin",
-            "datetime" : "Jan, 12 2025",
-            "time" : "12:00",
-            "message" : "apa la"
-        },
-        {
-            "role" : "System",
-            "datetime" : "Jan, 12 2025",
-            "time" : "12:01",
-            "message" : "Gapaham jink" 
-        }]
-    )
+    # user = (id, username, password, email, phone, address, role)
+    stored_hash = user[2]
 
-@router.post("/aily/admin/{id}/{publicKeyAdmin}")
-def chat_admin(id: str, publicKeyAdmin: str):
-    print(f"[ADMIN] id={id}, key={publicKeyAdmin}")
+    if not bcrypt.checkpw(pword.encode('utf-8'), stored_hash.encode('utf-8')):
+        return Response.Error(message="Password salah")
 
-    # Validasi: cek apakah id + publicKey cocok
-    if not validate_key(id, publicKeyAdmin, role="admin"):
-        return Response.NotFound("Key Tidak Sesuai")
-
-    # Jika valid, lanjutkan (nanti di sini akan ada NLP processing)
-    return Response.Ok(data=
-        ({
-            "role" : "Admin",
-            "datetime" : "Jan, 12 2025",
-            "time" : "12:00",
-            "message" : "apa la"
-        },
-        {
-            "role" : "System",
-            "datetime" : "Jan, 12 2025",
-            "time" : "12:01",
-            "message" : "Gapaham jink" 
-        })
-    )
-
-
-
+    return Response.Ok(data={
+        "id": stored_hash,
+        "username": user[1],
+        "email": user[3],
+        "phone": user[4],
+        "address": user[5],
+        "role": user[6]
+    })
