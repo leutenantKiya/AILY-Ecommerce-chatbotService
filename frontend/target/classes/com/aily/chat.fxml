@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aily.controller.ChatController"
+      styleClass="root-bg"
+      prefWidth="1280" prefHeight="880">
+
+    <!-- ═══ LEFT SIDEBAR ═══ -->
+    <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
+        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+
+        <!-- Logo -->
+        <Label text="AILY" styleClass="logo-text"/>
+
+        <Region VBox.vgrow="NEVER" prefHeight="20"/>
+
+        <!-- Menu -->
+        <Label text="Menu Utama" styleClass="sidebar-section-label"/>
+        <Button fx:id="btnChat" text="💬  Chat" onAction="#showChat"
+                styleClass="menu-item-btn-active"/>
+        <Button fx:id="btnBelanja" text="🛒  Belanja" onAction="#showCart"
+                styleClass="menu-item-btn">
+            <VBox.margin><Insets top="4"/></VBox.margin>
+        </Button>
+        <Button fx:id="btnPesanan" text="🛍️  Pesanan" onAction="#showOrders"
+                styleClass="menu-item-btn">
+            <VBox.margin><Insets top="4"/></VBox.margin>
+        </Button>
+
+        <!-- Spacer -->
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Divider -->
+        <Region styleClass="sidebar-divider" prefHeight="1"/>
+
+        <!-- User info -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <VBox.margin><Insets top="14" bottom="10"/></VBox.margin>
+            <StackPane styleClass="user-avatar">
+                <Label fx:id="avatarLabel" styleClass="user-avatar-label"/>
+            </StackPane>
+            <VBox spacing="2">
+                <Label fx:id="usernameLabel" styleClass="text-white" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                <Label fx:id="roleLabel" styleClass="text-gray" style="-fx-font-size: 11px;"/>
+            </VBox>
+        </HBox>
+
+        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+    </VBox>
+
+    <!-- ═══ MAIN CHAT AREA ═══ -->
+    <VBox HBox.hgrow="ALWAYS">
+
+        <!-- Top bar -->
+        <HBox styleClass="chat-topbar" alignment="CENTER_LEFT" spacing="12">
+            <StackPane styleClass="bot-avatar">
+                <Label text="A" style="-fx-text-fill: #07161E; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </StackPane>
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label text="AILY Assistant" styleClass="heading-white" style="-fx-font-size: 15px;"/>
+                <Label text="● Online" styleClass="text-teal" style="-fx-font-size: 11px;"/>
+            </VBox>
+            <Button text="Bersihkan chat" onAction="#clearChat" styleClass="clear-btn"/>
+        </HBox>
+
+        <!-- Messages scroll area -->
+        <StackPane VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="chat-scroll"
+                        vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox fx:id="messageContainer" styleClass="message-container" spacing="8"/>
+                </content>
+            </ScrollPane>
+            <!-- Watermark -->
+            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.15"/>
+        </StackPane>
+
+        <!-- Quick action chips -->
+        <HBox styleClass="chip-bar" spacing="8" alignment="CENTER_LEFT">
+            <Button text="🔍 Cari produk"    onAction="#chipCariProduk"  styleClass="chip"/>
+            <Button text="❓ FAQ"             onAction="#chipFaq"         styleClass="chip"/>
+            <Button text="🛒 Keranjang"       onAction="#chipKeranjang"   styleClass="chip"/>
+            <Button text="📦 Status Pesanan"  onAction="#chipStatusPesanan" styleClass="chip"/>
+            <Button text="📢 Promo hari ini"  onAction="#chipPromo"       styleClass="chip"/>
+        </HBox>
+
+        <!-- Input bar -->
+        <HBox styleClass="input-bar" alignment="CENTER" spacing="10">
+            <TextField fx:id="messageInput"
+                       promptText="Ketik pesan kamu... (coba: 'cari laptop', 'FAQ', 'keranjang')"
+                       styleClass="chat-input" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="sendButton" text="➤" onAction="#handleSend" styleClass="send-btn"/>
+        </HBox>
+    </VBox>
+
+</HBox>
