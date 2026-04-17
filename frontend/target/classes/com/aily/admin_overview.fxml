@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aily.controller.AdminOverviewController"
+      styleClass="root-bg"
+      prefWidth="1280" prefHeight="880">
+
+    <!-- ═══ ADMIN SIDEBAR ═══ -->
+    <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
+        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="AILY" styleClass="logo-text"/>
+            <Label text="ADMIN" styleClass="admin-badge"/>
+        </HBox>
+
+        <Region styleClass="sidebar-divider" prefHeight="1">
+            <VBox.margin><Insets top="16" bottom="16"/></VBox.margin>
+        </Region>
+
+        <Label text="Menu Utama" styleClass="sidebar-section-label"/>
+        <Button text="📊  Overview"       onAction="#goOverview"    styleClass="menu-item-btn-active"/>
+        <Button text="📦  Kelola Produk"  onAction="#goProducts"    styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💳  Transaksi"      onAction="#goTransactions" styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💬  Riwayat Chat"   onAction="#goChatHistory"  styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+
+        <Region VBox.vgrow="ALWAYS"/>
+        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <ScrollPane fitToWidth="true" styleClass="chat-scroll" HBox.hgrow="ALWAYS" hbarPolicy="NEVER">
+        <content>
+            <VBox styleClass="admin-content" spacing="28">
+
+                <Label text="Overview" styleClass="page-title"/>
+
+                <!-- Stat cards -->
+                <HBox spacing="16">
+                    <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Total Produk" styleClass="stat-title"/>
+                        <Label fx:id="totalProdukLabel" text="0" styleClass="stat-value-teal"/>
+                        <Label fx:id="totalProdukSub"   text="+0 minggu ini" styleClass="stat-sub"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Transaksi" styleClass="stat-title"/>
+                        <Label fx:id="totalTxLabel" text="0" styleClass="stat-value-orange"/>
+                        <Label fx:id="totalTxSub"   text="+0 Hari ini" styleClass="stat-sub"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Total Pendapatan" styleClass="stat-title"/>
+                        <Label fx:id="totalRevLabel" text="Rp 0" styleClass="stat-value-blue"/>
+                        <Label fx:id="totalRevSub"   text="+Rp 0 Hari ini" styleClass="stat-sub"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Sesi Chat Aktif" styleClass="stat-title"/>
+                        <Label fx:id="chatActiveLabel" text="0" styleClass="stat-value-purple"/>
+                        <Label fx:id="chatActiveSub"   text="0 Belum Terjawab" styleClass="stat-sub"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Recent transactions table -->
+                <VBox styleClass="table-card" spacing="0">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Transaksi Terbaru" styleClass="form-section-title" HBox.hgrow="ALWAYS"/>
+                        <Hyperlink text="Lihat Semua →" onAction="#goTransactions" styleClass="link-teal"/>
+                    </HBox>
+                    <Region styleClass="form-divider" prefHeight="1">
+                        <VBox.margin><Insets top="12" bottom="8"/></VBox.margin>
+                    </Region>
+
+                    <!-- Table header -->
+                    <HBox styleClass="table-header-row" spacing="0">
+                        <Label text="ID"      styleClass="table-col-label" prefWidth="100"/>
+                        <Label text="PEMBELI" styleClass="table-col-label" prefWidth="160"/>
+                        <Label text="PRODUK"  styleClass="table-col-label" prefWidth="200"/>
+                        <Label text="TOTAL"   styleClass="table-col-label" prefWidth="160"/>
+                        <Label text="STATUS"  styleClass="table-col-label" prefWidth="120"/>
+                    </HBox>
+
+                    <!-- Rows -->
+                    <VBox fx:id="txRowsBox"/>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</HBox>
