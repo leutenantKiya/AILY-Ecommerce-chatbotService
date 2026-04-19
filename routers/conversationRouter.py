@@ -55,6 +55,7 @@ def chat(id: str, body: ChatMessage):
         
         result = nlp_process(body.message)
         intent = result.get("intent")
+        konten = result.get("konten", "").lower()
         action_data = None
 
         # save input -> log
@@ -70,7 +71,10 @@ def chat(id: str, body: ChatMessage):
     # "faq", "tanya_toko", "help",
     # "salam", "terima_kasih", "selamat_tinggal",
     # "tidak_diketahui"
-        if intent == "faq" or intent == "tanya_toko":
+        if intent == "mencari" and konten =="":
+
+            action_data = {"message": "Fitur pencarian sedang dalam pengembangan.", "type": "mencari"}
+        elif intent == "faq" or intent == "tanya_toko":
             db_toko = SQLite()
             toko_data = db_toko.getTentangToko()
             # Format sebagai list of dict agar mudah dibaca frontend
