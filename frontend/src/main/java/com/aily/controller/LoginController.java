@@ -32,11 +32,10 @@ public class LoginController {
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.login(username, password);
-                String status = response.get("status").getAsString();
 
                 Platform.runLater(() -> {
                     loginButton.setDisable(false);
-                    if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = response.getAsJsonObject("data");
                         Session.currentUser = new User(
                                 data.get("id").getAsString(),

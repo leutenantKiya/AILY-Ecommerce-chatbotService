@@ -3,6 +3,10 @@ package com.aily.controller;
 import com.aily.App;
 import com.aily.Session;
 import com.aily.model.Product;
+import com.aily.service.ApiService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -13,7 +17,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.UUID;
 
 public class AdminProductsController implements Initializable {
 
@@ -26,13 +29,45 @@ public class AdminProductsController implements Initializable {
     @FXML private Label     produkCountLabel;
     @FXML private VBox      productRowsBox;
 
-    // In-memory product list (would be fetched from backend in production)
+    // Product list loaded from backend
     private final List<Product> products = new ArrayList<>();
     private Product editingProduct = null;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        refreshTable();
+        loadProductsFromBackend();
+    }
+
+    private void loadProductsFromBackend() {
+        new Thread(() -> {
+            try {
+                JsonObject response = ApiService.listProducts();
+                Platform.runLater(() -> {
+                    products.clear();
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
+                        JsonObject data = response.getAsJsonObject("data");
+                        if (data.has("products")) {
+                            JsonArray arr = data.getAsJsonArray("products");
+                            for (int i = 0; i < arr.size(); i++) {
+                                JsonObject p = arr.get(i).getAsJsonObject();
+                                products.add(new Product(
+                                        String.valueOf(p.get("id").getAsInt()),
+                                        p.get("name").getAsString(),
+                                        p.has("category") ? p.get("category").getAsString() : "",
+                                        p.get("price").getAsLong(),
+                                        p.get("stock").getAsInt(),
+                                        p.has("description") && !p.get("description").isJsonNull()
+                                                ? p.get("description").getAsString() : ""
+                                ));
+                            }
+                        }
+                    }
+                    refreshTable();
+                });
+            } catch (Exception e) {
+                Platform.runLater(this::refreshTable);
+            }
+        }).start();
     }
 
     @FXML
@@ -48,20 +83,38 @@ public class AdminProductsController implements Initializable {
         long price  = harga.isEmpty() ? 0 : Long.parseLong(harga.replaceAll("[^0-9]", ""));
         int  stock  = stok.isEmpty()  ? 0 : Integer.parseInt(stok.replaceAll("[^0-9]", ""));
 
+        saveButton.setDisable(true);
+
         if (editingProduct != null) {
-            editingProduct.setName(name);
-            editingProduct.setCode(code);
-            editingProduct.setPrice(price);
-            editingProduct.setStock(stock);
-            editingProduct.setDescription(desc);
-            editingProduct = null;
-            saveButton.setText("Simpan Produk");
+            int productId = Integer.parseInt(editingProduct.getId());
+            new Thread(() -> {
+                try {
+                    ApiService.updateProduct(productId, name, (int) price, stock, desc, code, "U", null);
+                    Platform.runLater(() -> {
+                        saveButton.setDisable(false);
+                        editingProduct = null;
+                        saveButton.setText("Simpan Produk");
+                        clearForm();
+                        loadProductsFromBackend();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> saveButton.setDisable(false));
+                }
+            }).start();
         } else {
-            products.add(new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
-                    name, code, price, stock, desc));
+            new Thread(() -> {
+                try {
+                    ApiService.addProduct(name, (int) price, stock, desc, code, "U", null);
+                    Platform.runLater(() -> {
+                        saveButton.setDisable(false);
+                        clearForm();
+                        loadProductsFromBackend();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> saveButton.setDisable(false));
+                }
+            }).start();
         }
-        clearForm();
-        refreshTable();
     }
 
     private void clearForm() {
@@ -81,8 +134,9 @@ public class AdminProductsController implements Initializable {
     }
 
     private HBox buildProductRow(Product p) {
-        Label id    = new Label(p.getCode());      id.getStyleClass().add("table-cell-text");  id.setPrefWidth(120);
-        Label name  = new Label(p.getName());      name.getStyleClass().add("table-cell-bold"); name.setPrefWidth(200);
+        Label id    = new Label(p.getId());         id.getStyleClass().add("table-cell-text");  id.setPrefWidth(60);
+        Label name  = new Label(p.getName());       name.getStyleClass().add("table-cell-bold"); name.setPrefWidth(200);
+        Label code  = new Label(p.getCode());       code.getStyleClass().add("table-cell-text"); code.setPrefWidth(120);
         Label price = new Label(p.formattedPrice()); price.getStyleClass().add("table-cell-teal"); price.setPrefWidth(160);
 
         Label stokLbl = new Label(p.getStock() + " UNIT");
@@ -95,14 +149,26 @@ public class AdminProductsController implements Initializable {
 
         Button delBtn = new Button("Hapus");
         delBtn.getStyleClass().add("btn-danger");
-        delBtn.setOnAction(e -> { products.remove(p); refreshTable(); });
+        delBtn.setOnAction(e -> handleDelete(p));
 
         HBox aksi = new HBox(6, editBtn, delBtn); aksi.setPrefWidth(120);
 
-        HBox row = new HBox(id, name, price, stokBox, aksi);
+        HBox row = new HBox(id, name, code, price, stokBox, aksi);
         row.getStyleClass().add("table-row");
         row.setPadding(new Insets(10, 0, 10, 0));
         return row;
+    }
+
+    private void handleDelete(Product p) {
+        new Thread(() -> {
+            try {
+                int productId = Integer.parseInt(p.getId());
+                ApiService.deleteProduct(productId);
+                Platform.runLater(this::loadProductsFromBackend);
+            } catch (Exception e) {
+                // silently fail
+            }
+        }).start();
     }
 
     private void startEdit(Product p) {
