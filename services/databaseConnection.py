@@ -5,7 +5,7 @@ from pymongo import MongoClient
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
-        self.client = MongoClient("mongodb://localhost:27017/")
+        self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
         self.db = self.client["aily"]
         self.collection = self.db[self.table]
 
@@ -20,6 +20,9 @@ class MongoDB:
 
     def update(self, query, data):
         self.collection.update_one(query, {"$set": data})
+
+    def push(self, query, data):
+        self.collection.update_one(query, {"$push": data})
 
     def delete(self, query):
         self.collection.delete_one(query)
@@ -38,7 +41,8 @@ class SQLite:
                 email TEXT NOT NULL,
                 phone TEXT NOT NULL,
                 address TEXT NOT NULL,
-                role TEXT NOT NULL
+                role TEXT NOT NULL,
+                gender TEXT DEFAULT 'L'
             );
 
             CREATE TABLE IF NOT EXISTS cart(
@@ -55,7 +59,9 @@ class SQLite:
                 stock INTEGER NOT NULL,
                 image TEXT,
                 description TEXT NOT NULL,
-                category TEXT NOT NULL
+                category TEXT NOT NULL,
+                gender TEXT DEFAULT 'U',
+                warna TEXT
             );
 
             CREATE TABLE IF NOT EXISTS cart_item (
@@ -87,7 +93,7 @@ class SQLite:
     def getTentangToko(self):
         self.cursor.execute(f"SELECT question, answer FROM tentangToko")
         return self.cursor.fetchall()
-
+ 
     def findUser(self, username):
         self.cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
         return self.cursor.fetchone()
@@ -96,14 +102,57 @@ class SQLite:
         self.cursor.execute("SELECT * FROM user WHERE password = ?", (hashed_password,))
         return self.cursor.fetchone()
 
-    def find_one(self, query):
-        self.cursor.execute(f"SELECT * FROM {self.table} WHERE {query}")
-        return self.cursor.fetchone()
-
-    def update(self, query, data):
-        self.cursor.execute(f"UPDATE {self.table} SET {data} WHERE {query}")
+    def update(self, table, colum_name, data_new, user_id):
+        self.cursor.execute(f"UPDATE {table} SET {colum_name} = ? WHERE id = ?", (data_new, user_id))
         self.conn.commit()
 
     def delete(self, query):
         self.cursor.execute(f"DELETE FROM {self.table} WHERE {query}")
         self.conn.commit()
+
+class ProductDB:
+    def __init__(self):
+        self.conn = sqlite3.connect("aily.db")
+        self.cursor = self.conn.cursor()
+
+    def searchBarang(self, name, gender):
+        self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
+        # print(self.cursor.fetchall())
+        return self.cursor.fetchall()
+
+    def addProduct(self, name, price, stock, image, description, category, gender, warna):
+        try:
+            self.cursor.execute(
+                "INSERT INTO product (name, price, stock, image, description, category, gender, warna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, price, stock, image, description, category, gender, warna)
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            print("Error insert product:", e)
+            return False
+
+    def updateProduct(self, product_id, name, price, stock, image, description, category, gender, warna):
+        try:
+            self.cursor.execute(
+                "UPDATE product SET name=?, price=?, stock=?, image=?, description=?, category=?, gender=?, warna=? WHERE id=?",
+                (name, price, stock, image, description, category, gender, warna, product_id)
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            print("Error update product:", e)
+            return False
+
+    def deleteProduct(self, product_id):
+        try:
+            self.cursor.execute("DELETE FROM product WHERE id=?", (product_id,))
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            print("Error delete product:", e)
+            return False
+
+    def getAllProducts(self):
+        self.cursor.execute("SELECT * FROM product")
+        return self.cursor.fetchall()
