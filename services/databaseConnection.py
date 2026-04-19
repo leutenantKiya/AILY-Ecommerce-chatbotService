@@ -1,12 +1,18 @@
+import os
 import bcrypt
 import sqlite3
 from pymongo import MongoClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
-        self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
-        self.db = self.client["aily"]
+        mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+        mongo_db = os.getenv("MONGO_DB", "aily")
+        self.client = MongoClient(mongo_uri)
+        self.db = self.client[mongo_db]
         self.collection = self.db[self.table]
 
     def insert(self, data):
@@ -83,7 +89,7 @@ class SQLite:
 
     def registerUser(self, uname, pword, email, phone, add, role):
         try:
-            self.cursor.execute(f"INSERT INTO user (username, password, email, phone, address, role) VALUES (?, ?, ?, ?, ?, ?)", (uname, pword, email, phone, add, role))
+            self.cursor.execute("INSERT INTO user (username, password, email, phone, address, role) VALUES (?, ?, ?, ?, ?, ?)", (uname, pword, email, phone, add, role))
             self.conn.commit()
             return True
         except sqlite3.Error as error_db:
@@ -91,7 +97,7 @@ class SQLite:
             return False
 
     def getTentangToko(self):
-        self.cursor.execute(f"SELECT question, answer FROM tentangToko")
+        self.cursor.execute("SELECT question, answer FROM tentangToko")
         return self.cursor.fetchall()
  
     def findUser(self, username):
@@ -116,8 +122,29 @@ class ProductDB:
         self.cursor = self.conn.cursor()
 
     def searchBarang(self, name, gender):
-        self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
-        # print(self.cursor.fetchall())
+        # Cari berdasarkan nama ATAU kategori
+        self.cursor.execute(
+            "SELECT * FROM product WHERE (name LIKE ? OR category LIKE ?) AND (gender = ? OR gender = 'U')", 
+            (f"%{name}%", f"%{name}%", gender)
+        )
+        return self.cursor.fetchall()
+
+    def searchByCategory(self, category, gender):
+        # Mapping alias informal → kategori di database
+        CATEGORY_ALIAS = {
+            "baju": ["kaos", "kemeja", "gamis", "dress"],
+            "pakaian": ["kaos", "kemeja", "gamis", "dress", "jaket", "hoodie", "sweater", "blazer"],
+            "celana": ["celana", "jeans"],
+            "sepatu": ["sepatu", "sandal"],
+            "aksesoris": ["aksesoris", "topi"],
+            "tas": ["tas"],
+        }
+        
+        categories = CATEGORY_ALIAS.get(category.lower(), [category.lower()])
+        placeholders = ",".join(["?" for _ in categories])
+        query = f"SELECT * FROM product WHERE category IN ({placeholders}) AND (gender = ? OR gender = 'U')"
+        params = categories + [gender]
+        self.cursor.execute(query, params)
         return self.cursor.fetchall()
 
     def addProduct(self, name, price, stock, image, description, category, gender, warna):
