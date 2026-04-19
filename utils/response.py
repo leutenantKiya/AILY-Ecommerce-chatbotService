@@ -44,11 +44,11 @@ class Response:
         }
 
     @staticmethod
-    def ValidationError(errors):
+    def ValidationError(errors="Validation error"):
         return {
         "status": Response.HTTP_VALIDATION_ERROR,
         "success": False,
-        "error": "Validation error"
+        "error": errors
         }
 
     @staticmethod

@@ -17,6 +17,8 @@ def connect():
 def registration(uname, pword, email, phone, add, role):
     encrypted_pword = bcrypt.hashpw(pword.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     db = connect()
+    if db.findUser(uname):
+        return Response.ValidationError("Username sudah ada")
     # di cek dl kalau role dia harus mastiin sebagai user bukan admin
     if db.registerUser(uname, encrypted_pword, email, phone, add, role):
         return Response.Ok(data = {"username" : uname,
@@ -36,7 +38,7 @@ def login(uname: str, pword: str):
     user = db.findUser(uname)
 
     if user is None:
-        return Response.NotFound("Username tidak ditemukan")
+        return Response.ValidationError("Username tidak ditemukan")
 
     # user = (id, username, password, email, phone, address, role)
     stored_hash = user[2]
