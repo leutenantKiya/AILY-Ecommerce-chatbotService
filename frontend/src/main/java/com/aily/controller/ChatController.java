@@ -61,10 +61,9 @@ public class ChatController implements Initializable {
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.sendMessage(user.getId(), text);
-                String status = response.get("status").getAsString();
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
-                    if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = response.getAsJsonObject("data");
                         String intent = "";
                         if (data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
@@ -88,20 +87,77 @@ public class ChatController implements Initializable {
     }
 
     private String buildBotReply(JsonObject data, String intent) {
+        // Coba parse action_data dari backend
         if (data.has("action_data") && !data.get("action_data").isJsonNull()) {
-            JsonObject action = data.getAsJsonObject("action_data");
-            if (action.has("data")) {
-                JsonObject d = action.getAsJsonObject("data");
-                if (d.has("result")) return d.get("result").getAsString();
+            try {
+                JsonObject action = data.getAsJsonObject("action_data");
+
+                // Intent "mencari" → action_data.products = [...]
+                if (action.has("products")) {
+                    var products = action.getAsJsonArray("products");
+                    if (products.isEmpty()) {
+                        return "Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.";
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Ditemukan ").append(products.size()).append(" produk:\n\n");
+                    for (int i = 0; i < Math.min(products.size(), 5); i++) {
+                        JsonObject p = products.get(i).getAsJsonObject();
+                        String name = p.get("name").getAsString();
+                        long price = p.get("price").getAsLong();
+                        int stock = p.get("stock").getAsInt();
+                        String formatted = String.format("Rp %,d", price).replace(',', '.');
+                        sb.append(i + 1).append(". ").append(name)
+                          .append("\n   Harga: ").append(formatted)
+                          .append(" | Stok: ").append(stock).append("\n");
+                    }
+                    if (products.size() > 5) {
+                        sb.append("\n... dan ").append(products.size() - 5).append(" produk lainnya.");
+                    }
+                    return sb.toString();
+                }
+
+                // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
+                if (action.has("result") && action.get("result").isJsonArray()) {
+                    var results = action.getAsJsonArray("result");
+                    if (results.isEmpty()) {
+                        return "Info toko belum tersedia.";
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Informasi Toko AILY:\n\n");
+                    for (int i = 0; i < results.size(); i++) {
+                        JsonObject qa = results.get(i).getAsJsonObject();
+                        String q = qa.get("question").getAsString();
+                        String a = qa.get("answer").getAsString();
+                        sb.append("- ").append(q).append(": ").append(a).append("\n");
+                    }
+                    return sb.toString();
+                }
+
+                // Fallback: action_data.message (untuk intent lainnya)
+                if (action.has("message")) {
+                    return action.get("message").getAsString();
+                }
+            } catch (Exception e) {
+                // action_data mungkin bukan JsonObject (misal array kosong)
             }
         }
+
+        // Gunakan respons NLP jika ada
+        if (data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
+            JsonObject nlp = data.getAsJsonObject("nlp_result");
+            if (nlp.has("respons") && !nlp.get("respons").getAsString().isEmpty()) {
+                return nlp.get("respons").getAsString();
+            }
+        }
+
+        // Fallback terakhir berdasarkan intent
         return switch (intent) {
             case "mencari"         -> "Baik, saya akan bantu cari produk. Sebutkan nama atau kategori produknya!";
             case "checkout"        -> "Mengarahkan ke proses checkout...";
             case "lacak_kiriman"   -> "Silakan masukkan nomor resi untuk melacak kiriman kamu.";
             case "status_pesanan"  -> "Saya akan periksa status pesanan kamu.";
             case "batal_pesanan"   -> "Untuk membatalkan pesanan, masukkan nomor pesanan kamu.";
-            case "faq","tanya_toko"-> "Berikut FAQ Toko AILY :\n\n1. Jam operasional: 24/7 via chatbot\n2. Pengiriman: 2-5 hari kerja\n3. Pembayaran: Transfer bank, e-wallet\n4. Retur: Maksimal 7 hari setelah diterima\n\nAda pertanyaan lain?";
+            case "faq","tanya_toko"-> "Hubungi kami untuk info toko lebih lanjut.";
             case "salam"           -> "Halo juga! Ada yang bisa saya bantu hari ini?";
             case "terima_kasih"    -> "Sama-sama! Jangan ragu untuk bertanya lagi.";
             case "selamat_tinggal" -> "Sampai jumpa! Semoga belanja kamu menyenangkan.";
@@ -112,11 +168,11 @@ public class ChatController implements Initializable {
 
     // ── Chips ─────────────────────────────────────────────────────
 
-    @FXML private void chipCariProduk()    { sendChip("🔍 Cari Produk"); }
-    @FXML private void chipFaq()           { sendChip("❓ FAQ"); }
-    @FXML private void chipKeranjang()     { sendChip("🛒 Keranjang"); }
-    @FXML private void chipStatusPesanan() { sendChip("📦 Status Pesanan"); }
-    @FXML private void chipPromo()         { sendChip("📢 Promo hari ini"); }
+    @FXML private void chipCariProduk()    { sendChip("carikan aku baju"); }
+    @FXML private void chipFaq()           { sendChip("informasi toko"); }
+    @FXML private void chipKeranjang()     { sendChip("lihat keranjang"); }
+    @FXML private void chipStatusPesanan() { sendChip("status pesanan saya"); }
+    @FXML private void chipPromo()         { sendChip("ada promo apa hari ini"); }
 
     private void sendChip(String text) {
         messageInput.setText(text);
@@ -158,6 +214,9 @@ public class ChatController implements Initializable {
 
         Text msgText = new Text(text);
         msgText.setWrappingWidth(340);
+        // Explicitly set text color — CSS inheritance is unreliable for Text in TextFlow
+        msgText.setFill(isUser ? javafx.scene.paint.Color.web("#07161E") : javafx.scene.paint.Color.web("#E8F0F3"));
+        msgText.setStyle("-fx-font-size: 13px;");
 
         TextFlow flow = new TextFlow(msgText);
         flow.getStyleClass().add(isUser ? "bubble-user" : "bubble-bot");
@@ -174,7 +233,7 @@ public class ChatController implements Initializable {
         Label avLbl = new Label(isUser
                 ? (Session.currentUser != null ? Session.currentUser.getUsername().substring(0, Math.min(2, Session.currentUser.getUsername().length())).toUpperCase() : "ME")
                 : "A");
-        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: " + (isUser ? "#07161E" : "#07161E") + ";");
+        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #07161E;");
         avatar.getChildren().add(avLbl);
         avatar.setMinSize(30, 30);
         avatar.setMaxSize(30, 30);
