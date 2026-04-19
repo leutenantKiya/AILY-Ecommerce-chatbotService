@@ -37,8 +37,8 @@ ADMIN_ONLY_INTENTS = ["crud"]
 
 # base endpoint bot
 # intent search
-@router.post("/aily/conversation/{role}")
-def chat(role: str, id: str, body: ChatMessage):
+@router.post("/aily/conversation/{id}")
+def chat(id: str, body: ChatMessage):
     # print(f"[CHAT] user={id}, pesan={body.message}")
 
     # cari user berdasarkan hashed pass for a tokenized session
@@ -71,8 +71,11 @@ def chat(role: str, id: str, body: ChatMessage):
     # "salam", "terima_kasih", "selamat_tinggal",
     # "tidak_diketahui"
         if intent == "faq" or intent == "tanya_toko":
-            toko_response = tentangToko()
-            action_data = toko_response
+            db_toko = SQLite()
+            toko_data = db_toko.getTentangToko()
+            # Format sebagai list of dict agar mudah dibaca frontend
+            formatted = [{"question": q, "answer": a} for q, a in toko_data] if toko_data else []
+            action_data = {"result": formatted, "type": "tanya_toko"}
         elif intent == "crud" and role == "admin":
             from routers.productManagementService import perform_delete_product, perform_list_products
             import re
@@ -96,17 +99,23 @@ def chat(role: str, id: str, body: ChatMessage):
             else:
                 action_data = perform_list_products()
         elif intent == "mencari":
-            gender = result.get("atribut").get("gender") 
+            gender = result.get("atribut", {}).get("gender", "default_user") 
             if gender == "default_user":
                 gender = 'L' 
-            print(gender)
             toko_response = searchBarangResult(result.get("konten"), gender)
             action_data = toko_response
-    # elif intent == "checkout": 
+        elif intent == "checkout":
+            action_data = {"message": "Fitur checkout sedang dalam pengembangan.", "type": "checkout"}
+        elif intent in ("salam", "terima_kasih", "selamat_tinggal", "help", "tidak_diketahui"):
+            # Intent sapaan / bantuan — gunakan respons dari NLP
+            action_data = {"message": result.get("respons", ""), "type": intent}
+
+        # Gunakan NLP response text sebagai fallback jika action_data masih None
+        if action_data is None:
+            action_data = {"message": result.get("respons", ""), "type": intent or "unknown"}
 
         # Simpan response bot ke MongoDB
-        bot_response_text = action_data
-        save_chat(id, "AILY Bot", "bot", bot_response_text)
+        save_chat(id, "AILY Bot", "bot", action_data)
        
         return Response.Ok(data={
             "user_id": id,
@@ -209,6 +218,23 @@ def updateUser(id, colum_name, data_new):
 # cari barang
 def searchBarangResult(name: str, gender: str):
     db = ProductDB()
-    result = db.searchBarang(name, gender)
-    print(result)
-    return result
+    # Cari berdasarkan nama produk
+    results = db.searchBarang(name, gender)
+    # Jika tidak ditemukan, coba cari berdasarkan kategori
+    if not results:
+        results = db.searchByCategory(name, gender)
+    # Format sebagai list of dict agar mudah dibaca frontend
+    formatted = []
+    for p in results:
+        formatted.append({
+            "id": p[0],
+            "name": p[1],
+            "price": p[2],
+            "stock": p[3],
+            "image": p[4],
+            "description": p[5],
+            "category": p[6],
+            "gender": p[7],
+            "warna": p[8]
+        })
+    return {"products": formatted, "type": "mencari"}

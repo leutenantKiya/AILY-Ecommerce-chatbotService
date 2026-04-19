@@ -31,11 +31,10 @@ public class RegisterController {
             try {
                 JsonObject response = ApiService.register(
                         username, password, "", "", "", "user");
-                String status = response.get("status").getAsString();
 
                 Platform.runLater(() -> {
                     registerButton.setDisable(false);
-                    if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
                         try {
                             // Kembali ke landing, tampilkan toast di sana
                             App.switchScene("landing", 1000, 700);

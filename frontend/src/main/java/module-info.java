@@ -1,7 +1,7 @@
 module com.aily {
     requires javafx.controls;
     requires javafx.fxml;
-    requires com.google.gson;
+    requires transitive com.google.gson;
     requires java.net.http;
 
     opens com.aily to javafx.fxml;
