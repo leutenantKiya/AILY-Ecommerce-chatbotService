@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aily.controller.CartController"
+            styleClass="root-bg"
+            prefWidth="1280" prefHeight="880">
+
+    <!-- TOP: Header -->
+    <top>
+        <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="16">
+            <Button text="←" onAction="#goBack" styleClass="back-btn"/>
+            <Label text="AILY" styleClass="logo-text-sm"/>
+            <Label text="Keranjang Belanja" styleClass="page-title" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="itemCountLabel" text="0 item" styleClass="item-count-badge"/>
+        </HBox>
+    </top>
+
+    <!-- CENTER: Cart items -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="chat-scroll" hbarPolicy="NEVER">
+            <content>
+                <StackPane>
+                    <!-- Empty state -->
+                    <VBox fx:id="emptyState" alignment="CENTER" spacing="16" visible="true">
+                        <Label text="🛒" style="-fx-font-size: 48px;"/>
+                        <Label text="Keranjang kamu masih kosong" styleClass="empty-state-label"/>
+                        <Button text="Mulai belanja" onAction="#goBack" styleClass="btn-outline" prefWidth="160"/>
+                        <!-- AILY watermark -->
+                        <Label text="AILY" styleClass="watermark" opacity="0.12"/>
+                    </VBox>
+
+                    <!-- Item list -->
+                    <VBox fx:id="cartItemsBox" spacing="12" visible="false">
+                        <padding><Insets top="20" bottom="20" left="24" right="24"/></padding>
+                    </VBox>
+                </StackPane>
+            </content>
+        </ScrollPane>
+    </center>
+
+    <!-- RIGHT: Summary panel -->
+    <right>
+        <VBox styleClass="summary-panel" spacing="14">
+            <Label text="Ringkasan Pesanan" styleClass="summary-title"/>
+            <Region styleClass="summary-divider" prefHeight="1"/>
+
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Subtotal" styleClass="summary-row-label" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="subtotalLabel" text="Rp 0" styleClass="summary-row-value"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Ongkos Kirim" styleClass="summary-row-label" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="ongkirLabel" text="Rp 0" styleClass="summary-row-value"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Diskon" styleClass="summary-row-label" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="diskonLabel" text="- Rp 0" styleClass="summary-row-value"/>
+            </HBox>
+
+            <Region styleClass="summary-divider" prefHeight="1"/>
+
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Total" styleClass="summary-total-label" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="totalLabel" text="Rp 0" styleClass="summary-total-value"/>
+            </HBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="Buat Pesanan" onAction="#handleCheckout"
+                    styleClass="btn-teal" maxWidth="Infinity" prefHeight="44"/>
+            <Button text="← Lanjut Belanja" onAction="#goBack"
+                    styleClass="btn-outline" maxWidth="Infinity" prefHeight="44"/>
+
+            <Label text="Pesanan dapat dibatalkan sebelum masa pengantaran dimulai"
+                   styleClass="text-muted" wrapText="true" alignment="CENTER"
+                   maxWidth="260"/>
+        </VBox>
+    </right>
+
+</BorderPane>
