@@ -105,6 +105,7 @@ NORMALIZATION_DICT = {
     "jaket":     "jaket",
     "kaos":      "kaos",
     "pakaian":   "baju",
+    "abju":      "baju",
 }
 
 
