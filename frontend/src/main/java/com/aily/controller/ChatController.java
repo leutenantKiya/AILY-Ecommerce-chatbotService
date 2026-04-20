@@ -60,7 +60,7 @@ public class ChatController implements Initializable {
 
         new Thread(() -> {
             try {
-                JsonObject response = ApiService.sendMessage(user.getId(), text);
+                JsonObject response = ApiService.sendMessage(user, text);
                 String status = response.get("status").getAsString();
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
