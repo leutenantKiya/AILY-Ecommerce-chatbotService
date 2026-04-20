@@ -84,6 +84,7 @@ class SQLite:
                 question TEXT(50) NOT NULL,
                 answer TEXT(100) NOT NULL
             );
+
         """
         self.cursor.executescript(query)
 
@@ -104,8 +105,11 @@ class SQLite:
         self.cursor.execute(f"SELECT question, answer FROM help")
         return self.cursor.fetchall()
  
-    def findUser(self, username):
-        self.cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
+    def findUser(self, user):
+        if "@" in user:
+            self.cursor.execute("SELECT * FROM user WHERE email = ?", (user,))
+        else:
+            self.cursor.execute("SELECT * FROM user WHERE username = ?", (user,))
         return self.cursor.fetchone()
 
     def findUserByPassword(self, hashed_password):
@@ -126,8 +130,9 @@ class ProductDB:
         self.cursor = self.conn.cursor()
 
     def searchBarang(self, name, gender):
+        if name.strip() == "":
+            return []
         self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
-        # print(self.cursor.fetchall())
         return self.cursor.fetchall()
 
     def addProduct(self, name, price, stock, image, description, category, gender, warna):
