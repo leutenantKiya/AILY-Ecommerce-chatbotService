@@ -1,0 +1,6 @@
+# Revert Commit
+
+This marker file documents the revert of commit `493882740b4493177938084cfcef4e0b34562f41`.
+
+Reverted on: 2026-04-19 13:41:37 UTC
+
