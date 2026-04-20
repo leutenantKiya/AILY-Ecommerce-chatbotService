@@ -103,7 +103,7 @@ def chat(role: str, body: ChatMessage):
             gender = result.get("atribut").get("gender") 
             if gender == "default_user":
                 gender = 'L' 
-            print(gender)
+            
             toko_response = searchBarangResult(result.get("konten"), gender)
             action_data = toko_response
     # elif intent == "checkout": 
@@ -222,5 +222,4 @@ def updateUser(id, colum_name, data_new):
 def searchBarangResult(name: str, gender: str):
     db = ProductDB()
     result = db.searchBarang(name, gender)
-    print(result)
     return result

@@ -94,86 +94,104 @@ public class ChatController implements Initializable {
 
         if (data.has("action_data") && !data.get("action_data").isJsonNull()) {
             try {
-                JsonObject action = data.getAsJsonObject("action_data");
+                try{
+                    // Intent "mencari" → action_data.products = [...]
+                    JsonArray action = data.getAsJsonArray("action_data");
+                    if (intent.equalsIgnoreCase("mencari")) {
+                        System.out.println("masuk Produk");
 
-                // Intent "mencari" → action_data.products = [...]
-                if (intent.equalsIgnoreCase("mencari")) {
-                    System.out.println("masuk Produk");
-                    var products = action.getAsJsonArray("products");
-                    if (products.isEmpty()) {
-                        return "Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.";
+                        StringBuilder sb = new StringBuilder();
+                        JsonArray products = data.getAsJsonArray("action_data");
+                        if (products.isEmpty()) {
+                            return sb.append("Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.").toString();
+                      }else{
+                            sb.append("Ditemukan ").append(products.size()).append(" produk:\n\n");
+
+                            for (int i = 0; i < Math.min(products.size(), 5); i++) {
+                                JsonArray p = products.get(i).getAsJsonArray(); // ← array, bukan object
+
+                                // [id, name, price, stock, null, desc, category, gender, color]
+                                String name = p.get(1).getAsString();
+                                long price = p.get(2).getAsLong();
+                                int stock = p.get(3).getAsInt();
+                                String color = p.get(8).getAsString();
+
+                                String formatted = String.format("Rp %,d", price).replace(',', '.');
+                                sb.append(i + 1).append(". ").append(name)
+                                        .append("\n   Harga : ").append(formatted)
+                                        .append("\n   Stok  : ").append(stock)
+                                        .append("\n   Warna : ").append(color)
+                                        .append("\n\n");
+                            }
+
+                            if (products.size() > 5) {
+                                sb.append("... dan ").append(products.size() - 5).append(" produk lainnya.");
+                            }
+                        }
+                        return sb.toString();
                     }
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Ditemukan ").append(products.size()).append(" produk:\n\n");
-                    for (int i = 0; i < Math.min(products.size(), 5); i++) {
-                        JsonObject p = products.get(i).getAsJsonObject();
-                        String name = p.get("name").getAsString();
-                        long price = p.get("price").getAsLong();
-                        int stock = p.get("stock").getAsInt();
-                        String formatted = String.format("Rp %,d", price).replace(',', '.');
-                        sb.append(i + 1).append(". ").append(name)
-                                .append("\n   Harga: ").append(formatted)
-                                .append(" | Stok: ").append(stock).append("\n");
-                    }
-                    if (products.size() > 5) {
-                        sb.append("\n... dan ").append(products.size() - 5).append(" produk lainnya.");
-                    }
-                    return sb.toString();
-                }
+                }catch (Exception e){
+                    JsonObject action = data.getAsJsonObject("action_data");
+                    // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
+                    if (intent.equalsIgnoreCase("tanya_toko")) {
+                        System.out.println("masuk FAQ");
 
-                // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
-                if (intent.equalsIgnoreCase("tanya_toko")) {
-                    System.out.println("masuk FAQ");
+                        JsonObject spesificData = action.getAsJsonObject("data");
+                        JsonArray results = spesificData.getAsJsonArray("result");
 
-                    JsonObject spesificData = action.getAsJsonObject("data");
-                    JsonArray results = spesificData.getAsJsonArray("result");
+                        if (results.isEmpty()) {
+                            return "Info toko belum tersedia.";
+                        }
 
-                    if (results.isEmpty()) {
-                        return "Info toko belum tersedia.";
-                    }
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Informasi Toko AILY:\n\n");
+                        for (int i = 0; i < results.size(); i++) {
+                            JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
+                            String key = item.get(0).getAsString();
+                            String value = item.get(1).getAsString();
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Informasi Toko AILY:\n\n");
-                    for (int i = 0; i < results.size(); i++) {
-                        JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
-                        String key = item.get(0).getAsString();
-                        String value = item.get(1).getAsString();
-
-                        sb.append("- ").append(key).append(": ").append(value).append("\n");
+                            sb.append("- ").append(key).append(": ").append(value).append("\n");
 //                        System.out.println(key + ": " + value);
+                        }
+
+                        return sb.toString();
                     }
 
-                    return sb.toString();
-                }
+                    if (intent.equalsIgnoreCase("help")) {
+                        System.out.println("masuk help");
 
-                if (intent.equalsIgnoreCase("help")) {
-                    System.out.println("masuk help");
+                        JsonObject spesificData = action.getAsJsonObject("data");
+                        JsonArray results = spesificData.getAsJsonArray("result");
 
-                    JsonObject spesificData = action.getAsJsonObject("data");
-                    JsonArray results = spesificData.getAsJsonArray("result");
+                        if (results.isEmpty()) {
+                            return "Info toko belum tersedia.";
+                        }
 
-                    if (results.isEmpty()) {
-                        return "Info toko belum tersedia.";
-                    }
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Berikut daftar layanan yang bisa saya bantu:\n\n");
+                        for (int i = 0; i < results.size(); i++) {
+                            JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
+                            String key = item.get(0).getAsString();
+                            String value = item.get(1).getAsString();
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Berikut daftar layanan yang bisa saya bantu:\n\n");
-                    for (int i = 0; i < results.size(); i++) {
-                        JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
-                        String key = item.get(0).getAsString();
-                        String value = item.get(1).getAsString();
-
-                        sb.append("- ").append(key).append(": ").append(value).append("\n");
+                            sb.append("- ").append(key).append(": ").append(value).append("\n");
 //                        System.out.println(key + ": " + value);
+                        }
+
+                        return sb.toString();
                     }
 
-                    return sb.toString();
+                    // Fallback: action_data.message (untuk intent lainnya)
+                    if (action.has("message")) {
+                        return action.get("message").getAsString();
+                    }
                 }
 
-                // Fallback: action_data.message (untuk intent lainnya)
-                if (action.has("message")) {
-                    return action.get("message").getAsString();
-                }
+
+
+
+
+
             } catch (Exception e) {
                 // action_data mungkin bukan JsonObject (misal array kosong)
             }
