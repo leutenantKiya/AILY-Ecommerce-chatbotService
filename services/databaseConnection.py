@@ -5,7 +5,7 @@ from pymongo import MongoClient
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
-        self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
+        self.client = MongoClient("mongodb://localhost:27017")
         self.db = self.client["aily"]
         self.collection = self.db[self.table]
 

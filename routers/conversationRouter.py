@@ -16,6 +16,7 @@ from services.databaseConnection import SQLite, MongoDB, ProductDB
 router = APIRouter()
 
 class ChatMessage(BaseModel):
+    id: str
     message: str
 
 class ChatSaveRequest(BaseModel):
@@ -38,12 +39,12 @@ ADMIN_ONLY_INTENTS = ["crud"]
 # base endpoint bot
 # intent search
 @router.post("/aily/conversation/{role}")
-def chat(role: str, id: str, body: ChatMessage):
+def chat(role: str, body: ChatMessage):
     # print(f"[CHAT] user={id}, pesan={body.message}")
 
     # cari user berdasarkan hashed pass for a tokenized session
     db = SQLite()
-    user = db.findUserByPassword(id)
+    user = db.findUserByPassword(body.id)
 
     try:
         if user is None:
@@ -58,7 +59,7 @@ def chat(role: str, id: str, body: ChatMessage):
         action_data = None
 
         # save input -> log
-        save_chat(id, username, role, body.message)
+        save_chat(body.id, username, role, body.message)
 
         # cek akses berdasarkan role
         if intent in ADMIN_ONLY_INTENTS and role != "admin":
@@ -106,10 +107,10 @@ def chat(role: str, id: str, body: ChatMessage):
 
         # Simpan response bot ke MongoDB
         bot_response_text = action_data
-        save_chat(id, "AILY Bot", "bot", bot_response_text)
+        save_chat(body.id, "AILY Bot", "bot", bot_response_text)
        
         return Response.Ok(data={
-            "user_id": id,
+            "user_id": body.id,
             "username": username,
             "role": role,
             "input": body.message,
