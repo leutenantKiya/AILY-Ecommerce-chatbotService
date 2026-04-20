@@ -72,8 +72,11 @@ def chat(role: str, body: ChatMessage):
     # "salam", "terima_kasih", "selamat_tinggal",
     # "tidak_diketahui"
         if intent == "faq" or intent == "tanya_toko":
-            toko_response = tentangToko()
-            action_data = toko_response
+            response = tentangToko()
+            action_data = response
+        elif intent == "help":
+            response = help()
+            action_data = response
         elif intent == "crud" and role == "admin":
             from routers.productManagementService import perform_delete_product, perform_list_products
             import re
@@ -125,6 +128,14 @@ def chat(role: str, body: ChatMessage):
 def tentangToko():
     db = SQLite()
     result = db.getTentangToko()
+    return Response.Ok(data={
+        "result": result
+    })
+
+@router.get("/aily/help")
+def help():
+    db = SQLite()
+    result = db.getHelp()
     return Response.Ok(data={
         "result": result
     })
