@@ -7,7 +7,7 @@
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.aily.controller.LandingController"
            styleClass="root-bg"
-           prefWidth="1000" prefHeight="700">
+           prefWidth="1280" prefHeight="880">
 
     <!-- Center content -->
     <VBox alignment="CENTER" spacing="20">

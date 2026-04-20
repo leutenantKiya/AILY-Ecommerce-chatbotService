@@ -78,6 +78,12 @@ class SQLite:
                 question TEXT(50) NOT NULL,
                 answer TEXT(100) NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS help(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT(50) NOT NULL,
+                answer TEXT(100) NOT NULL
+            );
         """
         self.cursor.executescript(query)
 
@@ -92,6 +98,10 @@ class SQLite:
 
     def getTentangToko(self):
         self.cursor.execute(f"SELECT question, answer FROM tentangToko")
+        return self.cursor.fetchall()
+
+    def getHelp(self):
+        self.cursor.execute(f"SELECT question, answer FROM help")
         return self.cursor.fetchall()
  
     def findUser(self, username):
