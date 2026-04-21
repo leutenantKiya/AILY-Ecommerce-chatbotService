@@ -104,7 +104,7 @@ def chat(role: str, body: ChatMessage):
             if gender == "default_user":
                 gender = 'L' 
             
-            toko_response = searchBarangResult(result.get("konten"), gender)
+            toko_response = searchBarangResult(role, result.get("konten"), gender)
             action_data = toko_response
     # elif intent == "checkout": 
 
@@ -219,7 +219,7 @@ def updateUser(id, colum_name, data_new):
 
 
 # cari barang
-def searchBarangResult(name: str, gender: str):
+def searchBarangResult(role: str, name: str, gender: str):
     db = ProductDB()
-    result = db.searchBarang(name, gender)
+    result = db.searchBarang(role, name, gender)
     return result

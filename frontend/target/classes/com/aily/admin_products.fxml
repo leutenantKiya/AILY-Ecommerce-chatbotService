@@ -1,91 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
 
-<HBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.aily.controller.AdminProductsController"
-      styleClass="root-bg"
-      prefWidth="1280" prefHeight="880">
+<HBox prefHeight="880" prefWidth="1280" styleClass="root-bg" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aily.controller.AdminProductsController">
 
     <!-- Sidebar -->
-    <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
-        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="AILY" styleClass="logo-text"/>
-            <Label text="ADMIN" styleClass="admin-badge"/>
+    <VBox minWidth="260" prefWidth="260" styleClass="sidebar">
+        <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label styleClass="logo-text" text="AILY" />
+            <Label styleClass="admin-badge" text="ADMIN" />
         </HBox>
-        <Region styleClass="sidebar-divider" prefHeight="1"><VBox.margin><Insets top="16" bottom="16"/></VBox.margin></Region>
-        <Label text="Menu Utama" styleClass="sidebar-section-label"/>
-        <Button text="📊  Overview"       onAction="#goOverview"     styleClass="menu-item-btn"/>
-        <Button text="📦  Kelola Produk"  onAction="#goProducts"     styleClass="menu-item-btn-active"><VBox.margin><Insets top="4"/></VBox.margin></Button>
-        <Button text="💳  Transaksi"      onAction="#goTransactions"  styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
-        <Button text="💬  Riwayat Chat"   onAction="#goChatHistory"   styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
-        <Region VBox.vgrow="ALWAYS"/>
-        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+        <Region prefHeight="1" styleClass="sidebar-divider"><VBox.margin><Insets bottom="16" top="16" /></VBox.margin></Region>
+        <Label styleClass="sidebar-section-label" text="Menu Utama" />
+        <Button onAction="#goOverview" styleClass="menu-item-btn" text="📊  Overview" />
+        <Button onAction="#goProducts" styleClass="menu-item-btn-active" text="📦  Kelola Produk"><VBox.margin><Insets top="4" /></VBox.margin></Button>
+        <Button onAction="#goTransactions" styleClass="menu-item-btn" text="💳  Transaksi"><VBox.margin><Insets top="4" /></VBox.margin></Button>
+        <Button onAction="#goChatHistory" styleClass="menu-item-btn" text="💬  Riwayat Chat"><VBox.margin><Insets top="4" /></VBox.margin></Button>
+        <Region VBox.vgrow="ALWAYS" />
+        <Button onAction="#handleLogout" styleClass="logout-btn" text="[← Keluar" />
     </VBox>
 
     <!-- Content -->
-    <ScrollPane fitToWidth="true" styleClass="chat-scroll" HBox.hgrow="ALWAYS" hbarPolicy="NEVER">
-        <content>
-            <VBox styleClass="admin-content" spacing="24">
-                <Label text="Kelola Produk" styleClass="page-title"/>
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-scroll" HBox.hgrow="ALWAYS">
+            <VBox spacing="24" styleClass="admin-content">
+                <Label styleClass="page-title" text="Kelola Produk" />
 
                 <!-- Form card -->
-                <VBox styleClass="form-card" spacing="16">
-                    <Label text="+ Tambah/Edit Produk" styleClass="form-section-title"/>
-                    <Region styleClass="form-divider" prefHeight="1"/>
+                <VBox spacing="16" styleClass="form-card">
+                    <Label styleClass="form-section-title" text="+ Tambah/Edit Produk" />
+                    <Region prefHeight="1" styleClass="form-divider" />
 
                     <HBox spacing="16">
                         <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label text="Nama Produk" styleClass="field-label"/>
-                            <TextField fx:id="namaProdukField" promptText="cth: Laptop Asus" styleClass="input-dark-sm"/>
+                            <Label styleClass="field-label" text="Nama Produk" />
+                            <TextField fx:id="namaProdukField" promptText="cth: Laptop Asus" styleClass="input-dark-sm" />
                         </VBox>
                         <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label text="Kode Produk" styleClass="field-label"/>
-                            <TextField fx:id="kodeProdukField" promptText="cth: LAP-001" styleClass="input-dark-sm"/>
+                            <Label styleClass="field-label" text="Kode Produk" />
+                            <TextField fx:id="kodeProdukField" promptText="cth: LAP-001" styleClass="input-dark-sm" />
                         </VBox>
                     </HBox>
                     <HBox spacing="16">
                         <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label text="Harga (Rp)" styleClass="field-label"/>
-                            <TextField fx:id="hargaField" promptText="0" styleClass="input-dark-sm"/>
+                            <Label styleClass="field-label" text="Harga (Rp)" />
+                            <TextField fx:id="hargaField" promptText="0" styleClass="input-dark-sm" />
                         </VBox>
                         <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label text="Stok" styleClass="field-label"/>
-                            <TextField fx:id="stokField" promptText="0" styleClass="input-dark-sm"/>
+                            <Label styleClass="field-label" text="Stok" />
+                            <TextField fx:id="stokField" promptText="0" styleClass="input-dark-sm" />
                         </VBox>
                     </HBox>
                     <VBox spacing="6">
-                        <Label text="Deskripsi" styleClass="field-label"/>
-                        <TextArea fx:id="deskripsiField" promptText="Deskripsi Produk"
-                                  styleClass="textarea-dark" prefHeight="90" wrapText="true"/>
+                        <Label styleClass="field-label" text="Deskripsi" />
+                        <TextArea fx:id="deskripsiField" prefHeight="90" promptText="Deskripsi Produk" styleClass="textarea-dark" wrapText="true" />
                     </VBox>
 
-                    <Button fx:id="saveButton" text="Simpan Produk" onAction="#handleSave"
-                            styleClass="btn-teal" prefWidth="180"/>
+                    <Button fx:id="saveButton" onAction="#handleSave" prefWidth="180" styleClass="btn-teal" text="Simpan Produk" />
                 </VBox>
 
                 <!-- Product list table -->
-                <VBox styleClass="table-card" spacing="0">
+                <VBox styleClass="table-card">
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="Daftar Produk" styleClass="form-section-title" HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="produkCountLabel" text="0 produk" styleClass="text-gray"/>
+                        <Label styleClass="form-section-title" text="Daftar Produk" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="produkCountLabel" styleClass="text-gray" text="0">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin></Label>
+                  <Label text="produk" />
                     </HBox>
-                    <Region styleClass="form-divider" prefHeight="1"><VBox.margin><Insets top="12" bottom="8"/></VBox.margin></Region>
+                    <Region prefHeight="1" styleClass="form-divider"><VBox.margin><Insets bottom="8" top="12" /></VBox.margin></Region>
 
                     <HBox styleClass="table-header-row">
-                        <Label text="ID"     styleClass="table-col-label" prefWidth="120"/>
-                        <Label text="NAMA"   styleClass="table-col-label" prefWidth="200"/>
-                        <Label text="HARGA"  styleClass="table-col-label" prefWidth="160"/>
-                        <Label text="STOK"   styleClass="table-col-label" prefWidth="100"/>
-                        <Label text="AKSI"   styleClass="table-col-label" prefWidth="120"/>
+                        <Label prefWidth="120" styleClass="table-col-label" text="ID" />
+                        <Label prefWidth="200" styleClass="table-col-label" text="NAMA" />
+                        <Label prefWidth="160" styleClass="table-col-label" text="HARGA" />
+                        <Label prefWidth="100" styleClass="table-col-label" text="STOK" />
+                        <Label prefWidth="120" styleClass="table-col-label" text="AKSI" />
                     </HBox>
 
-                    <VBox fx:id="productRowsBox"/>
+                    <VBox fx:id="productRowsBox" />
                 </VBox>
             </VBox>
-        </content>
     </ScrollPane>
 </HBox>
