@@ -3,6 +3,10 @@ package com.aily.controller;
 import com.aily.App;
 import com.aily.Session;
 import com.aily.model.Order;
+import com.aily.service.ApiService.*;
+import com.aily.service.ApiService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -11,6 +15,8 @@ import javafx.scene.layout.*;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import static com.aily.service.ApiService.getProduk;
 
 public class AdminOverviewController implements Initializable {
 
@@ -28,8 +34,17 @@ public class AdminOverviewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         int txCount  = Session.orders.size();
         long revenue = Session.orders.stream().mapToLong(Order::getTotal).sum();
+        String productCount = "0";
+        try{
+            JsonObject obj = getProduk().getAsJsonObject("data");
+            JsonArray array = obj.getAsJsonArray("products");
+            productCount = String.valueOf(array.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        totalProdukLabel.setText("0");
+
+        totalProdukLabel.setText(productCount);
         totalTxLabel    .setText(String.valueOf(txCount));
         totalRevLabel   .setText(fmt(revenue));
         chatActiveLabel .setText("0");
