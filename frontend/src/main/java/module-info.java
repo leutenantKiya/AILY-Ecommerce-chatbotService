@@ -3,6 +3,7 @@ module com.aily {
     requires javafx.fxml;
     requires com.google.gson;
     requires java.net.http;
+    requires java.logging;
 
     opens com.aily to javafx.fxml;
     opens com.aily.controller to javafx.fxml;

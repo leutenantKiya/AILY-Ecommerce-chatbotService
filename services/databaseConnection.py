@@ -129,9 +129,10 @@ class ProductDB:
         self.conn = sqlite3.connect("aily.db")
         self.cursor = self.conn.cursor()
 
-    def searchBarang(self, name, gender):
+    def searchBarang(self,role, name, gender):
         if name.strip() == "":
-            return []
+            if role != "admin":
+                return []
         self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
         return self.cursor.fetchall()
 
