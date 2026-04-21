@@ -3,6 +3,11 @@ package com.aily.controller;
 import com.aily.App;
 import com.aily.Session;
 import com.aily.model.Product;
+import com.aily.service.ApiService;
+import com.aily.service.ApiService.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -15,8 +20,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
-public class AdminProductsController implements Initializable {
 
+public class AdminProductsController implements Initializable {
+    private List<Product> productList;
     @FXML private TextField namaProdukField;
     @FXML private TextField kodeProdukField;
     @FXML private TextField hargaField;
@@ -30,8 +36,42 @@ public class AdminProductsController implements Initializable {
     private final List<Product> products = new ArrayList<>();
     private Product editingProduct = null;
 
+//    public AdminProductsController() throws Exception {
+//        initTable();
+//    }
+
+
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        try {
+            initTable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        refreshTable();
+    }
+
+    private void initTable() throws Exception {
+        JsonObject obj = ApiService.getProduk().getAsJsonObject("data");
+        JsonArray array = obj.getAsJsonArray("products");
+
+        products.clear();
+
+        for (int i = 0; i < array.size(); i++) {
+            JsonObject prod = array.get(i).getAsJsonObject();
+
+            String id = prod.get("id").getAsString();
+            String name = prod.get("name").getAsString();
+            long price = prod.get("price").getAsLong();
+            int stock = prod.get("stock").getAsInt();
+            String category = prod.get("category").getAsString();
+            String warna = prod.get("warna").getAsString();
+
+            System.out.println(id);
+            products.add(new Product(id, name, category, price, stock, warna));
+        }
+
         refreshTable();
     }
 
@@ -48,6 +88,21 @@ public class AdminProductsController implements Initializable {
         long price  = harga.isEmpty() ? 0 : Long.parseLong(harga.replaceAll("[^0-9]", ""));
         int  stock  = stok.isEmpty()  ? 0 : Integer.parseInt(stok.replaceAll("[^0-9]", ""));
 
+
+        Product product = new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                name, code, price, stock, desc);
+        clearForm();
+        appendProduct(product);
+
+    }
+
+    private void appendProduct(Product product){
+        String name = product.getName();
+        String code = product.getCode();
+        Long price = product.getPrice();
+        int stock = product.getStock();
+        String desc = product.getDescription();
+
         if (editingProduct != null) {
             editingProduct.setName(name);
             editingProduct.setCode(code);
@@ -60,9 +115,11 @@ public class AdminProductsController implements Initializable {
             products.add(new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
                     name, code, price, stock, desc));
         }
-        clearForm();
+
         refreshTable();
     }
+
+
 
     private void clearForm() {
         namaProdukField.clear();
@@ -74,7 +131,7 @@ public class AdminProductsController implements Initializable {
 
     private void refreshTable() {
         productRowsBox.getChildren().clear();
-        produkCountLabel.setText(products.size() + " produk");
+        produkCountLabel.setText(products.size() + "");
         for (Product p : products) {
             productRowsBox.getChildren().add(buildProductRow(p));
         }

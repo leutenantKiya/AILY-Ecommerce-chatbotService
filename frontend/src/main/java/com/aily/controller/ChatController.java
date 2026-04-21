@@ -4,6 +4,7 @@ import com.aily.App;
 import com.aily.Session;
 import com.aily.model.User;
 import com.aily.service.ApiService;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -60,7 +61,7 @@ public class ChatController implements Initializable {
 
         new Thread(() -> {
             try {
-                JsonObject response = ApiService.sendMessage(user.getId(), text);
+                JsonObject response = ApiService.sendMessage(user, text);
                 String status = response.get("status").getAsString();
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
@@ -88,20 +89,130 @@ public class ChatController implements Initializable {
     }
 
     private String buildBotReply(JsonObject data, String intent) {
+        System.out.println(data.toString());
+        System.out.println(intent);
+
         if (data.has("action_data") && !data.get("action_data").isJsonNull()) {
-            JsonObject action = data.getAsJsonObject("action_data");
-            if (action.has("data")) {
-                JsonObject d = action.getAsJsonObject("data");
-                if (d.has("result")) return d.get("result").getAsString();
+            try {
+                try{
+                    // Intent "mencari" → action_data.products = [...]
+                    JsonArray action = data.getAsJsonArray("action_data");
+                    if (intent.equalsIgnoreCase("mencari")) {
+                        System.out.println("masuk Produk");
+
+                        StringBuilder sb = new StringBuilder();
+                        JsonArray products = data.getAsJsonArray("action_data");
+                        if (products.isEmpty()) {
+                            return sb.append("Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.").toString();
+                      }else{
+                            sb.append("Ditemukan ").append(products.size()).append(" produk:\n\n");
+
+                            for (int i = 0; i < Math.min(products.size(), 5); i++) {
+                                JsonArray p = products.get(i).getAsJsonArray(); // ← array, bukan object
+
+                                // [id, name, price, stock, null, desc, category, gender, color]
+                                String name = p.get(1).getAsString();
+                                long price = p.get(2).getAsLong();
+                                int stock = p.get(3).getAsInt();
+                                String color = p.get(8).getAsString();
+
+                                String formatted = String.format("Rp %,d", price).replace(',', '.');
+                                sb.append(i + 1).append(". ").append(name)
+                                        .append("\n   Harga : ").append(formatted)
+                                        .append("\n   Stok  : ").append(stock)
+                                        .append("\n   Warna : ").append(color)
+                                        .append("\n\n");
+                            }
+
+                            if (products.size() > 5) {
+                                sb.append("... dan ").append(products.size() - 5).append(" produk lainnya.");
+                            }
+                        }
+                        return sb.toString();
+                    }
+                }catch (Exception e){
+                    JsonObject action = data.getAsJsonObject("action_data");
+                    // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
+                    if (intent.equalsIgnoreCase("tanya_toko")) {
+                        System.out.println("masuk FAQ");
+
+                        JsonObject spesificData = action.getAsJsonObject("data");
+                        JsonArray results = spesificData.getAsJsonArray("result");
+
+                        if (results.isEmpty()) {
+                            return "Info toko belum tersedia.";
+                        }
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Informasi Toko AILY:\n\n");
+                        for (int i = 0; i < results.size(); i++) {
+                            JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
+                            String key = item.get(0).getAsString();
+                            String value = item.get(1).getAsString();
+
+                            sb.append("- ").append(key).append(": ").append(value).append("\n");
+//                        System.out.println(key + ": " + value);
+                        }
+
+                        return sb.toString();
+                    }
+
+                    if (intent.equalsIgnoreCase("help")) {
+                        System.out.println("masuk help");
+
+                        JsonObject spesificData = action.getAsJsonObject("data");
+                        JsonArray results = spesificData.getAsJsonArray("result");
+
+                        if (results.isEmpty()) {
+                            return "Info toko belum tersedia.";
+                        }
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Berikut daftar layanan yang bisa saya bantu:\n\n");
+                        for (int i = 0; i < results.size(); i++) {
+                            JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
+                            String key = item.get(0).getAsString();
+                            String value = item.get(1).getAsString();
+
+                            sb.append("- ").append(key).append(": ").append(value).append("\n");
+//                        System.out.println(key + ": " + value);
+                        }
+
+                        return sb.toString();
+                    }
+
+                    // Fallback: action_data.message (untuk intent lainnya)
+                    if (action.has("message")) {
+                        return action.get("message").getAsString();
+                    }
+                }
+
+
+
+
+
+
+            } catch (Exception e) {
+                // action_data mungkin bukan JsonObject (misal array kosong)
             }
         }
+
+        // Gunakan respons NLP jika ada
+//        if (data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
+//            JsonObject nlp = data.getAsJsonObject("nlp_result");
+//            if (nlp.has("respons") && !nlp.get("respons").getAsString().isEmpty()) {
+//                return nlp.get("respons").getAsString();
+//            }
+//        }
+
+        // Fallback terakhir berdasarkan intent
         return switch (intent) {
             case "mencari"         -> "Baik, saya akan bantu cari produk. Sebutkan nama atau kategori produknya!";
             case "checkout"        -> "Mengarahkan ke proses checkout...";
             case "lacak_kiriman"   -> "Silakan masukkan nomor resi untuk melacak kiriman kamu.";
             case "status_pesanan"  -> "Saya akan periksa status pesanan kamu.";
             case "batal_pesanan"   -> "Untuk membatalkan pesanan, masukkan nomor pesanan kamu.";
-            case "faq","tanya_toko"-> "Berikut FAQ Toko AILY :\n\n1. Jam operasional: 24/7 via chatbot\n2. Pengiriman: 2-5 hari kerja\n3. Pembayaran: Transfer bank, e-wallet\n4. Retur: Maksimal 7 hari setelah diterima\n\nAda pertanyaan lain?";
+            case "faq","tanya_toko"-> "Hubungi kami untuk info toko lebih lanjut.";
             case "salam"           -> "Halo juga! Ada yang bisa saya bantu hari ini?";
             case "terima_kasih"    -> "Sama-sama! Jangan ragu untuk bertanya lagi.";
             case "selamat_tinggal" -> "Sampai jumpa! Semoga belanja kamu menyenangkan.";
@@ -158,6 +269,7 @@ public class ChatController implements Initializable {
 
         Text msgText = new Text(text);
         msgText.setWrappingWidth(340);
+        msgText.setStyle("-fx-font-size: 16px; -fx-fill: " + (isUser ? "#07161E" : "#c2d6f6")  + ";");
 
         TextFlow flow = new TextFlow(msgText);
         flow.getStyleClass().add(isUser ? "bubble-user" : "bubble-bot");

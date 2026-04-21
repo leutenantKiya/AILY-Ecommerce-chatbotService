@@ -76,7 +76,7 @@
                 </content>
             </ScrollPane>
             <!-- Watermark -->
-            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.15"/>
+<!--            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.15"/>-->
         </StackPane>
 
         <!-- Quick action chips -->
