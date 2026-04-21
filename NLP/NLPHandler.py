@@ -100,6 +100,7 @@ NORMALIZATION_DICT = {
     "min":       "",
     "gan":       "",
     "sis":       "",
+    "faq":       "tentang toko",
 
     # Produk informal
     "jaket":     "jaket",

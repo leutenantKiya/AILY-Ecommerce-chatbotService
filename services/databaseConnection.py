@@ -5,7 +5,7 @@ from pymongo import MongoClient
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
-        self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
+        self.client = MongoClient("mongodb://localhost:27017")
         self.db = self.client["aily"]
         self.collection = self.db[self.table]
 
@@ -78,6 +78,13 @@ class SQLite:
                 question TEXT(50) NOT NULL,
                 answer TEXT(100) NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS help(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT(50) NOT NULL,
+                answer TEXT(100) NOT NULL
+            );
+
         """
         self.cursor.executescript(query)
 
@@ -93,9 +100,16 @@ class SQLite:
     def getTentangToko(self):
         self.cursor.execute(f"SELECT question, answer FROM tentangToko")
         return self.cursor.fetchall()
+
+    def getHelp(self):
+        self.cursor.execute(f"SELECT question, answer FROM help")
+        return self.cursor.fetchall()
  
-    def findUser(self, username):
-        self.cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
+    def findUser(self, user):
+        if "@" in user:
+            self.cursor.execute("SELECT * FROM user WHERE email = ?", (user,))
+        else:
+            self.cursor.execute("SELECT * FROM user WHERE username = ?", (user,))
         return self.cursor.fetchone()
 
     def findUserByPassword(self, hashed_password):
@@ -115,9 +129,11 @@ class ProductDB:
         self.conn = sqlite3.connect("aily.db")
         self.cursor = self.conn.cursor()
 
-    def searchBarang(self, name, gender):
+    def searchBarang(self,role, name, gender):
+        if name.strip() == "":
+            if role != "admin":
+                return []
         self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
-        # print(self.cursor.fetchall())
         return self.cursor.fetchall()
 
     def addProduct(self, name, price, stock, image, description, category, gender, warna):

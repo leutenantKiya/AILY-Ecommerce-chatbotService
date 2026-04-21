@@ -2,6 +2,8 @@ package com.aily.controller;
 
 import com.aily.App;
 import com.aily.Session;
+import com.aily.model.User;
+import com.google.gson.JsonObject;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -32,6 +34,11 @@ public class AdminChatController implements Initializable {
         for (ChatEntry entry : entries) {
             chatHistoryBox.getChildren().add(buildRow(entry));
         }
+    }
+
+    private JsonObject getData(Session session) {
+        User user = Session.currentUser;
+
     }
 
     private HBox buildRow(ChatEntry e) {

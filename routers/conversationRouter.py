@@ -16,6 +16,7 @@ from services.databaseConnection import SQLite, MongoDB, ProductDB
 router = APIRouter()
 
 class ChatMessage(BaseModel):
+    id: str
     message: str
 
 class ChatSaveRequest(BaseModel):
@@ -38,12 +39,12 @@ ADMIN_ONLY_INTENTS = ["crud"]
 # base endpoint bot
 # intent search
 @router.post("/aily/conversation/{role}")
-def chat(role: str, id: str, body: ChatMessage):
+def chat(role: str, body: ChatMessage):
     # print(f"[CHAT] user={id}, pesan={body.message}")
 
     # cari user berdasarkan hashed pass for a tokenized session
     db = SQLite()
-    user = db.findUserByPassword(id)
+    user = db.findUserByPassword(body.id)
 
     try:
         if user is None:
@@ -58,7 +59,7 @@ def chat(role: str, id: str, body: ChatMessage):
         action_data = None
 
         # save input -> log
-        save_chat(id, username, role, body.message)
+        save_chat(body.id, username, role, body.message)
 
         # cek akses berdasarkan role
         if intent in ADMIN_ONLY_INTENTS and role != "admin":
@@ -71,8 +72,11 @@ def chat(role: str, id: str, body: ChatMessage):
     # "salam", "terima_kasih", "selamat_tinggal",
     # "tidak_diketahui"
         if intent == "faq" or intent == "tanya_toko":
-            toko_response = tentangToko()
-            action_data = toko_response
+            response = tentangToko()
+            action_data = response
+        elif intent == "help":
+            response = help()
+            action_data = response
         elif intent == "crud" and role == "admin":
             from routers.productManagementService import perform_delete_product, perform_list_products
             import re
@@ -99,17 +103,17 @@ def chat(role: str, id: str, body: ChatMessage):
             gender = result.get("atribut").get("gender") 
             if gender == "default_user":
                 gender = 'L' 
-            print(gender)
-            toko_response = searchBarangResult(result.get("konten"), gender)
+            
+            toko_response = searchBarangResult(role, result.get("konten"), gender)
             action_data = toko_response
     # elif intent == "checkout": 
 
         # Simpan response bot ke MongoDB
         bot_response_text = action_data
-        save_chat(id, "AILY Bot", "bot", bot_response_text)
+        save_chat(body.id, "AILY Bot", "bot", bot_response_text)
        
         return Response.Ok(data={
-            "user_id": id,
+            "user_id": body.id,
             "username": username,
             "role": role,
             "input": body.message,
@@ -124,6 +128,14 @@ def chat(role: str, id: str, body: ChatMessage):
 def tentangToko():
     db = SQLite()
     result = db.getTentangToko()
+    return Response.Ok(data={
+        "result": result
+    })
+
+@router.get("/aily/help")
+def help():
+    db = SQLite()
+    result = db.getHelp()
     return Response.Ok(data={
         "result": result
     })
@@ -207,8 +219,7 @@ def updateUser(id, colum_name, data_new):
 
 
 # cari barang
-def searchBarangResult(name: str, gender: str):
+def searchBarangResult(role: str, name: str, gender: str):
     db = ProductDB()
-    result = db.searchBarang(name, gender)
-    print(result)
+    result = db.searchBarang(role, name, gender)
     return result

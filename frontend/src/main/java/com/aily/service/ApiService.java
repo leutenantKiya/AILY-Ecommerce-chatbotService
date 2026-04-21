@@ -1,5 +1,6 @@
 package com.aily.service;
 
+import com.aily.model.User;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -51,10 +52,11 @@ public class ApiService {
 
     // ── Conversation ──────────────────────────────────────────────────────────
 
-    public static JsonObject sendMessage(String hashedPassword, String message) throws Exception {
-        String url = BASE_URL + "/aily/conversation/" + encode(hashedPassword);
+    public static JsonObject sendMessage(User user, String message) throws Exception {
+        String url = BASE_URL + "/aily/conversation/" + user.getRole();
 
         JsonObject body = new JsonObject();
+        body.addProperty("id", user.getId());
         body.addProperty("message", message);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -67,11 +69,11 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── Toko ──────────────────────────────────────────────────────────────────
+    // ── Admin ──────────────────────────────────────────────────────────────────
 
-    public static JsonObject getTentangToko() throws Exception {
+    public static JsonObject getProduk() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/aily/tentangToko"))
+                .uri(URI.create(BASE_URL + "/aily/admin/product/list"))
                 .GET()
                 .build();
 
