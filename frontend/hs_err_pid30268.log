@@ -1,0 +1,264 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 264241152 bytes. Error detail: G1 virtual space
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   This process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   JVM is running with Zero Based Compressed Oops mode in which the Java heap is
+#     placed in the first 32GB address space. The Java Heap base address is the
+#     maximum limit for the native heap growth. Please use -XX:HeapBaseMinAddress
+#     to set the Java Heap base and to place the Java Heap above 32GB virtual address.
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (os_windows.cpp:3703), pid=30268, tid=28536
+#
+# JRE version:  (23.0.1+11) (build )
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (23.0.1+11-39, mixed mode, sharing, tiered, compressed oops, compressed class ptrs, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: --module-path=D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\target\classes;C:\Users\Lenovo\.m2\repository\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-base\17.0.6\javafx-base-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-controls\17.0.6\javafx-controls-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-fxml\17.0.6\javafx-fxml-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-graphics\17.0.6\javafx-graphics-17.0.6-win.jar --add-modules=com.aily -Djdk.module.main=com.aily com.aily/com.aily.App
+
+Host: 12th Gen Intel(R) Core(TM) i5-12450HX, 12 cores, 15G,  Windows 11 , 64 bit Build 26100 (10.0.26100.8246)
+Time: Tue Apr 21 21:00:35 2026 SE Asia Standard Time elapsed time: 0.009954 seconds (0d 0h 0m 0s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000002c50431f520):  JavaThread "Unknown thread" [_thread_in_vm, id=28536, stack(0x000000f8c8200000,0x000000f8c8300000) (1024K)]
+
+Stack: [0x000000f8c8200000,0x000000f8c8300000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x6e08b9]  (no source info available)
+V  [jvm.dll+0x87dc83]  (no source info available)
+V  [jvm.dll+0x88010e]  (no source info available)
+V  [jvm.dll+0x8807e3]  (no source info available)
+V  [jvm.dll+0x27aee6]  (no source info available)
+V  [jvm.dll+0x6dd1c5]  (no source info available)
+V  [jvm.dll+0x6d104a]  (no source info available)
+V  [jvm.dll+0x35b3ea]  (no source info available)
+V  [jvm.dll+0x3637f6]  (no source info available)
+V  [jvm.dll+0x34fd5e]  (no source info available)
+V  [jvm.dll+0x34fff8]  (no source info available)
+V  [jvm.dll+0x3289cc]  (no source info available)
+V  [jvm.dll+0x32966e]  (no source info available)
+V  [jvm.dll+0x844355]  (no source info available)
+V  [jvm.dll+0x3b9848]  (no source info available)
+V  [jvm.dll+0x82d14c]  (no source info available)
+V  [jvm.dll+0x454d4e]  (no source info available)
+V  [jvm.dll+0x456bd1]  (no source info available)
+C  [jli.dll+0x52a3]  (no source info available)
+C  [ucrtbase.dll+0x37b0]  (no source info available)
+C  [KERNEL32.DLL+0x2e8d7]  (no source info available)
+C  [ntdll.dll+0x8c3fc]  (no source info available)
+
+Lock stack of current Java thread (top to bottom):
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00007ffc3b163618, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+Total: 0
+
+Other Threads:
+  0x000002c505fe4810 WorkerThread "GC Thread#0"                     [id=25096, stack(0x000000f8c8300000,0x000000f8c8400000) (1024K)]
+  0x000002c505ff7260 ConcurrentGCThread "G1 Main Marker"            [id=24628, stack(0x000000f8c8400000,0x000000f8c8500000) (1024K)]
+  0x000002c505ff7c10 WorkerThread "G1 Conc#0"                       [id=26040, stack(0x000000f8c8500000,0x000000f8c8600000) (1024K)]
+
+[error occurred during error reporting (printing all threads), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffc3a8abfba]
+VM state: not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x00007ffc3b1e3a10] Heap_lock - owner thread: 0x000002c50431f520
+
+Heap address: 0x0000000704800000, size: 4024 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+
+CDS archive(s) mapped at: [0x0000000000000000-0x0000000000000000-0x0000000000000000), size 0, SharedBaseAddress: 0x0000000800000000, ArchiveRelocationMode: 1.
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0, Narrow klass range: 0x0
+
+GC Precious Log:
+ CardTable entry size: 512
+ Card Set container configuration: InlinePtr #cards 4 size 8 Array Of Cards #cards 16 size 48 Howl #buckets 8 coarsen threshold 3686 Howl Bitmap #cards 512 size 80 coarsen threshold 460 Card regions per heap region 1 cards per card region 4096
+
+Heap:
+ garbage-first heap   total reserved 4120576K, committed 0K, used 0K [0x0000000704800000, 0x0000000800000000)
+  region size 2048K, 0 young (0K), 0 survivors (0K)
+
+[error occurred during error reporting (printing heap information), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffc3acac3c9]
+GC Heap History (0 events):
+No events
+
+Dll operation events (1 events):
+Event: 0.007 Loaded shared library C:\Program Files\Java\jdk-23\bin\java.dll
+
+Deoptimization events (0 events):
+No events
+
+Classes loaded (0 events):
+No events
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+VM Operations (0 events):
+No events
+
+Memory protections (0 events):
+No events
+
+Nmethod flushes (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff6ecfe0000 - 0x00007ff6ecff0000 	C:\Program Files\Java\jdk-23\bin\java.exe
+0x00007ffcc78c0000 - 0x00007ffcc7b27000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffcc6b10000 - 0x00007ffcc6bd9000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffcc4d50000 - 0x00007ffcc5144000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffcc4190000 - 0x00007ffcc42db000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffcb1740000 - 0x00007ffcb175b000 	C:\Program Files\Java\jdk-23\bin\VCRUNTIME140.dll
+0x00007ffcb1760000 - 0x00007ffcb1777000 	C:\Program Files\Java\jdk-23\bin\jli.dll
+0x00007ffcc5650000 - 0x00007ffcc5815000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffca3f50000 - 0x00007ffca41e3000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.8115_none_3e075c82e3354f9c\COMCTL32.dll
+0x00007ffcc5620000 - 0x00007ffcc5647000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffcc7850000 - 0x00007ffcc787b000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffcc6930000 - 0x00007ffcc69d9000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffcc5150000 - 0x00007ffcc527b000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffcc4430000 - 0x00007ffcc44d3000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffcc73d0000 - 0x00007ffcc7402000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffc927e0000 - 0x00007ffc928d2000 	C:\Program Files\Windhawk\Engine\1.6.1\64\windhawk.dll
+0x00007ffcc69e0000 - 0x00007ffcc6a96000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffcc6ea0000 - 0x00007ffcc6f47000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffcc5f30000 - 0x00007ffcc6048000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffcb1730000 - 0x00007ffcb173c000 	C:\Program Files\Java\jdk-23\bin\vcruntime140_1.dll
+0x00007ffc8da40000 - 0x00007ffc8dace000 	C:\Program Files\Java\jdk-23\bin\msvcp140.dll
+0x00007ffc3a570000 - 0x00007ffc3b2bf000 	C:\Program Files\Java\jdk-23\bin\server\jvm.dll
+0x00007ffcc6c30000 - 0x00007ffcc6cb0000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffcc3ff0000 - 0x00007ffcc404e000 	C:\WINDOWS\SYSTEM32\POWRPROF.dll
+0x00007ffcb7b40000 - 0x00007ffcb7b76000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffcb25b0000 - 0x00007ffcb25bb000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffcc3fd0000 - 0x00007ffcc3fe4000 	C:\WINDOWS\SYSTEM32\UMPDC.dll
+0x00007ffcc2f00000 - 0x00007ffcc2f1b000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffcb1720000 - 0x00007ffcb172a000 	C:\Program Files\Java\jdk-23\bin\jimage.dll
+0x00007ffcc19b0000 - 0x00007ffcc1bf2000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffcc7490000 - 0x00007ffcc7812000 	C:\WINDOWS\System32\combase.dll
+0x00007ffcc7100000 - 0x00007ffcc71d8000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffca98f0000 - 0x00007ffca992b000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffcc5570000 - 0x00007ffcc5615000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffcb1700000 - 0x00007ffcb171e000 	C:\Program Files\Java\jdk-23\bin\java.dll
+0x00007ffcc6f50000 - 0x00007ffcc70e7000 	C:\WINDOWS\System32\ole32.dll
+0x00007ffcc60c0000 - 0x00007ffcc6827000 	C:\WINDOWS\System32\SHELL32.dll
+0x00007ffcc5280000 - 0x00007ffcc53ea000 	C:\WINDOWS\System32\wintypes.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Program Files\Java\jdk-23\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.8115_none_3e075c82e3354f9c;C:\Program Files\Windhawk\Engine\1.6.1\64;C:\Program Files\Java\jdk-23\bin\server
+
+VM Arguments:
+jvm_args: --module-path=D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\target\classes;C:\Users\Lenovo\.m2\repository\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-base\17.0.6\javafx-base-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-controls\17.0.6\javafx-controls-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-fxml\17.0.6\javafx-fxml-17.0.6-win.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-graphics\17.0.6\javafx-graphics-17.0.6-win.jar --add-modules=com.aily -Djdk.module.main=com.aily 
+java_command: com.aily/com.aily.App
+java_class_path (initial): C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-base\17.0.6\javafx-base-17.0.6.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-controls\17.0.6\javafx-controls-17.0.6.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-fxml\17.0.6\javafx-fxml-17.0.6.jar;C:\Users\Lenovo\.m2\repository\org\openjfx\javafx-graphics\17.0.6\javafx-graphics-17.0.6.jar
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 4                                         {product} {ergonomic}
+     uint ConcGCThreads                            = 3                                         {product} {ergonomic}
+     uint G1ConcRefinementThreads                  = 10                                        {product} {ergonomic}
+   size_t G1HeapRegionSize                         = 2097152                                   {product} {ergonomic}
+   size_t InitialHeapSize                          = 264241152                                 {product} {ergonomic}
+   size_t MarkStackSize                            = 4194304                                   {product} {ergonomic}
+   size_t MarkStackSizeMax                         = 536870912                                 {product} {ergonomic}
+   size_t MaxHeapSize                              = 4219469824                                {product} {ergonomic}
+   size_t MinHeapDeltaBytes                        = 2097152                                   {product} {ergonomic}
+   size_t MinHeapSize                              = 8388608                                   {product} {ergonomic}
+    uintx NonNMethodCodeHeapSize                   = 5832704                                {pd product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 122945536                              {pd product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 122880000                              {pd product} {ergonomic}
+    uintx ReservedCodeCacheSize                    = 251658240                              {pd product} {ergonomic}
+     bool SegmentedCodeCache                       = true                                      {product} {ergonomic}
+   size_t SoftMaxHeapSize                          = 4219469824                             {manageable} {ergonomic}
+     bool UseCompressedOops                        = true                           {product lp64_product} {ergonomic}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags foldmultilines=false
+ #1: stderr all=off uptime,level,tags foldmultilines=false
+
+Environment Variables:
+PATH=C:\Python313\Scripts\;C:\Python313\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Scripts\;C:\Program Files\PuTTY\;C:\MinGW\bin;C:\MinGW\include;C:\ProgramData\chocolatey\bin;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\nodejs\;C:\sqlite;C:\Program Files\GitHub CLI\;C:\Program Files\Cloudflare\Cloudflare WARP\;D:\semester 4\rplbo\praktik\apache-maven-3.9.12-bin\apache-maven-3.9.12\bin;C:\Program Files (x86)\cloudflared\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\dotnet\;C:\Users\Lenovo\scoop\shims;C:\Users\Lenovo\AppData\Local\Programs\oh-my-posh\bin\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\Lenovo\AppData\Local\Microsoft\WindowsApps;C:\Users\Lenovo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Lenovo\AppData\Local\GitHubDesktop\bin;C:\Users\Lenovo\AppData\Roaming\npm;C:\Users\Lenovo\AppData\Local\Programs\mongosh\;C:\Users\Lenovo\AppData\Local\Microsoft\WinGet\Links;D:\Antigravity\bin;C:\Users\Lenovo\AppData\Local\Programs\Warp\bin;
+USERNAME=Kiya
+TERM=xterm
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 151 Stepping 2, GenuineIntel
+TMP=C:\Users\Lenovo\AppData\Local\Temp
+TEMP=C:\Users\Lenovo\AppData\Local\Temp
+
+
+
+
+Periodic native trim disabled
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 11 , 64 bit Build 26100 (10.0.26100.8246)
+OS uptime: 1 days 7:38 hours
+Hyper-V role detected
+
+CPU: total 12 (initial active 12) (6 cores per cpu, 2 threads per core) family 6 model 151 stepping 2 microcode 0x3e, cx8, cmov, fxsr, ht, mmx, 3dnowpref, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, lzcnt, tsc, tscinvbit, avx, avx2, aes, erms, clmul, bmi1, bmi2, adx, sha, fma, vzeroupper, clflush, clflushopt, clwb, hv, serialize, rdtscp, rdpid, fsrm, gfni, f16c, cet_ibt, cet_ss
+Processor Information for processor 0
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 1
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 2
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 3
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 4
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 5
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 6
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 7
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 8
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 9
+  Max Mhz: 2400, Current Mhz: 1466, Mhz Limit: 2400
+Processor Information for processor 10
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+Processor Information for processor 11
+  Max Mhz: 2400, Current Mhz: 2400, Mhz Limit: 2400
+
+Memory: 4k page, system-wide physical 16091M (1865M free)
+TotalPageFile size 25897M (AvailPageFile size 110M)
+current process WorkingSet (physical memory assigned to process): 14M, peak: 14M
+current process commit charge ("private bytes"): 65M, peak: 317M
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (23.0.1+11-39) for windows-amd64 JRE (23.0.1+11-39), built on 2024-09-30T07:20:43Z with MS VC++ 17.6 (VS2022)
+
+END.

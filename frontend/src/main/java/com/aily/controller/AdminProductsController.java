@@ -12,7 +12,11 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Base64;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,9 @@ public class AdminProductsController implements Initializable {
     @FXML private Button    saveButton;
     @FXML private Label     produkCountLabel;
     @FXML private VBox      productRowsBox;
+    @FXML private Label     imageNameLabel;
+
+    private String currentImageBase64 = null;
 
     // Product list loaded from backend
     private final List<Product> products = new ArrayList<>();
@@ -38,6 +45,7 @@ public class AdminProductsController implements Initializable {
         loadProductsFromBackend();
     }
 
+<<<<<<< Updated upstream
     private void loadProductsFromBackend() {
         new Thread(() -> {
             try {
@@ -68,6 +76,30 @@ public class AdminProductsController implements Initializable {
                 Platform.runLater(this::refreshTable);
             }
         }).start();
+=======
+    private void initTable() throws Exception {
+        JsonObject obj = ApiService.getProduk().getAsJsonObject("data");
+        JsonArray array = obj.getAsJsonArray("products");
+
+        products.clear();
+
+        for (int i = 0; i < array.size(); i++) {
+            JsonObject prod = array.get(i).getAsJsonObject();
+
+            String id = prod.get("id").getAsString();
+            String name = prod.get("name").getAsString();
+            long price = prod.get("price").getAsLong();
+            int stock = prod.get("stock").getAsInt();
+            String category = prod.get("category").getAsString();
+            String warna = prod.get("warna").getAsString();
+            String imageStr = prod.has("image") && !prod.get("image").isJsonNull() ? prod.get("image").getAsString() : null;
+
+            System.out.println(id);
+            products.add(new Product(id, name, category, price, stock, warna, imageStr));
+        }
+
+        refreshTable();
+>>>>>>> Stashed changes
     }
 
     @FXML
@@ -83,6 +115,7 @@ public class AdminProductsController implements Initializable {
         long price  = harga.isEmpty() ? 0 : Long.parseLong(harga.replaceAll("[^0-9]", ""));
         int  stock  = stok.isEmpty()  ? 0 : Integer.parseInt(stok.replaceAll("[^0-9]", ""));
 
+<<<<<<< Updated upstream
         saveButton.setDisable(true);
 
         if (editingProduct != null) {
@@ -114,6 +147,35 @@ public class AdminProductsController implements Initializable {
                     Platform.runLater(() -> saveButton.setDisable(false));
                 }
             }).start();
+=======
+
+        Product product = new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                name, code, price, stock, desc, currentImageBase64);
+        clearForm();
+        appendProduct(product);
+
+    }
+
+    private void appendProduct(Product product){
+        String name = product.getName();
+        String code = product.getCode();
+        Long price = product.getPrice();
+        int stock = product.getStock();
+        String desc = product.getDescription();
+
+        if (editingProduct != null) {
+            editingProduct.setName(name);
+            editingProduct.setCode(code);
+            editingProduct.setPrice(price);
+            editingProduct.setStock(stock);
+            editingProduct.setDescription(desc);
+            editingProduct.setImage(currentImageBase64);
+            editingProduct = null;
+            saveButton.setText("Simpan Produk");
+        } else {
+            products.add(new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                    name, code, price, stock, desc, currentImageBase64));
+>>>>>>> Stashed changes
         }
     }
 
@@ -123,6 +185,10 @@ public class AdminProductsController implements Initializable {
         hargaField.clear();
         stokField.clear();
         deskripsiField.clear();
+        currentImageBase64 = null;
+        if (imageNameLabel != null) {
+            imageNameLabel.setText("Belum ada gambar");
+        }
     }
 
     private void refreshTable() {
@@ -178,7 +244,32 @@ public class AdminProductsController implements Initializable {
         hargaField.setText(String.valueOf(p.getPrice()));
         stokField.setText(String.valueOf(p.getStock()));
         deskripsiField.setText(p.getDescription());
+        currentImageBase64 = p.getImage();
+        if (imageNameLabel != null) {
+            imageNameLabel.setText(currentImageBase64 != null ? "Gambar tersimpan" : "Belum ada gambar");
+        }
         saveButton.setText("Update Produk");
+    }
+
+    @FXML
+    private void handleChooseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Pilih Gambar Produk");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            try {
+                byte[] fileContent = Files.readAllBytes(file.toPath());
+                currentImageBase64 = Base64.getEncoder().encodeToString(fileContent);
+                if (imageNameLabel != null) {
+                    imageNameLabel.setText(file.getName());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML private void goOverview()     { try { App.switchScene("admin_overview",     1280, 880); } catch (Exception ignored) {} }

@@ -31,6 +31,16 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
+    public static JsonObject deleteChat(String userId) throws Exception {
+        String url = BASE_URL + "/aily/user/conversation/chat/delete?user_id=" + encode(userId);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .DELETE()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
     public static JsonObject register(String username, String password,
                                       String email, String phone,
                                       String address, String role) throws Exception {
@@ -72,18 +82,27 @@ public class ApiService {
 
     // ── Chat History ──────────────────────────────────────────────────────────
 
+<<<<<<< Updated upstream
     public static JsonObject loadChatHistory(String userId) throws Exception {
         String url = BASE_URL + "/aily/user/conversation/chat/load?user_id=" + encode(userId);
 
+=======
+    public static JsonObject getChatHistory(String userId) throws Exception {
+        String url = BASE_URL + "/aily/user/conversation/chat/load?user_id=" + encode(userId);
+>>>>>>> Stashed changes
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
+<<<<<<< Updated upstream
     public static JsonObject saveChatMessage(String userId, String username,
                                              String role, String message) throws Exception {
         String url = BASE_URL + "/aily/user/conversation/chat/save";
@@ -119,6 +138,9 @@ public class ApiService {
     // ── Product Management (Admin) ────────────────────────────────────────────
 
     public static JsonObject listProducts() throws Exception {
+=======
+    public static JsonObject getProduk() throws Exception {
+>>>>>>> Stashed changes
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/aily/admin/product/list"))
                 .GET()

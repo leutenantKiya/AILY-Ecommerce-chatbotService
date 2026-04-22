@@ -3,6 +3,11 @@ module com.aily {
     requires javafx.fxml;
     requires transitive com.google.gson;
     requires java.net.http;
+<<<<<<< Updated upstream
+=======
+    requires java.logging;
+    requires java.desktop;
+>>>>>>> Stashed changes
 
     opens com.aily to javafx.fxml;
     opens com.aily.controller to javafx.fxml;

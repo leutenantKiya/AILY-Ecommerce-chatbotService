@@ -62,6 +62,14 @@
                         <TextArea fx:id="deskripsiField" promptText="Deskripsi Produk"
                                   styleClass="textarea-dark" prefHeight="90" wrapText="true"/>
                     </VBox>
+                    
+                    <VBox spacing="6">
+                        <Label styleClass="field-label" text="Gambar Produk" />
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Pilih Gambar" onAction="#handleChooseImage" styleClass="btn-gray" />
+                            <Label fx:id="imageNameLabel" text="Belum ada gambar" styleClass="text-gray" />
+                        </HBox>
+                    </VBox>
 
                     <Button fx:id="saveButton" text="Simpan Produk" onAction="#handleSave"
                             styleClass="btn-teal" prefWidth="180"/>
