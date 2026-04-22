@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\LoginAdminController.java
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminOverviewController.java
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminProductsController.java
@@ -18,3 +19,25 @@ C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\f
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\App.java
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\CartItem.java
 C:\Users\Asus\Desktop\Kuliah\Semester_4\!Project\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\RegisterController.java
+=======
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminChatController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\LoginController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\ChatMessage.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\User.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\LoginAdminController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminTransactionsController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\OrdersController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\Product.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\CartController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\Session.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\service\ApiService.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\CartItem.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\model\Order.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\LandingController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\RegisterController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminOverviewController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\ChatController.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\module-info.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\App.java
+D:\semester 4\rplbo\praktik\tugasAkhir\AILY-Ecommerce-chatbotService\frontend\src\main\java\com\aily\controller\AdminProductsController.java
+>>>>>>> Stashed changes

@@ -6,6 +6,7 @@ from utils.response import Response
 from NLP.NLPHandler import process as nlp_process
 from services.databaseConnection import SQLite, MongoDB, ProductDB
 
+import base64
 
 
 # brainstorming baru plan:
@@ -173,6 +174,16 @@ def save_chat_endpoint(body: ChatSaveRequest):
         "message": "Chat successfully saved"
     })
 
+def sanitize_for_json(obj):
+    """Recursively convert bytes to base64 strings for JSON serialization."""
+    if isinstance(obj, bytes):
+        return base64.b64encode(obj).decode("utf-8")
+    elif isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_for_json(item) for item in obj]
+    return obj
+
 @router.get("/aily/user/conversation/chat/load")
 def load_chat(user_id: str):
     chatLog = MongoDB("chatUserLog")
@@ -192,9 +203,19 @@ def load_chat(user_id: str):
         # Jika sudah ada, load dari id
         all_chats = user_doc.get("chats", [])
 
+    safe_chats = sanitize_for_json(all_chats)
+
     return Response.Ok(data={
         "user_id": user_id,
-        "chat_history": all_chats
+        "chat_history": safe_chats
+    })
+
+@router.delete("/aily/user/conversation/chat/delete")
+def delete_chat(user_id: str):
+    chatLog = MongoDB("chatUserLog")
+    chatLog.delete({"user_id": user_id})
+    return Response.Ok(data={
+        "message": "Chat deleted successfully"
     })
 
 @router.post("/aily/user/updateUser")

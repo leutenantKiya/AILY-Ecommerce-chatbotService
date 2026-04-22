@@ -9,10 +9,15 @@ load_dotenv()
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
+<<<<<<< Updated upstream
         mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
         mongo_db = os.getenv("MONGO_DB", "aily")
         self.client = MongoClient(mongo_uri)
         self.db = self.client[mongo_db]
+=======
+        self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
+        self.db = self.client["aily"]
+>>>>>>> Stashed changes
         self.collection = self.db[self.table]
 
     def insert(self, data):
@@ -63,11 +68,9 @@ class SQLite:
                 name TEXT NOT NULL,
                 price INTEGER NOT NULL,
                 stock INTEGER NOT NULL,
-                image TEXT,
+                image MEDIUMBLOB,
                 description TEXT NOT NULL,
-                category TEXT NOT NULL,
-                gender TEXT DEFAULT 'U',
-                warna TEXT
+                gender TEXT DEFAULT 'U'
             );
 
             CREATE TABLE IF NOT EXISTS cart_item (
@@ -121,6 +124,7 @@ class ProductDB:
         self.conn = sqlite3.connect("aily.db")
         self.cursor = self.conn.cursor()
 
+<<<<<<< Updated upstream
     def searchBarang(self, name, gender):
         # Cari berdasarkan nama ATAU kategori
         self.cursor.execute(
@@ -146,12 +150,29 @@ class ProductDB:
         params = categories + [gender]
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
+=======
+    def searchBarang(self,role, name, gender):
+        import base64
+        if name.strip() == "":
+            if role != "admin":
+                return []
+        self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
+        rows = self.cursor.fetchall()
+        result = []
+        for row in rows:
+            row_list = list(row)
+            # row[4] is the image column — encode binary to base64 string
+            if row_list[4] is not None and isinstance(row_list[4], bytes):
+                row_list[4] = base64.b64encode(row_list[4]).decode("utf-8")
+            result.append(row_list)
+        return result
+>>>>>>> Stashed changes
 
-    def addProduct(self, name, price, stock, image, description, category, gender, warna):
+    def addProduct(self, name, price, stock, image, description, gender):
         try:
             self.cursor.execute(
-                "INSERT INTO product (name, price, stock, image, description, category, gender, warna) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (name, price, stock, image, description, category, gender, warna)
+                "INSERT INTO product (name, price, stock, image, description, gender) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, price, stock, image, description, gender)
             )
             self.conn.commit()
             return True
@@ -159,11 +180,11 @@ class ProductDB:
             print("Error insert product:", e)
             return False
 
-    def updateProduct(self, product_id, name, price, stock, image, description, category, gender, warna):
+    def updateProduct(self, product_id, name, price, stock, image, description, gender):
         try:
             self.cursor.execute(
-                "UPDATE product SET name=?, price=?, stock=?, image=?, description=?, category=?, gender=?, warna=? WHERE id=?",
-                (name, price, stock, image, description, category, gender, warna, product_id)
+                "UPDATE product SET name=?, price=?, stock=?, image=?, description=?, gender=? WHERE id=?",
+                (name, price, stock, image, description, gender, product_id)
             )
             self.conn.commit()
             return True

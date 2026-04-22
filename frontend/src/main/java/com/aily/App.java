@@ -15,8 +15,8 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
         stage.setTitle("AILY E-commerce Chatbot");
-        stage.setResizable(true);
-        switchScene("landing", 1000, 700);
+        stage.setResizable(false);
+        switchScene("landing", 1920, 1080);
         stage.show();
     }
 
