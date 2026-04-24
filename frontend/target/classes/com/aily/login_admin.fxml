@@ -7,7 +7,7 @@
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.aily.controller.LoginAdminController"
            styleClass="root-bg"
-           prefWidth="1280" prefHeight="880">
+           prefWidth="1920" prefHeight="1080">
 
     <VBox styleClass="card" alignment="TOP_LEFT" spacing="0"
           prefWidth="380" maxWidth="380">
