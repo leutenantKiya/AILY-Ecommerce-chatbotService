@@ -33,7 +33,7 @@ public class AdminChatController implements Initializable {
 
         new Thread(() -> {
             try {
-                JsonObject response = ApiService.loadChatHistory(Session.currentUser.getId());
+                JsonObject response = ApiService.getChatHistory(Session.currentUser.getId());
                 Platform.runLater(() -> {
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = response.getAsJsonObject("data");
@@ -75,7 +75,6 @@ public class AdminChatController implements Initializable {
         return element.toString();
     }
 
-<<<<<<< Updated upstream
     private void showEmpty() {
         chatHistoryBox.getChildren().clear();
         Label empty = new Label("Belum ada riwayat chat.");
@@ -83,12 +82,6 @@ public class AdminChatController implements Initializable {
         empty.setPadding(new Insets(20));
         chatHistoryBox.getChildren().add(empty);
     }
-=======
-//    private JsonObject getData(Session session) {
-//        User user = Session.currentUser;
-//
-//    }
->>>>>>> Stashed changes
 
     private HBox buildRow(String user, String lastMsg, String role, String time) {
         VBox info = new VBox(4);
@@ -119,14 +112,14 @@ public class AdminChatController implements Initializable {
         return row;
     }
 
-    @FXML private void goOverview()     { try { App.switchScene("admin_overview",     1920, 1080); } catch (Exception ignored) {} }
-    @FXML private void goProducts()     { try { App.switchScene("admin_products",     1920, 1080); } catch (Exception ignored) {} }
-    @FXML private void goTransactions() { try { App.switchScene("admin_transactions", 1920, 1080); } catch (Exception ignored) {} }
+    @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
+    @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
+    @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
     @FXML private void goChatHistory()  { /* already here */ }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
 }

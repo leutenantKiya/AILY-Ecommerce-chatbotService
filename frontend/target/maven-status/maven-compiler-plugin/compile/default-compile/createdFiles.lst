@@ -12,7 +12,6 @@ com\aily\controller\LoginAdminController.class
 com\aily\controller\LoginController.class
 com\aily\App.class
 com\aily\model\User.class
-com\aily\controller\AdminChatController$ChatEntry.class
 com\aily\controller\AdminProductsController.class
 com\aily\model\Order$Status.class
 com\aily\controller\LandingController.class

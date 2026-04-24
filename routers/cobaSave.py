@@ -5,12 +5,16 @@ from PIL import Image
 import io
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from services.databaseConnection import ProductDB
+# from services.databaseConnection import ProductDB
 
-db = ProductDB()
-with open("kaosJMK48.jpg", "rb") as f:
+# db = ProductDB()
+image_path = os.path.join(os.path.dirname(__file__), '..', 'kacamata.jpeg')
+with open(image_path, "rb") as f:
     image = f.read()
+    print(image)
 
+image = Image.open(io.BytesIO(image))
+image.show()
 # db.addProduct(
 #     name="example",
 #     price=1000,
@@ -21,15 +25,15 @@ with open("kaosJMK48.jpg", "rb") as f:
 # )
 
 
-db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'aily.db')
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
-cursor.execute("UPDATE product SET image = ? WHERE name LIKE ?", (image, "%Kaos%"))
-conn.commit()
-row = cursor.fetchone()
-conn.close()
+# db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'aily.db')
+# conn = sqlite3.connect(db_path)
+# cursor = conn.cursor()
+# cursor.execute("UPDATE product SET image = ? WHERE name LIKE ?", (image, "%Kaos%"))
+# cursor.execute("SELECT image from product where id = 32")
+# conn.commit()
+# row = cursor.fetchone()
+# conn.close()
 
-if row: 
-    binary_data = row[0] 
-    image = Image.open(io.BytesIO(binary_data))
-    image.show()
+# if row: 
+    # print(row[0])
+    # binary_data = row[0] 

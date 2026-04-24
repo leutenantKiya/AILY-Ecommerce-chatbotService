@@ -37,7 +37,7 @@ public class RegisterController {
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
                         try {
                             // Kembali ke landing, tampilkan toast di sana
-                            App.switchScene("landing", 1000, 700);
+                            App.switchScene("landing");
                         } catch (Exception e) {
                             errorLabel.setText("Berhasil, gagal kembali ke landing.");
                         }
@@ -58,7 +58,7 @@ public class RegisterController {
 
     @FXML
     private void goBack() {
-        try { App.switchScene("landing", 1000, 700); }
+        try { App.switchScene("landing"); }
         catch (Exception e) { errorLabel.setText("Gagal kembali."); }
     }
 }

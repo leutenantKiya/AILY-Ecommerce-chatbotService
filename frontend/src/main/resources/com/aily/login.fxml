@@ -7,7 +7,7 @@
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.aily.controller.LoginController"
            styleClass="root-bg"
-           prefWidth="900" prefHeight="700">
+           prefWidth="1920" prefHeight="1080">
 
     <!-- Login card centered -->
     <VBox styleClass="card" alignment="TOP_LEFT" spacing="0"
