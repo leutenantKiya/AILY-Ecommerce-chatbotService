@@ -13,11 +13,9 @@ public class ApiService {
 
     private static final String BASE_URL = "http://localhost:8000";
     private static final HttpClient client = HttpClient.newBuilder()
-        .version(HttpClient.Version.HTTP_1_1)
-        .build();
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
     private static final Gson gson = new Gson();
-
-    // ── Auth ──────────────────────────────────────────────────────────────────
 
     public static JsonObject login(String username, String password) throws Exception {
         String url = BASE_URL + "/aily/login?uname=" + encode(username) + "&pword=" + encode(password);
@@ -37,6 +35,7 @@ public class ApiService {
                 .uri(URI.create(url))
                 .DELETE()
                 .build();
+
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), JsonObject.class);
     }
@@ -62,12 +61,11 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── Conversation ──────────────────────────────────────────────────────────
-
     public static JsonObject sendMessage(String hashedPassword, String message) throws Exception {
-        String url = BASE_URL + "/aily/conversation/" + encode(hashedPassword);
+        String url = BASE_URL + "/aily/conversation";
 
         JsonObject body = new JsonObject();
+        body.addProperty("id", hashedPassword);
         body.addProperty("message", message);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -80,29 +78,17 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── Chat History ──────────────────────────────────────────────────────────
-
-<<<<<<< Updated upstream
-    public static JsonObject loadChatHistory(String userId) throws Exception {
-        String url = BASE_URL + "/aily/user/conversation/chat/load?user_id=" + encode(userId);
-
-=======
     public static JsonObject getChatHistory(String userId) throws Exception {
         String url = BASE_URL + "/aily/user/conversation/chat/load?user_id=" + encode(userId);
->>>>>>> Stashed changes
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-<<<<<<< Updated upstream
     public static JsonObject saveChatMessage(String userId, String username,
                                              String role, String message) throws Exception {
         String url = BASE_URL + "/aily/user/conversation/chat/save";
@@ -123,8 +109,6 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── Toko ──────────────────────────────────────────────────────────────────
-
     public static JsonObject getTentangToko() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/aily/tentangToko"))
@@ -135,12 +119,7 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── Product Management (Admin) ────────────────────────────────────────────
-
-    public static JsonObject listProducts() throws Exception {
-=======
     public static JsonObject getProduk() throws Exception {
->>>>>>> Stashed changes
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/aily/admin/product/list"))
                 .GET()
@@ -204,7 +183,70 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
-    // ── User Profile ──────────────────────────────────────────────────────────
+    public static JsonObject getUserCart(String hashedPassword) throws Exception {
+        String url = BASE_URL + "/aily/user/cart?user_id=" + encode(hashedPassword);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject addToCart(String hashedPassword, int productId, int quantity) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("user_id", hashedPassword);
+        body.addProperty("product_id", productId);
+        body.addProperty("quantity", quantity);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/aily/user/cart/add"))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject updateCartItem(String hashedPassword, int productId, int quantity) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("user_id", hashedPassword);
+        body.addProperty("product_id", productId);
+        body.addProperty("quantity", quantity);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/aily/user/cart/item"))
+                .PUT(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject removeFromCart(String hashedPassword, int productId) throws Exception {
+        String url = BASE_URL + "/aily/user/cart/item?user_id=" + encode(hashedPassword) + "&product_id=" + productId;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject clearUserCart(String hashedPassword) throws Exception {
+        String url = BASE_URL + "/aily/user/cart/clear?user_id=" + encode(hashedPassword);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
 
     public static JsonObject updateUserProfile(String hashedPassword, String[][] updates) throws Exception {
         String url = BASE_URL + "/aily/user/updateUser?id=" + encode(hashedPassword);
@@ -226,8 +268,6 @@ public class ApiService {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), JsonObject.class);
     }
-
-    // ── Helper ────────────────────────────────────────────────────────────────
 
     private static String encode(String value) {
         return java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8);

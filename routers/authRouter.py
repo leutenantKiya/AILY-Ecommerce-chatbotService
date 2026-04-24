@@ -1,7 +1,6 @@
 # will take care of authentication 
 from utils.response import Response
 from fastapi import APIRouter
-from auth.key_validator import validate_key
 from services.databaseConnection import MongoDB, SQLite
 
 import bcrypt

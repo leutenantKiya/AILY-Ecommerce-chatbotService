@@ -13,7 +13,7 @@ public class LandingController {
     @FXML
     private void goToUserLogin() {
         try {
-            App.switchScene("login", 900, 700);
+            App.switchScene("login");
         } catch (Exception e) {
             showToast("Gagal membuka halaman login.");
         }
@@ -22,7 +22,7 @@ public class LandingController {
     @FXML
     private void goToAdminLogin() {
         try {
-            App.switchScene("login_admin", 900, 700);
+            App.switchScene("login_admin");
         } catch (Exception e) {
             showToast("Gagal membuka halaman admin.");
         }
@@ -31,7 +31,7 @@ public class LandingController {
     @FXML
     private void goToRegister() {
         try {
-            App.switchScene("register", 900, 700);
+            App.switchScene("register");
         } catch (Exception e) {
             showToast("Gagal membuka halaman register.");
         }

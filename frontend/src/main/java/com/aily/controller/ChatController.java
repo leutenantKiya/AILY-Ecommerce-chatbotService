@@ -2,42 +2,53 @@ package com.aily.controller;
 
 import com.aily.App;
 import com.aily.Session;
+import com.aily.model.CartItem;
+import com.aily.model.Product;
 import com.aily.model.User;
 import com.aily.service.ApiService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.Base64;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
+import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.ResourceBundle;
 
-import javax.swing.ImageIcon;
-
 public class ChatController implements Initializable {
-    @FXML private VBox  messageContainer;
+    @FXML private VBox messageContainer;
     @FXML private ScrollPane scrollPane;
-    @FXML private TextField  messageInput;
-    @FXML private Button     sendButton;
-    @FXML private Label      usernameLabel;
-    @FXML private Label      roleLabel;
-    @FXML private Label      avatarLabel;
+    @FXML private TextField messageInput;
+    @FXML private Button sendButton;
+    @FXML private Label usernameLabel;
+    @FXML private Label roleLabel;
+    @FXML private Label avatarLabel;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH.mm");
-
+    private static final String WELCOME_MESSAGE =
+            "Selamat datang di AILY \uD83D\uDC4B\uD83D\uDE0A\n" +
+            "Saya siap membantu kamu berbelanja.\n" +
+            "Coba ketik nama produk yang ingin kamu cari!";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -45,105 +56,105 @@ public class ChatController implements Initializable {
         if (user != null) {
             usernameLabel.setText(user.getUsername());
             roleLabel.setText(user.isAdmin() ? "Admin" : "Pembeli");
-            avatarLabel.setText(user.getUsername().substring(0, Math.min(2, user.getUsername().length())).toUpperCase());
+            avatarLabel.setText(user.getUsername()
+                    .substring(0, Math.min(2, user.getUsername().length()))
+                    .toUpperCase());
 
-            new Thread(() -> {
-                try {
-                    JsonObject response = ApiService.getChatHistory(user.getId());
-                    String status = response.get("status").getAsString();
-                    System.out.println(status);
-                    Platform.runLater(() -> {
-                        if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
-                            JsonObject data = response.getAsJsonObject("data");
-                            JsonArray chats = data.getAsJsonArray("chat_history");
-                            if (chats != null && chats.size() > 0) {
-                                for (int i = 0; i < chats.size(); i++) {
-                                    JsonObject chatObj = chats.get(i).getAsJsonObject();
-                                    String role = chatObj.get("role").getAsString();
-                                    
-                                    if ("bot".equalsIgnoreCase(role)) {
-                                        if (chatObj.get("message").isJsonNull()) {
-                                            addBotMessage("Pesanan / info diproses.");
-                                        } else if (chatObj.get("message").isJsonArray()) {
-                                            addBotProductMessage(chatObj.getAsJsonArray("message"));
-                                        } else if (chatObj.get("message").isJsonObject()) {
-                                            JsonObject msgObj = chatObj.getAsJsonObject("message");
-                                            if (msgObj.has("data") && msgObj.getAsJsonObject("data").has("result")) {
-                                                JsonArray results = msgObj.getAsJsonObject("data").getAsJsonArray("result");
-                                                StringBuilder sb = new StringBuilder();
-                                                for (int j = 0; j < results.size(); j++) {
-                                                    try {
-                                                        JsonArray item = results.get(j).getAsJsonArray();
-                                                        sb.append("- ").append(item.get(0).getAsString()).append(": ").append(item.get(1).getAsString()).append("\n");
-                                                    }catch(Exception ex) {}
-                                                }
-                                                addBotMessage(sb.toString());
-                                            } else if (msgObj.has("message")) {
-                                                addBotMessage(msgObj.get("message").getAsString());
-                                            } else {
-                                                addBotMessage("Pesan dikirim dari sistem.");
-                                            }
-                                        } else {
-                                            addBotMessage(chatObj.get("message").getAsString());
-                                        }
-                                    } else {
-                                        if (!chatObj.get("message").isJsonNull()) {
-                                            addUserMessage(chatObj.get("message").getAsString());
-                                        }
-                                    }
-                                }
-                                scrollToBottom();
-                            } else {
-                                addBotMessage("Selamat datang di AILY \uD83D\uDC4B\uD83D\uDE0A\nSaya siap membantu kamu berbelanja.\nCoba ketik nama produk yang ingin kamu cari!");
-                            }
-                        } else {
-                            addBotMessage("Gagal memuat riwayat chat.");
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Platform.runLater(() -> {
-                        addBotMessage("Selamat datang di AILY \uD83D\uDC4B\uD83D\uDE0A\nSaya siap membantu kamu berbelanja.\nCoba ketik nama produk yang ingin kamu cari!");
-                    });
-                }
-            }).start();
-            
+            new Thread(() -> loadChatHistory(user)).start();
         } else {
-            addBotMessage("Selamat datang di AILY \uD83D\uDC4B\uD83D\uDE0A\nSaya siap membantu kamu berbelanja.\nCoba ketik nama produk yang ingin kamu cari!");
+            showWelcomeMessage();
         }
+
         messageInput.setOnAction(e -> handleSend());
     }
 
-    // ── Send ──────────────────────────────────────────────────────
+    private void loadChatHistory(User user) {
+        try {
+            JsonObject response = ApiService.getChatHistory(user.getId());
+            String status = asString(response.get("status"), "");
+            System.out.println(status);
+
+            Platform.runLater(() -> {
+                if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                    JsonObject data = asJsonObject(response.get("data"));
+                    JsonArray chats = data == null ? null : asJsonArray(data.get("chat_history"));
+
+                    if (chats != null && !chats.isEmpty()) {
+                        for (JsonElement chatElement : chats) {
+                            JsonObject chatObj = asJsonObject(chatElement);
+                            if (chatObj == null) {
+                                continue;
+                            }
+
+                            String role = asString(chatObj.get("role"), "");
+                            JsonElement message = chatObj.get("message");
+
+                            if ("bot".equalsIgnoreCase(role)) {
+                                renderBotHistoryMessage(message);
+                            } else if (message != null && !message.isJsonNull()) {
+                                addUserMessage(asString(message, ""));
+                            }
+                        }
+                        scrollToBottom();
+                    } else {
+                        showWelcomeMessage();
+                    }
+                } else {
+                    addBotMessage("Gagal memuat riwayat chat.");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Platform.runLater(this::showWelcomeMessage);
+        }
+    }
 
     @FXML
     private void handleSend() {
         String text = messageInput.getText().trim();
-        if (text.isEmpty()) return;
+        if (text.isEmpty()) {
+            return;
+        }
+
         addUserMessage(text);
         messageInput.clear();
         sendButton.setDisable(true);
 
         User user = Session.currentUser;
-        if (user == null) { addBotMessage("Sesi habis. Silakan login ulang."); return; }
+        if (user == null) {
+            sendButton.setDisable(false);
+            addBotMessage("Sesi habis. Silakan login ulang.");
+            return;
+        }
 
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.sendMessage(user.getId(), text);
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
+
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
-                        JsonObject data = response.getAsJsonObject("data");
+                        JsonObject data = asJsonObject(response.get("data"));
                         String intent = "";
-                        if (data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
-                            JsonObject nlp = data.getAsJsonObject("nlp_result");
-                            if (nlp.has("intent")) intent = nlp.get("intent").getAsString();
+
+                        if (data != null) {
+                            JsonObject nlp = asJsonObject(data.get("nlp_result"));
+                            if (nlp != null && nlp.has("intent")) {
+                                intent = asString(nlp.get("intent"), "");
+                            }
                         }
-                        // Intent "mencari" → tampilkan produk dengan gambar
-                        if (intent.equalsIgnoreCase("mencari") && data.has("action_data") && !data.get("action_data").isJsonNull()) {
+
+                        if (data != null
+                                && intent.equalsIgnoreCase("mencari")
+                                && data.has("action_data")
+                                && !data.get("action_data").isJsonNull()) {
                             try {
-                                JsonArray products = data.getAsJsonArray("action_data");
-                                addBotProductMessage(products);
+                                JsonArray products = extractProducts(data.get("action_data"));
+                                if (products != null) {
+                                    addBotProductMessage(products);
+                                } else {
+                                    addBotMessage(buildBotReply(data, intent));
+                                }
                             } catch (Exception ex) {
                                 addBotMessage("Maaf, terjadi kesalahan saat menampilkan produk.");
                             }
@@ -152,7 +163,8 @@ public class ChatController implements Initializable {
                         }
                     } else {
                         String msg = response.has("error")
-                                ? response.get("error").getAsString() : "Maaf, terjadi kesalahan.";
+                                ? response.get("error").getAsString()
+                                : "Maaf, terjadi kesalahan.";
                         addBotMessage(msg);
                     }
                 });
@@ -166,141 +178,116 @@ public class ChatController implements Initializable {
     }
 
     private String buildBotReply(JsonObject data, String intent) {
-        // Coba parse action_data dari backend
-        if (data.has("action_data") && !data.get("action_data").isJsonNull()) {
+        if (data != null && data.has("action_data") && !data.get("action_data").isJsonNull()) {
             try {
-<<<<<<< Updated upstream
-                JsonObject action = data.getAsJsonObject("action_data");
-
-                // Intent "mencari" → action_data.products = [...]
-                if (action.has("products")) {
-                    var products = action.getAsJsonArray("products");
+                JsonArray products = extractProducts(data.get("action_data"));
+                if (products != null) {
                     if (products.isEmpty()) {
                         return "Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.";
                     }
+
                     StringBuilder sb = new StringBuilder();
                     sb.append("Ditemukan ").append(products.size()).append(" produk:\n\n");
-                    for (int i = 0; i < Math.min(products.size(), 5); i++) {
-                        JsonObject p = products.get(i).getAsJsonObject();
-                        String name = p.get("name").getAsString();
-                        long price = p.get("price").getAsLong();
-                        int stock = p.get("stock").getAsInt();
-                        String formatted = String.format("Rp %,d", price).replace(',', '.');
-                        sb.append(i + 1).append(". ").append(name)
-                          .append("\n   Harga: ").append(formatted)
-                          .append(" | Stok: ").append(stock).append("\n");
-=======
-                try{
-                    // Intent "mencari" sudah di-handle di handleSend → addBotProductMessage
-                    JsonArray action = data.getAsJsonArray("action_data");
-                }catch (Exception e){
-                    JsonObject action = data.getAsJsonObject("action_data");
-                    // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
-                    if (intent.equalsIgnoreCase("tanya_toko")) {
-                        System.out.println("masuk FAQ");
 
-                        JsonObject spesificData = action.getAsJsonObject("data");
-                        JsonArray results = spesificData.getAsJsonArray("result");
-
-                        if (results.isEmpty()) {
-                            return "Info toko belum tersedia.";
+                    int displayed = 0;
+                    for (JsonElement productEl : products) {
+                        if (displayed >= 5) {
+                            break;
                         }
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Informasi Toko AILY:\n\n");
-                        for (int i = 0; i < results.size(); i++) {
-                            JsonArray item = results.get(i).getAsJsonArray(); // tiap item = ["key", "value"]
-                            String key = item.get(0).getAsString();
-                            String value = item.get(1).getAsString();
-
-                            sb.append("- ").append(key).append(": ").append(value).append("\n");
-//                        System.out.println(key + ": " + value);
+                        Product product = parseProduct(productEl);
+                        if (product == null) {
+                            continue;
                         }
 
-                        return sb.toString();
->>>>>>> Stashed changes
+                        displayed++;
+                        sb.append(displayed).append(". ").append(product.getName())
+                          .append("\n   Harga: ").append(product.formattedPrice())
+                          .append(" | Stok: ").append(product.getStock()).append("\n");
                     }
-                    if (products.size() > 5) {
-                        sb.append("\n... dan ").append(products.size() - 5).append(" produk lainnya.");
+
+                    int remaining = products.size() - displayed;
+                    if (remaining > 0) {
+                        sb.append("\n... dan ").append(remaining).append(" produk lainnya.");
                     }
+
                     return sb.toString();
                 }
 
-                // Intent "tanya_toko"/"faq" -> action_data.result = [{question, answer}, ...]
-                if (action.has("result") && action.get("result").isJsonArray()) {
-                    var results = action.getAsJsonArray("result");
-                    if (results.isEmpty()) {
-                        return "Info toko belum tersedia.";
-                    }
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Informasi Toko AILY:\n\n");
-                    for (int i = 0; i < results.size(); i++) {
-                        JsonObject qa = results.get(i).getAsJsonObject();
-                        String q = qa.get("question").getAsString();
-                        String a = qa.get("answer").getAsString();
-                        sb.append("- ").append(q).append(": ").append(a).append("\n");
-                    }
-                    return sb.toString();
-                }
+                JsonObject action = asJsonObject(data.get("action_data"));
+                if (action != null) {
+                    if (intent.equalsIgnoreCase("tanya_toko") || intent.equalsIgnoreCase("faq")) {
+                        JsonObject specificData = asJsonObject(action.get("data"));
+                        JsonArray pairResults = specificData == null ? null : asJsonArray(specificData.get("result"));
+                        if (pairResults != null) {
+                            if (pairResults.isEmpty()) {
+                                return "Info toko belum tersedia.";
+                            }
+                            return formatPairResults(pairResults, "Informasi Toko AILY:");
+                        }
 
-                // Fallback: action_data.message (untuk intent lainnya)
-                if (action.has("message")) {
-                    return action.get("message").getAsString();
+                        JsonArray qaResults = asJsonArray(action.get("result"));
+                        if (qaResults != null) {
+                            if (qaResults.isEmpty()) {
+                                return "Info toko belum tersedia.";
+                            }
+                            return formatQuestionAnswerResults(qaResults, "Informasi Toko AILY:");
+                        }
+                    }
+
+                    if (action.has("message")) {
+                        return asString(action.get("message"), "Pesan dikirim dari sistem.");
+                    }
                 }
             } catch (Exception e) {
-                // action_data mungkin bukan JsonObject (misal array kosong)
+                System.out.println("Error parsing action_data: " + e.getMessage());
             }
         }
 
-        // Gunakan respons NLP jika ada
-        if (data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
-            JsonObject nlp = data.getAsJsonObject("nlp_result");
-            if (nlp.has("respons") && !nlp.get("respons").getAsString().isEmpty()) {
-                return nlp.get("respons").getAsString();
+        if (data != null && data.has("nlp_result") && !data.get("nlp_result").isJsonNull()) {
+            JsonObject nlp = asJsonObject(data.get("nlp_result"));
+            if (nlp != null && nlp.has("respons") && !asString(nlp.get("respons"), "").isEmpty()) {
+                return asString(nlp.get("respons"), "");
             }
         }
 
-        // Fallback terakhir berdasarkan intent
         return switch (intent) {
-            case "mencari"         -> "Baik, saya akan bantu cari produk. Sebutkan nama atau kategori produknya!";
-            case "checkout"        -> "Mengarahkan ke proses checkout...";
-            case "lacak_kiriman"   -> "Silakan masukkan nomor resi untuk melacak kiriman kamu.";
-            case "status_pesanan"  -> "Saya akan periksa status pesanan kamu.";
-            case "batal_pesanan"   -> "Untuk membatalkan pesanan, masukkan nomor pesanan kamu.";
-            case "faq","tanya_toko"-> "Hubungi kami untuk info toko lebih lanjut.";
-            case "salam"           -> "Halo juga! Ada yang bisa saya bantu hari ini?";
-            case "terima_kasih"    -> "Sama-sama! Jangan ragu untuk bertanya lagi.";
+            case "mencari" -> "Baik, saya akan bantu cari produk. Sebutkan nama atau kategori produknya!";
+            case "checkout" -> "Mengarahkan ke proses checkout...";
+            case "lacak_kiriman" -> "Silakan masukkan nomor resi untuk melacak kiriman kamu.";
+            case "status_pesanan" -> "Saya akan periksa status pesanan kamu.";
+            case "batal_pesanan" -> "Untuk membatalkan pesanan, masukkan nomor pesanan kamu.";
+            case "faq", "tanya_toko" -> "Hubungi kami untuk info toko lebih lanjut.";
+            case "salam" -> "Halo juga! Ada yang bisa saya bantu hari ini?";
+            case "terima_kasih" -> "Sama-sama! Jangan ragu untuk bertanya lagi.";
             case "selamat_tinggal" -> "Sampai jumpa! Semoga belanja kamu menyenangkan.";
             case "tidak_diketahui" -> "Maaf, saya belum paham maksud kamu. Coba ulangi dengan kata lain.";
-            default                -> "Pesan kamu diterima! (intent: " + intent + ")";
+            default -> "Pesan kamu diterima! (intent: " + intent + ")";
         };
     }
-    
-    // ── Chips ─────────────────────────────────────────────────────
 
-    @FXML private void chipCariProduk()    { sendChip("carikan aku baju"); }
-    @FXML private void chipFaq()           { sendChip("informasi toko"); }
-    @FXML private void chipKeranjang()     { sendChip("lihat keranjang"); }
+    @FXML private void chipCariProduk() { sendChip("carikan aku baju"); }
+    @FXML private void chipFaq() { sendChip("informasi toko"); }
+    @FXML private void chipKeranjang() { sendChip("lihat keranjang"); }
     @FXML private void chipStatusPesanan() { sendChip("status pesanan saya"); }
-    @FXML private void chipPromo()         { sendChip("ada promo apa hari ini"); }
+    @FXML private void chipPromo() { sendChip("ada promo apa hari ini"); }
 
     private void sendChip(String text) {
         messageInput.setText(text);
         messageInput.requestFocus();
         messageInput.end();
-//        messageInput.setText(text);
     }
 
-    // ── Nav ───────────────────────────────────────────────────────
-
-    @FXML private void showChat()   { /* already on chat */ }
-    @FXML private void showCart()   { try { App.switchScene("cart",   1280, 880); } catch (Exception ignored) {} }
-    @FXML private void showOrders() { try { App.switchScene("orders", 1280, 880); } catch (Exception ignored) {} }
+    @FXML private void showChat() { }
+    @FXML private void showCart() { try { App.switchScene("cart"); } catch (Exception ignored) { } }
+    @FXML private void showOrders() { try { App.switchScene("orders"); } catch (Exception ignored) { } }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try {
+            App.switchScene("landing");
+        } catch (Exception ignored) { }
     }
 
     @FXML
@@ -309,7 +296,7 @@ public class ChatController implements Initializable {
         if (user != null) {
             new Thread(() -> {
                 try {
-                    JsonObject response = ApiService.deleteChat(user.getId());
+                    ApiService.deleteChat(user.getId());
                     Platform.runLater(() -> {
                         messageContainer.getChildren().clear();
                         addBotMessage("Chat berhasil dibersihkan dari server. Ada yang bisa saya bantu?");
@@ -325,16 +312,12 @@ public class ChatController implements Initializable {
         }
     }
 
-    // ── Bubble builders ───────────────────────────────────────────
-
-    /**
-     * Menampilkan pesan bot khusus untuk hasil pencarian produk, lengkap dengan gambar.
-     */
     private void addBotProductMessage(JsonArray products) {
         if (products.isEmpty()) {
             addBotMessage("Maaf, produk yang kamu cari tidak ditemukan. Coba kata kunci lain.");
             return;
         }
+
         messageContainer.getChildren().add(buildProductBubbleRow(products));
         scrollToBottom();
     }
@@ -342,94 +325,77 @@ public class ChatController implements Initializable {
     private HBox buildProductBubbleRow(JsonArray products) {
         String time = LocalTime.now().format(TIME_FMT);
 
-        // Container utama untuk semua kartu produk
         VBox cardsContainer = new VBox(8);
 
-        // Header text
         Text headerText = new Text("Ditemukan " + products.size() + " produk:\n");
         headerText.setStyle("-fx-font-size: 16px; -fx-fill: #c2d6f6; -fx-font-weight: bold;");
         cardsContainer.getChildren().add(headerText);
 
-        for (int i = 0; i < Math.min(products.size(), 5); i++) {
+        int displayed = 0;
+        for (int i = 0; i < products.size() && displayed < 5; i++) {
+            JsonElement productEl = products.get(i);
             try {
-                JsonArray p = products.get(i).getAsJsonArray();
+                Product product = parseProduct(productEl);
+                if (product == null) {
+                    continue;
+                }
 
-                // [id, name, price, stock, image, desc, gender]
-                String idStr = p.get(0).getAsString();
-                String name  = p.get(1).getAsString();
-                long   price = p.get(2).getAsLong();
-                int    stock = p.get(3).getAsInt();
-                String desc = p.get(5).isJsonNull() ? "-" : p.get(5).getAsString();
-                String formatted = String.format("Rp %,d", price).replace(',', '.');
+                displayed++;
 
                 HBox productCard = new HBox(12);
                 productCard.setAlignment(Pos.CENTER_LEFT);
                 productCard.setPadding(new Insets(10));
-                productCard.setStyle("-fx-background-color: #0d2232; -fx-background-radius: 8;"); 
+                productCard.setStyle("-fx-background-color: #0d2232; -fx-background-radius: 8;");
 
-                // Decode dan tampilkan gambar
-                String imageStr = p.get(4).isJsonNull() ? null : p.get(4).getAsString();
                 ImageView imageView = new ImageView();
                 imageView.setFitWidth(150);
                 imageView.setFitHeight(150);
                 imageView.setPreserveRatio(false);
+
+                String imageStr = product.getImage();
                 if (imageStr != null && !imageStr.isEmpty()) {
                     try {
                         byte[] imageBytes = Base64.getDecoder().decode(imageStr);
                         Image img = new Image(new ByteArrayInputStream(imageBytes));
                         imageView.setImage(img);
                     } catch (Exception imgEx) {
-                        System.out.println("Gagal decode gambar produk: " + name);
+                        System.out.println("Gagal decode gambar produk: " + product.getName());
                     }
                 }
 
-                // Info teks produk
                 VBox infoBox = new VBox(4);
-                Label nameLabel = new Label(name);
+                Label nameLabel = new Label(product.getName());
                 nameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;");
-                Label priceLabel = new Label(formatted);
+
+                Label priceLabel = new Label(product.formattedPrice());
                 priceLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #1abc9c; -fx-font-weight: bold;");
-                Label descLabel = new Label("Stok: " + stock + " | " + desc);
+
+                Label descLabel = new Label("Stok: " + product.getStock() + " | " + product.getDescription());
                 descLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #8b9eb0;");
                 descLabel.setWrapText(true);
                 descLabel.setMaxWidth(200);
+
                 infoBox.getChildren().addAll(nameLabel, priceLabel, descLabel);
                 HBox.setHgrow(infoBox, Priority.ALWAYS);
 
                 Button addToCartBtn = new Button(" + Keranjang ");
                 addToCartBtn.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: #07161E; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
-                addToCartBtn.setOnAction(e -> {
-                    com.aily.model.Product prod = new com.aily.model.Product(idStr, name, "CARI", price, stock, desc, imageStr);
-                    boolean found = false;
-                    for (com.aily.model.CartItem item : Session.cart) {
-                        if (item.getProduct().getId().equals(prod.getId())) {
-                            item.setQuantity(item.getQuantity() + 1);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        Session.cart.add(new com.aily.model.CartItem(prod, 1));
-                    }
-                    addToCartBtn.setText("Ditambahkan ✓");
-                    addToCartBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: #07161E; -fx-font-weight: bold; -fx-background-radius: 4;");
-                });
+                addToCartBtn.setOnAction(e -> addProductToCart(product, addToCartBtn));
 
-                productCard.getChildren().addAll(infoBox, addToCartBtn);
-                cardsContainer.getChildren().add(imageView);
+                productCard.getChildren().addAll(imageView, infoBox, addToCartBtn);
                 cardsContainer.getChildren().add(productCard);
             } catch (Exception e) {
                 System.out.println("Error parsing produk index " + i + ": " + e.getMessage());
             }
         }
 
-        if (products.size() > 5) {
-            Text moreText = new Text("... dan " + (products.size() - 5) + " produk lainnya.");
+        int remaining = products.size() - displayed;
+        if (remaining > 0) {
+            Text moreText = new Text("... dan " + remaining + " produk lainnya.");
             moreText.setStyle("-fx-font-size: 14px; -fx-fill: #c2d6f6; -fx-font-style: italic;");
             cardsContainer.getChildren().add(moreText);
         }
 
-        // Bungkus dalam VBox dengan style bubble-bot
         VBox bubbleContent = new VBox(cardsContainer);
         bubbleContent.getStyleClass().add("bubble-bot");
         bubbleContent.setPadding(new Insets(10, 14, 10, 14));
@@ -439,7 +405,6 @@ public class ChatController implements Initializable {
 
         VBox content = new VBox(2, bubbleContent, timeLabel);
 
-        // Avatar
         StackPane avatar = new StackPane();
         avatar.getStyleClass().add("bot-msg-avatar");
         Label avLbl = new Label("A");
@@ -471,8 +436,9 @@ public class ChatController implements Initializable {
 
         Text msgText = new Text(text);
         msgText.setWrappingWidth(340);
-        // Explicitly set text color — CSS inheritance is unreliable for Text in TextFlow
-        msgText.setFill(isUser ? javafx.scene.paint.Color.web("#07161E") : javafx.scene.paint.Color.web("#E8F0F3"));
+        msgText.setFill(isUser
+                ? javafx.scene.paint.Color.web("#07161E")
+                : javafx.scene.paint.Color.web("#E8F0F3"));
         msgText.setStyle("-fx-font-size: 13px;");
 
         TextFlow flow = new TextFlow(msgText);
@@ -484,11 +450,14 @@ public class ChatController implements Initializable {
 
         VBox content = new VBox(2, flow, timeLabel);
 
-        // Avatar circle
         StackPane avatar = new StackPane();
         avatar.getStyleClass().add(isUser ? "msg-avatar" : "bot-msg-avatar");
         Label avLbl = new Label(isUser
-                ? (Session.currentUser != null ? Session.currentUser.getUsername().substring(0, Math.min(2, Session.currentUser.getUsername().length())).toUpperCase() : "ME")
+                ? (Session.currentUser != null
+                    ? Session.currentUser.getUsername()
+                        .substring(0, Math.min(2, Session.currentUser.getUsername().length()))
+                        .toUpperCase()
+                    : "ME")
                 : "A");
         avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #07161E;");
         avatar.getChildren().add(avLbl);
@@ -499,16 +468,305 @@ public class ChatController implements Initializable {
         row.setPadding(new Insets(4, 20, 4, 20));
         if (isUser) {
             row.setAlignment(Pos.CENTER_RIGHT);
-            timeLabel.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+            timeLabel.setAlignment(Pos.CENTER_RIGHT);
             row.getChildren().addAll(content, avatar);
         } else {
             row.setAlignment(Pos.CENTER_LEFT);
             row.getChildren().addAll(avatar, content);
         }
+
         return row;
     }
 
     private void scrollToBottom() {
         Platform.runLater(() -> scrollPane.setVvalue(1.0));
+    }
+
+    private void showWelcomeMessage() {
+        addBotMessage(WELCOME_MESSAGE);
+    }
+
+    private void renderBotHistoryMessage(JsonElement messageElement) {
+        JsonElement normalizedMessage = normalizeJsonElement(messageElement);
+        if (normalizedMessage == null || normalizedMessage.isJsonNull()) {
+            addBotMessage("Pesanan / info diproses.");
+            return;
+        }
+
+        JsonArray products = extractProducts(normalizedMessage);
+        if (products != null) {
+            addBotProductMessage(products);
+            return;
+        }
+
+        JsonObject messageObject = asJsonObject(normalizedMessage);
+        if (messageObject != null) {
+            JsonArray nestedProducts = extractProducts(messageObject.get("products"));
+            if (nestedProducts != null) {
+                addBotProductMessage(nestedProducts);
+                return;
+            }
+
+            JsonObject dataObject = asJsonObject(messageObject.get("data"));
+            JsonArray pairResults = dataObject == null ? null : asJsonArray(dataObject.get("result"));
+            if (pairResults != null && !pairResults.isEmpty()) {
+                addBotMessage(formatPairResults(pairResults, null));
+                return;
+            }
+
+            if (messageObject.has("message")) {
+                addBotMessage(asString(messageObject.get("message"), "Pesan dikirim dari sistem."));
+                return;
+            }
+
+            addBotMessage("Pesan dikirim dari sistem.");
+            return;
+        }
+
+        if (normalizedMessage.isJsonArray()) {
+            addBotMessage(normalizedMessage.toString());
+            return;
+        }
+
+        addBotMessage(asString(normalizedMessage, "Pesan dikirim dari sistem."));
+    }
+
+    private JsonArray extractProducts(JsonElement source) {
+        JsonElement normalized = normalizeJsonElement(source);
+        if (normalized == null || normalized.isJsonNull()) {
+            return null;
+        }
+
+        if (normalized.isJsonObject()) {
+            JsonObject obj = normalized.getAsJsonObject();
+            if (obj.has("products")) {
+                return extractProducts(obj.get("products"));
+            }
+            return null;
+        }
+
+        if (!normalized.isJsonArray()) {
+            return null;
+        }
+
+        JsonArray array = normalized.getAsJsonArray();
+        if (array.isEmpty()) {
+            return array;
+        }
+
+        return looksLikeProductPayload(array.get(0)) ? array : null;
+    }
+
+    private boolean looksLikeProductPayload(JsonElement element) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return false;
+        }
+
+        if (normalized.isJsonObject()) {
+            JsonObject obj = normalized.getAsJsonObject();
+            return obj.has("name") && obj.has("price") && obj.has("stock");
+        }
+
+        if (normalized.isJsonArray()) {
+            JsonArray array = normalized.getAsJsonArray();
+            return array.size() >= 4;
+        }
+
+        return false;
+    }
+
+    private Product parseProduct(JsonElement element) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return null;
+        }
+
+        if (normalized.isJsonObject()) {
+            JsonObject productObj = normalized.getAsJsonObject();
+            JsonElement codeElement = productObj.has("category")
+                    ? productObj.get("category")
+                    : productObj.get("gender");
+
+            return new Product(
+                    asString(productObj.get("id"), ""),
+                    asString(productObj.get("name"), "Produk tanpa nama"),
+                    asString(codeElement, "CARI"),
+                    asLong(productObj.get("price"), 0L),
+                    asInt(productObj.get("stock"), 0),
+                    asString(productObj.get("description"), "-"),
+                    asNullableString(productObj.get("image"))
+            );
+        }
+
+        if (normalized.isJsonArray()) {
+            JsonArray productArr = normalized.getAsJsonArray();
+            return new Product(
+                    asString(getArrayValue(productArr, 0), ""),
+                    asString(getArrayValue(productArr, 1), "Produk tanpa nama"),
+                    asString(getArrayValue(productArr, 6), "CARI"),
+                    asLong(getArrayValue(productArr, 2), 0L),
+                    asInt(getArrayValue(productArr, 3), 0),
+                    asString(getArrayValue(productArr, 5), "-"),
+                    asNullableString(getArrayValue(productArr, 4))
+            );
+        }
+
+        return null;
+    }
+
+    private String formatPairResults(JsonArray results, String header) {
+        StringBuilder sb = new StringBuilder();
+        if (header != null && !header.isBlank()) {
+            sb.append(header).append("\n\n");
+        }
+
+        for (JsonElement resultEl : results) {
+            JsonArray pair = asJsonArray(resultEl);
+            if (pair == null || pair.size() < 2) {
+                continue;
+            }
+
+            sb.append("- ")
+              .append(asString(pair.get(0), "-"))
+              .append(": ")
+              .append(asString(pair.get(1), "-"))
+              .append("\n");
+        }
+
+        return sb.toString().trim();
+    }
+
+    private String formatQuestionAnswerResults(JsonArray results, String header) {
+        StringBuilder sb = new StringBuilder();
+        if (header != null && !header.isBlank()) {
+            sb.append(header).append("\n\n");
+        }
+
+        for (JsonElement resultEl : results) {
+            JsonObject qa = asJsonObject(resultEl);
+            if (qa == null) {
+                continue;
+            }
+
+            sb.append("- ")
+              .append(asString(qa.get("question"), "-"))
+              .append(": ")
+              .append(asString(qa.get("answer"), "-"))
+              .append("\n");
+        }
+
+        return sb.toString().trim();
+    }
+
+    private JsonObject asJsonObject(JsonElement element) {
+        JsonElement normalized = normalizeJsonElement(element);
+        return normalized != null && normalized.isJsonObject() ? normalized.getAsJsonObject() : null;
+    }
+
+    private JsonArray asJsonArray(JsonElement element) {
+        JsonElement normalized = normalizeJsonElement(element);
+        return normalized != null && normalized.isJsonArray() ? normalized.getAsJsonArray() : null;
+    }
+
+    private JsonElement normalizeJsonElement(JsonElement element) {
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+
+        if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+            String raw = element.getAsString().trim();
+            if ((raw.startsWith("{") && raw.endsWith("}")) || (raw.startsWith("[") && raw.endsWith("]"))) {
+                try {
+                    return JsonParser.parseString(raw);
+                } catch (Exception ignored) { }
+            }
+        }
+
+        return element;
+    }
+
+    private JsonElement getArrayValue(JsonArray array, int index) {
+        if (array == null || index < 0 || index >= array.size()) {
+            return null;
+        }
+        return array.get(index);
+    }
+
+    private String asString(JsonElement element, String fallback) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return fallback;
+        }
+
+        try {
+            return normalized.getAsString();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private String asNullableString(JsonElement element) {
+        String value = asString(element, null);
+        return value == null || value.isBlank() ? null : value;
+    }
+
+    private long asLong(JsonElement element, long fallback) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return fallback;
+        }
+
+        try {
+            return normalized.getAsLong();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private int asInt(JsonElement element, int fallback) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return fallback;
+        }
+
+        try {
+            return normalized.getAsInt();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private void addProductToCart(Product product, Button addToCartBtn) {
+        addProductToLocalSessionCart(product, 1);
+        markCartButtonAdded(addToCartBtn);
+
+        if (Session.currentUser == null) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                ApiService.addToCart(Session.currentUser.getId(), Integer.parseInt(product.getId()), 1);
+            } catch (Exception ex) {
+                Platform.runLater(() -> addBotMessage("Produk masuk ke keranjang lokal, tapi sinkronisasi ke server gagal."));
+            }
+        }).start();
+    }
+
+    private void addProductToLocalSessionCart(Product product, int quantity) {
+        for (CartItem item : Session.cart) {
+            if (item.getProduct().getId().equals(product.getId())) {
+                item.setQuantity(item.getQuantity() + quantity);
+                return;
+            }
+        }
+
+        Session.cart.add(new CartItem(product, quantity));
+    }
+
+    private void markCartButtonAdded(Button addToCartBtn) {
+        addToCartBtn.setText("Ditambahkan \u2713");
+        addToCartBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: #07161E; -fx-font-weight: bold; -fx-background-radius: 4;");
     }
 }

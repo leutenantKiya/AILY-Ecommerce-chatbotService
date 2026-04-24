@@ -46,7 +46,7 @@ public class LoginController {
                                 data.get("role").getAsString()
                         );
                         try {
-                            App.switchScene("chat", 1280, 880);
+                            App.switchScene("chat");
                         } catch (Exception e) {
                             errorLabel.setText("Gagal membuka halaman chat.");
                         }
@@ -67,13 +67,13 @@ public class LoginController {
 
     @FXML
     private void goToRegister() {
-        try { App.switchScene("register", 900, 700); }
+        try { App.switchScene("register"); }
         catch (Exception e) { errorLabel.setText("Gagal membuka halaman register."); }
     }
 
     @FXML
     private void goBack() {
-        try { App.switchScene("landing", 1000, 700); }
+        try { App.switchScene("landing"); }
         catch (Exception e) { errorLabel.setText("Gagal kembali."); }
     }
 

@@ -53,7 +53,7 @@ public class LoginAdminController {
                                 role
                         );
                         try {
-                            App.switchScene("admin_overview", 1280, 880);
+                            App.switchScene("admin_overview");
                         } catch (Exception e) {
                             errorLabel.setText("Gagal membuka dashboard admin.");
                         }
@@ -74,13 +74,13 @@ public class LoginAdminController {
 
     @FXML
     private void goToRegister() {
-        try { App.switchScene("register", 900, 700); }
+        try { App.switchScene("register"); }
         catch (Exception e) { errorLabel.setText("Gagal membuka halaman register."); }
     }
 
     @FXML
     private void goBack() {
-        try { App.switchScene("landing", 1000, 700); }
+        try { App.switchScene("landing"); }
         catch (Exception e) { errorLabel.setText("Gagal kembali."); }
     }
 

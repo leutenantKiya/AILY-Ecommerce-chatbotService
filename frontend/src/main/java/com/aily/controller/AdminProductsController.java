@@ -45,11 +45,10 @@ public class AdminProductsController implements Initializable {
         loadProductsFromBackend();
     }
 
-<<<<<<< Updated upstream
     private void loadProductsFromBackend() {
         new Thread(() -> {
             try {
-                JsonObject response = ApiService.listProducts();
+                JsonObject response = ApiService.getProduk();
                 Platform.runLater(() -> {
                     products.clear();
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
@@ -58,15 +57,16 @@ public class AdminProductsController implements Initializable {
                             JsonArray arr = data.getAsJsonArray("products");
                             for (int i = 0; i < arr.size(); i++) {
                                 JsonObject p = arr.get(i).getAsJsonObject();
-                                products.add(new Product(
-                                        String.valueOf(p.get("id").getAsInt()),
-                                        p.get("name").getAsString(),
-                                        p.has("category") ? p.get("category").getAsString() : "",
-                                        p.get("price").getAsLong(),
-                                        p.get("stock").getAsInt(),
-                                        p.has("description") && !p.get("description").isJsonNull()
-                                                ? p.get("description").getAsString() : ""
-                                ));
+                                String id = String.valueOf(p.get("id").getAsInt());
+                                String name = p.get("name").getAsString();
+                                String code = p.has("category") ? p.get("category").getAsString() : "";
+                                long price = p.get("price").getAsLong();
+                                int stock = p.get("stock").getAsInt();
+                                String description = p.has("description") && !p.get("description").isJsonNull()
+                                        ? p.get("description").getAsString() : "";
+                                String imageStr = p.has("image") && !p.get("image").isJsonNull()
+                                        ? p.get("image").getAsString() : null;
+                                products.add(new Product(id, name, code, price, stock, description, imageStr));
                             }
                         }
                     }
@@ -76,30 +76,6 @@ public class AdminProductsController implements Initializable {
                 Platform.runLater(this::refreshTable);
             }
         }).start();
-=======
-    private void initTable() throws Exception {
-        JsonObject obj = ApiService.getProduk().getAsJsonObject("data");
-        JsonArray array = obj.getAsJsonArray("products");
-
-        products.clear();
-
-        for (int i = 0; i < array.size(); i++) {
-            JsonObject prod = array.get(i).getAsJsonObject();
-
-            String id = prod.get("id").getAsString();
-            String name = prod.get("name").getAsString();
-            long price = prod.get("price").getAsLong();
-            int stock = prod.get("stock").getAsInt();
-            String category = prod.get("category").getAsString();
-            String warna = prod.get("warna").getAsString();
-            String imageStr = prod.has("image") && !prod.get("image").isJsonNull() ? prod.get("image").getAsString() : null;
-
-            System.out.println(id);
-            products.add(new Product(id, name, category, price, stock, warna, imageStr));
-        }
-
-        refreshTable();
->>>>>>> Stashed changes
     }
 
     @FXML
@@ -115,7 +91,6 @@ public class AdminProductsController implements Initializable {
         long price  = harga.isEmpty() ? 0 : Long.parseLong(harga.replaceAll("[^0-9]", ""));
         int  stock  = stok.isEmpty()  ? 0 : Integer.parseInt(stok.replaceAll("[^0-9]", ""));
 
-<<<<<<< Updated upstream
         saveButton.setDisable(true);
 
         if (editingProduct != null) {
@@ -147,35 +122,6 @@ public class AdminProductsController implements Initializable {
                     Platform.runLater(() -> saveButton.setDisable(false));
                 }
             }).start();
-=======
-
-        Product product = new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
-                name, code, price, stock, desc, currentImageBase64);
-        clearForm();
-        appendProduct(product);
-
-    }
-
-    private void appendProduct(Product product){
-        String name = product.getName();
-        String code = product.getCode();
-        Long price = product.getPrice();
-        int stock = product.getStock();
-        String desc = product.getDescription();
-
-        if (editingProduct != null) {
-            editingProduct.setName(name);
-            editingProduct.setCode(code);
-            editingProduct.setPrice(price);
-            editingProduct.setStock(stock);
-            editingProduct.setDescription(desc);
-            editingProduct.setImage(currentImageBase64);
-            editingProduct = null;
-            saveButton.setText("Simpan Produk");
-        } else {
-            products.add(new Product(UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
-                    name, code, price, stock, desc, currentImageBase64));
->>>>>>> Stashed changes
         }
     }
 
@@ -272,14 +218,14 @@ public class AdminProductsController implements Initializable {
         }
     }
 
-    @FXML private void goOverview()     { try { App.switchScene("admin_overview",     1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
     @FXML private void goProducts()     { /* already here */ }
-    @FXML private void goTransactions() { try { App.switchScene("admin_transactions", 1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat",         1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
+    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
 }

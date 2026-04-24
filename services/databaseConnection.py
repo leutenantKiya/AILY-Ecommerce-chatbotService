@@ -1,5 +1,6 @@
-import os
-import bcrypt
+import base64
+# import os
+# import bcrypt
 import sqlite3
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -9,15 +10,14 @@ load_dotenv()
 class MongoDB:
     def __init__(self, Table):
         self.table = Table
-<<<<<<< Updated upstream
-        mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-        mongo_db = os.getenv("MONGO_DB", "aily")
-        self.client = MongoClient(mongo_uri)
-        self.db = self.client[mongo_db]
-=======
+# <<<<<<< Updated upstream
+#         mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+#         mongo_db = os.getenv("MONGO_DB", "aily")
+#         self.client = MongoClient(mongo_uri)
+#         self.db = self.client[mongo_db]
+# =======
         self.client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
         self.db = self.client["aily"]
->>>>>>> Stashed changes
         self.collection = self.db[self.table]
 
     def insert(self, data):
@@ -87,6 +87,12 @@ class SQLite:
                 question TEXT(50) NOT NULL,
                 answer TEXT(100) NOT NULL
             );
+            
+            CREATE TABLE IF NOT EXISTS help(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT(50) NOT NULL,
+                answer TEXT(100) NOT NULL
+            );
         """
         self.cursor.executescript(query)
 
@@ -118,45 +124,36 @@ class SQLite:
     def delete(self, query):
         self.cursor.execute(f"DELETE FROM {self.table} WHERE {query}")
         self.conn.commit()
+        
+    def getHelp(self):
+        self.cursor.execute(f"SELECT question, answer FROM help")
+        return self.cursor.fetchall()
 
 class ProductDB:
     def __init__(self):
         self.conn = sqlite3.connect("aily.db")
         self.cursor = self.conn.cursor()
 
-<<<<<<< Updated upstream
-    def searchBarang(self, name, gender):
-        # Cari berdasarkan nama ATAU kategori
-        self.cursor.execute(
-            "SELECT * FROM product WHERE (name LIKE ? OR category LIKE ?) AND (gender = ? OR gender = 'U')", 
-            (f"%{name}%", f"%{name}%", gender)
-        )
-        return self.cursor.fetchall()
+    def _serialize_product_row(self, row):
+        if row is None:
+            return None
 
-    def searchByCategory(self, category, gender):
-        # Mapping alias informal → kategori di database
-        CATEGORY_ALIAS = {
-            "baju": ["kaos", "kemeja", "gamis", "dress"],
-            "pakaian": ["kaos", "kemeja", "gamis", "dress", "jaket", "hoodie", "sweater", "blazer"],
-            "celana": ["celana", "jeans"],
-            "sepatu": ["sepatu", "sandal"],
-            "aksesoris": ["aksesoris", "topi"],
-            "tas": ["tas"],
+        row_list = list(row)
+        if row_list[4] is not None and isinstance(row_list[4], bytes):
+            row_list[4] = base64.b64encode(row_list[4]).decode("utf-8")
+
+        return {
+            "id": row_list[0],
+            "name": row_list[1],
+            "price": row_list[2],
+            "stock": row_list[3],
+            "image": row_list[4],
+            "description": row_list[5],
+            "gender": row_list[6],
         }
-        
-        categories = CATEGORY_ALIAS.get(category.lower(), [category.lower()])
-        placeholders = ",".join(["?" for _ in categories])
-        query = f"SELECT * FROM product WHERE category IN ({placeholders}) AND (gender = ? OR gender = 'U')"
-        params = categories + [gender]
-        self.cursor.execute(query, params)
-        return self.cursor.fetchall()
-=======
-    def searchBarang(self,role, name, gender):
-        import base64
-        if name.strip() == "":
-            if role != "admin":
-                return []
-        self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U')",(gender,))
+
+    def searchBarang(self,name, gender):
+        self.cursor.execute(f"SELECT * FROM product WHERE name LIKE '%{name}%' and (gender = ? OR gender = 'U') ",(gender,))
         rows = self.cursor.fetchall()
         result = []
         for row in rows:
@@ -166,7 +163,37 @@ class ProductDB:
                 row_list[4] = base64.b64encode(row_list[4]).decode("utf-8")
             result.append(row_list)
         return result
->>>>>>> Stashed changes
+
+    def getProductById(self, product_id):
+        self.cursor.execute("SELECT * FROM product WHERE id = ?", (product_id,))
+        row = self.cursor.fetchone()
+        return self._serialize_product_row(row)
+
+    def findProductsByKeyword(self, keyword, gender=None, limit=5):
+        like_keyword = f"%{keyword.strip()}%"
+        if gender in ("L", "P"):
+            self.cursor.execute(
+                """
+                SELECT * FROM product
+                WHERE name LIKE ?
+                  AND (gender = ? OR gender = 'U')
+                ORDER BY id ASC
+                LIMIT ?
+                """,
+                (like_keyword, gender, limit)
+            )
+        else:
+            self.cursor.execute(
+                """
+                SELECT * FROM product
+                WHERE name LIKE ?
+                ORDER BY id ASC
+                LIMIT ?
+                """,
+                (like_keyword, limit)
+            )
+
+        return [self._serialize_product_row(row) for row in self.cursor.fetchall()]
 
     def addProduct(self, name, price, stock, image, description, gender):
         try:
@@ -204,3 +231,153 @@ class ProductDB:
     def getAllProducts(self):
         self.cursor.execute("SELECT * FROM product")
         return self.cursor.fetchall()
+
+
+class CartDB:
+    def __init__(self):
+        self.conn = sqlite3.connect("aily.db")
+        self.cursor = self.conn.cursor()
+
+    def _get_or_create_active_cart_id(self, user_id):
+        self.cursor.execute(
+            "SELECT id FROM cart WHERE userId = ? AND status = 'Belum Checkout' ORDER BY id DESC LIMIT 1",
+            (user_id,)
+        )
+        row = self.cursor.fetchone()
+        if row is not None:
+            return row[0]
+
+        self.cursor.execute(
+            "INSERT INTO cart (userId, status) VALUES (?, 'Belum Checkout')",
+            (user_id,)
+        )
+        self.conn.commit()
+        return self.cursor.lastrowid
+
+    def getCartItems(self, user_id):
+        cart_id = self._get_or_create_active_cart_id(user_id)
+        self.cursor.execute(
+            """
+            SELECT
+                ci.productId,
+                ci.jumlah_barang,
+                p.name,
+                p.price,
+                p.stock,
+                p.image,
+                p.description,
+                p.gender
+            FROM cart_item ci
+            JOIN product p ON p.id = ci.productId
+            WHERE ci.cartId = ?
+            ORDER BY ci.id ASC
+            """,
+            (cart_id,)
+        )
+
+        items = []
+        for row in self.cursor.fetchall():
+            image = row[5]
+            if image is not None and isinstance(image, bytes):
+                image = base64.b64encode(image).decode("utf-8")
+
+            items.append({
+                "product_id": row[0],
+                "quantity": row[1],
+                "name": row[2],
+                "price": row[3],
+                "stock": row[4],
+                "image": image,
+                "description": row[6],
+                "gender": row[7],
+            })
+
+        return items
+
+    def addToCart(self, user_id, product_id, quantity):
+        self.cursor.execute("SELECT stock FROM product WHERE id = ?", (product_id,))
+        product = self.cursor.fetchone()
+        if product is None:
+            return False, "Produk tidak ditemukan."
+
+        stock = product[0]
+        if quantity <= 0:
+            return False, "Jumlah produk harus lebih dari 0."
+
+        cart_id = self._get_or_create_active_cart_id(user_id)
+        self.cursor.execute(
+            "SELECT id, jumlah_barang FROM cart_item WHERE cartId = ? AND productId = ?",
+            (cart_id, product_id)
+        )
+        existing = self.cursor.fetchone()
+
+        new_quantity = quantity
+        if existing is not None:
+            new_quantity = existing[1] + quantity
+
+        if new_quantity > stock:
+            return False, f"Stok produk hanya tersedia {stock}."
+
+        if existing is not None:
+            self.cursor.execute(
+                "UPDATE cart_item SET jumlah_barang = ? WHERE id = ?",
+                (new_quantity, existing[0])
+            )
+        else:
+            self.cursor.execute(
+                "INSERT INTO cart_item (cartId, productId, jumlah_barang) VALUES (?, ?, ?)",
+                (cart_id, product_id, quantity)
+            )
+
+        self.conn.commit()
+        return True, "Produk berhasil ditambahkan ke keranjang."
+
+    def updateCartItem(self, user_id, product_id, quantity):
+        cart_id = self._get_or_create_active_cart_id(user_id)
+
+        if quantity <= 0:
+            self.cursor.execute(
+                "DELETE FROM cart_item WHERE cartId = ? AND productId = ?",
+                (cart_id, product_id)
+            )
+            self.conn.commit()
+            return True, "Produk dihapus dari keranjang."
+
+        self.cursor.execute("SELECT stock FROM product WHERE id = ?", (product_id,))
+        product = self.cursor.fetchone()
+        if product is None:
+            return False, "Produk tidak ditemukan."
+
+        stock = product[0]
+        if quantity > stock:
+            return False, f"Stok produk hanya tersedia {stock}."
+
+        self.cursor.execute(
+            "SELECT id FROM cart_item WHERE cartId = ? AND productId = ?",
+            (cart_id, product_id)
+        )
+        existing = self.cursor.fetchone()
+        if existing is None:
+            return False, "Produk belum ada di keranjang."
+
+        self.cursor.execute(
+            "UPDATE cart_item SET jumlah_barang = ? WHERE id = ?",
+            (quantity, existing[0])
+        )
+        self.conn.commit()
+        return True, "Jumlah produk di keranjang berhasil diperbarui."
+
+    def removeCartItem(self, user_id, product_id):
+        cart_id = self._get_or_create_active_cart_id(user_id)
+        self.cursor.execute(
+            "DELETE FROM cart_item WHERE cartId = ? AND productId = ?",
+            (cart_id, product_id)
+        )
+        self.conn.commit()
+        return True
+
+    def clearCart(self, user_id):
+        cart_id = self._get_or_create_active_cart_id(user_id)
+        self.cursor.execute("DELETE FROM cart_item WHERE cartId = ?", (cart_id,))
+        self.conn.commit()
+        return True

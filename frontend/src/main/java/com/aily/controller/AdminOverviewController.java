@@ -63,14 +63,14 @@ public class AdminOverviewController implements Initializable {
 
     // ── Nav ──────────────────────────────────────────────────────
     @FXML private void goOverview()     { /* already here */ }
-    @FXML private void goProducts()     { try { App.switchScene("admin_products",     1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goTransactions() { try { App.switchScene("admin_transactions", 1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat",         1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
+    @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
+    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
 
     private String fmt(long amount) {

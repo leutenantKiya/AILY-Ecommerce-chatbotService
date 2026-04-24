@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routers.authRouter import router as auth_router
+from routers.cartService import router as cartRouter
 from routers.conversationRouter import router as conversationRouter
 from routers.productManagementService import router as productRouter
 from services.databaseConnection import MongoDB, SQLite
@@ -20,6 +21,8 @@ app.include_router(auth_router)
 app.include_router(conversationRouter)
 # connect to product management router
 app.include_router(productRouter)
+# connect to cart router
+app.include_router(cartRouter)
 
 # entry point here la
 if __name__ == "__main__":
