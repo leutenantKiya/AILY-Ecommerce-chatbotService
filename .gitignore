@@ -33,6 +33,7 @@ aily.db
 .env
 .env.local
 .env.*.local
+backend/.env
 
 # Maven build artifacts
 target/
@@ -57,4 +58,5 @@ frontend/hs_err_pid*.log
 *.tmp
 *.temp
 revert_marker.txt
+memory.md
 
