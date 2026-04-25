@@ -41,14 +41,14 @@ public class AdminTransactionsController implements Initializable {
         return row;
     }
 
-    @FXML private void goOverview()     { try { App.switchScene("admin_overview",     1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goProducts()     { try { App.switchScene("admin_products",     1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
+    @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
     @FXML private void goTransactions() { /* already here */ }
-    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat",         1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
 }

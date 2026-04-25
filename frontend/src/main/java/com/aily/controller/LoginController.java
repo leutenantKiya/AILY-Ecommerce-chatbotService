@@ -32,11 +32,10 @@ public class LoginController {
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.login(username, password);
-                String status = response.get("status").getAsString();
 
                 Platform.runLater(() -> {
                     loginButton.setDisable(false);
-                    if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = response.getAsJsonObject("data");
                         Session.currentUser = new User(
                                 data.get("id").getAsString(),
@@ -47,7 +46,7 @@ public class LoginController {
                                 data.get("role").getAsString()
                         );
                         try {
-                            App.switchScene("chat", 1280, 880);
+                            App.switchScene("chat");
                         } catch (Exception e) {
                             errorLabel.setText("Gagal membuka halaman chat.");
                         }
@@ -68,13 +67,13 @@ public class LoginController {
 
     @FXML
     private void goToRegister() {
-        try { App.switchScene("register", 900, 700); }
+        try { App.switchScene("register"); }
         catch (Exception e) { errorLabel.setText("Gagal membuka halaman register."); }
     }
 
     @FXML
     private void goBack() {
-        try { App.switchScene("landing", 1000, 700); }
+        try { App.switchScene("landing"); }
         catch (Exception e) { errorLabel.setText("Gagal kembali."); }
     }
 

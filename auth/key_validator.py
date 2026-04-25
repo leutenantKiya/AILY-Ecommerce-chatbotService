@@ -1,16 +1,3 @@
-# ===========================================================
-# auth/key_validator.py — Validasi ID + PublicKey
-# ===========================================================
-# File ini bertugas memvalidasi apakah kombinasi
-# id + publicKey yang dikirim oleh user/admin itu valid.
-#
-# Cara kerja:
-#   1. Terima id, publicKey, dan role ("user" atau "admin")
-#   2. Cari id tersebut di data dummy
-#   3. Cocokkan publicKey-nya
-#   4. Return True jika cocok, False jika tidak
-# ===========================================================
-
 from data.dummy_keys import USERS, ADMINS
 
 

@@ -1,4 +1,14 @@
 tempCodeRunnerFile.py
+.venv
 __pycache__
-venv
-addDB.py
+
+# Database files
+*.db
+aily.db
+
+# Maven build artifacts
+target/
+frontend/target/
+
+# IDE settings
+.idea/

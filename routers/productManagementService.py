@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from utils.response import Response
 from services.databaseConnection import ProductDB
+import base64
 
 router = APIRouter()
 
@@ -12,9 +13,7 @@ class ProductRequest(BaseModel):
     stock: int
     image: Optional[str] = None
     description: str
-    category: str
     gender: Optional[str] = 'U'
-    warna: Optional[str] = None
 
 @router.get("/aily/admin/product/list")
 def list_products():
@@ -24,16 +23,18 @@ def list_products():
     # Map the tuple 
     product_list = []
     for p in products:
+        img = p[4]
+        if isinstance(img, bytes):
+            img = base64.b64encode(img).decode('utf-8')
+            
         product_list.append({
             "id": p[0],
             "name": p[1],
             "price": p[2],
             "stock": p[3],
-            "image": p[4],
+            "image": img,
             "description": p[5],
-            "category": p[6],
-            "gender": p[7],
-            "warna": p[8]
+            "gender": p[6],
         })
 
     return Response.Ok(data={"products": product_list})
@@ -47,9 +48,7 @@ def add_product(product: ProductRequest):
         stock=product.stock,
         image=product.image,
         description=product.description,
-        category=product.category,
         gender=product.gender,
-        warna=product.warna
     )
     
     if success:
@@ -67,9 +66,7 @@ def update_product(product_id: int, product: ProductRequest):
         stock=product.stock,
         image=product.image,
         description=product.description,
-        category=product.category,
-        gender=product.gender,
-        warna=product.warna
+        gender=product.gender
     )
     
     if success:
@@ -97,7 +94,7 @@ def perform_delete_product(product_id):
     else:
         return {"message": "Gagal menghapus produk.", "type": "delete"}
 
-def perform_add_product(name, price, stock, description, category, image=None, gender='U', warna=None):
+def perform_add_product(name, price, stock, description, image=None, gender='U'):
     db = ProductDB()
     success = db.addProduct(
         name=name,
@@ -105,9 +102,7 @@ def perform_add_product(name, price, stock, description, category, image=None, g
         stock=stock,
         image=image,
         description=description,
-        category=category,
-        gender=gender,
-        warna=warna
+        gender=gender
     )
     
     if success:
@@ -115,7 +110,7 @@ def perform_add_product(name, price, stock, description, category, image=None, g
     else:
         return {"message": "Gagal menambahkan produk.", "type": "add"}
 
-def perform_update_product(product_id, name, price, stock, description, category, image=None, gender='U', warna=None):
+def perform_update_product(product_id, name, price, stock, description, image=None, gender='U'):
     db = ProductDB()
     success = db.updateProduct(
         product_id=product_id,
@@ -124,9 +119,7 @@ def perform_update_product(product_id, name, price, stock, description, category
         stock=stock,
         image=image,
         description=description,
-        category=category,
-        gender=gender,
-        warna=warna
+        gender=gender
     )
     
     if success:
@@ -141,16 +134,18 @@ def perform_list_products():
     # Map the tuple 
     product_list = []
     for p in products:
+        img = p[4]
+        if isinstance(img, bytes):
+            img = base64.b64encode(img).decode('utf-8')
+            
         product_list.append({
             "id": p[0],
             "name": p[1],
             "price": p[2],
             "stock": p[3],
-            "image": p[4],
+            "image": img,
             "description": p[5],
-            "category": p[6],
-            "gender": p[7],
-            "warna": p[8]
+            "gender": p[6]
         })
 
     return {"products": product_list, "type": "list"}
