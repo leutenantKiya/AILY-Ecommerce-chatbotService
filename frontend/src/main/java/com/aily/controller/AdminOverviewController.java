@@ -3,10 +3,6 @@ package com.aily.controller;
 import com.aily.App;
 import com.aily.Session;
 import com.aily.model.Order;
-import com.aily.service.ApiService.*;
-import com.aily.service.ApiService;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -15,8 +11,6 @@ import javafx.scene.layout.*;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-
-import static com.aily.service.ApiService.getProduk;
 
 public class AdminOverviewController implements Initializable {
 
@@ -34,17 +28,8 @@ public class AdminOverviewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         int txCount  = Session.orders.size();
         long revenue = Session.orders.stream().mapToLong(Order::getTotal).sum();
-        String productCount = "0";
-        try{
-            JsonObject obj = getProduk().getAsJsonObject("data");
-            JsonArray array = obj.getAsJsonArray("products");
-            productCount = String.valueOf(array.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-
-        totalProdukLabel.setText(productCount);
+        totalProdukLabel.setText("0");
         totalTxLabel    .setText(String.valueOf(txCount));
         totalRevLabel   .setText(fmt(revenue));
         chatActiveLabel .setText("0");
@@ -78,14 +63,14 @@ public class AdminOverviewController implements Initializable {
 
     // ── Nav ──────────────────────────────────────────────────────
     @FXML private void goOverview()     { /* already here */ }
-    @FXML private void goProducts()     { try { App.switchScene("admin_products",     1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goTransactions() { try { App.switchScene("admin_transactions", 1280, 880); } catch (Exception ignored) {} }
-    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat",         1280, 880); } catch (Exception ignored) {} }
+    @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
+    @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
+    @FXML private void goChatHistory()  { try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
 
     @FXML
     private void handleLogout() {
         Session.clear();
-        try { App.switchScene("landing", 1000, 700); } catch (Exception ignored) {}
+        try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
 
     private String fmt(long amount) {

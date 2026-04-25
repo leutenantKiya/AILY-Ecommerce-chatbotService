@@ -1,8 +1,0 @@
-fastapi==0.115.0
-uvicorn==0.30.0
-pymongo==4.16.0
-PySastrawi==1.2.0
-tensorflow
-numpy
-bcrypt
-

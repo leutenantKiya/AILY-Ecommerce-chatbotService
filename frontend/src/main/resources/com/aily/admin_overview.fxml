@@ -7,7 +7,7 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.aily.controller.AdminOverviewController"
       styleClass="root-bg"
-      prefWidth="1280" prefHeight="880">
+      prefWidth="1920" prefHeight="1080">
 
     <!-- ═══ ADMIN SIDEBAR ═══ -->
     <VBox styleClass="sidebar" prefWidth="260" minWidth="260">

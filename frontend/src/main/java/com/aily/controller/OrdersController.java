@@ -100,6 +100,6 @@ public class OrdersController implements Initializable {
 
     @FXML
     private void goBack() {
-        try { App.switchScene("chat", 1280, 880); } catch (Exception ignored) {}
+        try { App.switchScene("chat"); } catch (Exception ignored) {}
     }
 }
