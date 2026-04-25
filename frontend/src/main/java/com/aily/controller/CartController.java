@@ -174,25 +174,37 @@ public class CartController implements Initializable {
             return;
         }
 
-        long subtotal = Session.cart.stream().mapToLong(CartItem::subtotal).sum();
-        long total = subtotal + ONGKIR;
-        String orderId = "#TRX-" + (int) (Math.random() * 900 + 100);
-
-        for (CartItem item : Session.cart) {
-            Order order = new Order(orderId, item.getProduct(),
-                    item.getQuantity(), total, Order.Status.DIPROSES);
-            Session.orders.add(order);
+        if (Session.currentUser == null) {
+            showAlert(Alert.AlertType.ERROR, "Checkout Gagal", "Sesi habis. Silakan login ulang.");
+            return;
         }
 
-        Session.cart.clear();
-        clearBackendCartAsync();
-        refresh();
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Pesanan Berhasil");
-        alert.setHeaderText(null);
-        alert.setContentText("Pesanan berhasil dibuat! No. pesanan " + orderId);
-        alert.showAndWait();
+        new Thread(() -> {
+            try {
+                JsonObject response = ApiService.checkout(Session.currentUser.getId());
+                Platform.runLater(() -> {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
+                        JsonObject data = response.getAsJsonObject("data");
+                        JsonObject order = data.has("order") ? data.getAsJsonObject("order") : null;
+                        String orderCode = order != null && order.has("order_code")
+                                ? order.get("order_code").getAsString()
+                                : "-";
+                        Session.cart.clear();
+                        refresh();
+                        showAlert(Alert.AlertType.INFORMATION, "Pesanan Berhasil",
+                                "Pesanan berhasil dibuat! No. pesanan " + orderCode);
+                    } else {
+                        String message = response.has("error")
+                                ? response.get("error").getAsString()
+                                : "Checkout gagal diproses.";
+                        showAlert(Alert.AlertType.ERROR, "Checkout Gagal", message);
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Checkout Gagal",
+                        "Tidak dapat terhubung ke server."));
+            }
+        }).start();
     }
 
     @FXML
@@ -244,5 +256,13 @@ public class CartController implements Initializable {
 
     private String fmt(long amount) {
         return String.format("Rp %,d", amount).replace(',', '.');
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

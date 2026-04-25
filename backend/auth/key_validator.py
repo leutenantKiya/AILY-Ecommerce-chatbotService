@@ -1,4 +1,8 @@
-from data.dummy_keys import USERS, ADMINS
+try:
+    from data.dummy_keys import USERS, ADMINS
+except ModuleNotFoundError:
+    USERS = {}
+    ADMINS = {}
 
 
 def validate_key(id: str, public_key: str, role: str) -> bool:

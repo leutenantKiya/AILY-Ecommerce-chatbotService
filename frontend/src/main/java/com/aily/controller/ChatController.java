@@ -281,6 +281,7 @@ public class ChatController implements Initializable {
     @FXML private void showChat() { }
     @FXML private void showCart() { try { App.switchScene("cart"); } catch (Exception ignored) { } }
     @FXML private void showOrders() { try { App.switchScene("orders"); } catch (Exception ignored) { } }
+    @FXML private void showProfile() { try { App.switchScene("profile"); } catch (Exception ignored) { } }
 
     @FXML
     private void handleLogout() {

@@ -97,7 +97,7 @@ public class AdminProductsController implements Initializable {
             int productId = Integer.parseInt(editingProduct.getId());
             new Thread(() -> {
                 try {
-                    ApiService.updateProduct(productId, name, (int) price, stock, desc, code, "U", null);
+                    ApiService.updateProduct(productId, name, (int) price, stock, desc, code, "U", null, currentImageBase64);
                     Platform.runLater(() -> {
                         saveButton.setDisable(false);
                         editingProduct = null;
@@ -112,7 +112,7 @@ public class AdminProductsController implements Initializable {
         } else {
             new Thread(() -> {
                 try {
-                    ApiService.addProduct(name, (int) price, stock, desc, code, "U", null);
+                    ApiService.addProduct(name, (int) price, stock, desc, code, "U", null, currentImageBase64);
                     Platform.runLater(() -> {
                         saveButton.setDisable(false);
                         clearForm();
@@ -220,6 +220,7 @@ public class AdminProductsController implements Initializable {
 
     @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
     @FXML private void goProducts()     { /* already here */ }
+    @FXML private void goStoreInfo()    { try { App.switchScene("admin_store"); } catch (Exception ignored) {} }
     @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
     @FXML private void goChatHistory()  { try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
 

@@ -26,8 +26,7 @@ CREATE TABLE product(
                 price INTEGER NOT NULL,
                 stock INTEGER NOT NULL,
                 image TEXT,
-                description TEXT NOT NULL,
-                category TEXT NOT NULL
+                description TEXT NOT NULL
             , gender TEXT DEFAULT 'U', warna TEXT DEFAULT '');
 /****** CORRUPTION ERROR *******/
 CREATE TABLE cart_item (

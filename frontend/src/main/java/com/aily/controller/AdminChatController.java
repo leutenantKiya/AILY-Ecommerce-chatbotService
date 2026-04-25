@@ -114,6 +114,7 @@ public class AdminChatController implements Initializable {
 
     @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
     @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
+    @FXML private void goStoreInfo()    { try { App.switchScene("admin_store"); } catch (Exception ignored) {} }
     @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
     @FXML private void goChatHistory()  { /* already here */ }
 

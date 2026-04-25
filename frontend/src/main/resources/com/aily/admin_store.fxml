@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aily.controller.AdminStoreController"
+      styleClass="root-bg"
+      prefWidth="1920" prefHeight="1080">
+
+    <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
+        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="AILY" styleClass="logo-text"/>
+            <Label text="ADMIN" styleClass="admin-badge"/>
+        </HBox>
+        <Region styleClass="sidebar-divider" prefHeight="1"><VBox.margin><Insets top="16" bottom="16"/></VBox.margin></Region>
+        <Label text="Menu Utama" styleClass="sidebar-section-label"/>
+        <Button text="📊  Overview"       onAction="#goOverview"     styleClass="menu-item-btn"/>
+        <Button text="📦  Kelola Produk"  onAction="#goProducts"     styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="🏪  Info Toko"      onAction="#goStoreInfo"    styleClass="menu-item-btn-active"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💳  Transaksi"      onAction="#goTransactions" styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💬  Riwayat Chat"   onAction="#goChatHistory"  styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Region VBox.vgrow="ALWAYS"/>
+        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+    </VBox>
+
+    <ScrollPane fitToWidth="true" styleClass="chat-scroll" HBox.hgrow="ALWAYS" hbarPolicy="NEVER">
+        <content>
+            <VBox styleClass="admin-content" spacing="24">
+                <Label text="Kelola Informasi Toko" styleClass="page-title"/>
+
+                <VBox styleClass="form-card" spacing="16">
+                    <Label text="+ Tambah/Edit Informasi Toko" styleClass="form-section-title"/>
+                    <Region styleClass="form-divider" prefHeight="1"/>
+
+                    <VBox spacing="6">
+                        <Label text="Judul Informasi" styleClass="field-label"/>
+                        <TextField fx:id="questionField" promptText="cth: Jam Buka" styleClass="input-dark-sm"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Isi Informasi" styleClass="field-label"/>
+                        <TextArea fx:id="answerField" promptText="Isi informasi toko"
+                                  styleClass="textarea-dark" prefHeight="100" wrapText="true"/>
+                    </VBox>
+
+                    <Label fx:id="statusLabel" styleClass="error-label" wrapText="true"/>
+
+                    <HBox spacing="12">
+                        <Button fx:id="saveButton" text="Simpan Info" onAction="#handleSave"
+                                styleClass="btn-teal" prefWidth="160"/>
+                        <Button text="Bersihkan" onAction="#handleClear" styleClass="btn-outline" prefWidth="140"/>
+                    </HBox>
+                </VBox>
+
+                <VBox styleClass="table-card" spacing="0">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Daftar Informasi Toko" styleClass="form-section-title" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="countLabel" text="0 info" styleClass="text-gray"/>
+                    </HBox>
+                    <Region styleClass="form-divider" prefHeight="1"><VBox.margin><Insets top="12" bottom="8"/></VBox.margin></Region>
+
+                    <HBox styleClass="table-header-row">
+                        <Label text="ID"     styleClass="table-col-label" prefWidth="80"/>
+                        <Label text="JUDUL"  styleClass="table-col-label" prefWidth="220"/>
+                        <Label text="ISI"    styleClass="table-col-label" prefWidth="520"/>
+                        <Label text="AKSI"   styleClass="table-col-label" prefWidth="140"/>
+                    </HBox>
+
+                    <VBox fx:id="storeInfoRowsBox"/>
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</HBox>

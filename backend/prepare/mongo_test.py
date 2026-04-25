@@ -1,7 +1,12 @@
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 uid = "$2b$12$WfYIlXOnScUocD5ksrOzqeK2EziFBArnUFzUCw67Gab7MaOGs/0XO"
-client = MongoClient("mongodb://Kiya:Jogja321@localhost:27017/?authSource=admin")
+client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
 doc = client["aily"]["chatUserLog"].find_one({"user_id": uid})
 
 if doc is not None:

@@ -50,7 +50,8 @@ public class LoginAdminController {
                                 data.get("email").getAsString(),
                                 data.get("phone").getAsString(),
                                 data.get("address").getAsString(),
-                                role
+                                role,
+                                data.has("gender") ? data.get("gender").getAsString() : "L"
                         );
                         try {
                             App.switchScene("admin_overview");

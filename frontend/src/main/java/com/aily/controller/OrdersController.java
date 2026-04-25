@@ -3,6 +3,12 @@ package com.aily.controller;
 import com.aily.App;
 import com.aily.Session;
 import com.aily.model.Order;
+import com.aily.model.Product;
+import com.aily.service.ApiService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -28,7 +34,85 @@ public class OrdersController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        refresh();
+        if (Session.currentUser != null) {
+            new Thread(this::loadOrdersFromBackend).start();
+        } else {
+            refresh();
+        }
+    }
+
+    private void loadOrdersFromBackend() {
+        try {
+            JsonObject response = ApiService.getUserOrders(Session.currentUser.getId());
+            if (response.has("status") && response.get("status").getAsInt() == 200) {
+                JsonObject data = response.getAsJsonObject("data");
+                JsonArray orders = data.getAsJsonArray("orders");
+                Session.orders.clear();
+                for (JsonElement orderEl : orders) {
+                    Session.orders.add(parseOrder(orderEl.getAsJsonObject()));
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        Platform.runLater(this::refresh);
+    }
+
+    private Order parseOrder(JsonObject orderObj) {
+        JsonArray items = orderObj.has("items") && orderObj.get("items").isJsonArray()
+                ? orderObj.getAsJsonArray("items")
+                : new JsonArray();
+
+        StringBuilder names = new StringBuilder();
+        int quantity = 0;
+        Product displayProduct = null;
+
+        for (int i = 0; i < items.size(); i++) {
+            JsonObject item = items.get(i).getAsJsonObject();
+            if (i > 0) {
+                names.append(", ");
+            }
+            names.append(item.get("product_name").getAsString());
+            quantity += item.get("quantity").getAsInt();
+
+            if (displayProduct == null) {
+                JsonObject product = item.getAsJsonObject("product");
+                displayProduct = new Product(
+                        product.get("id").getAsString(),
+                        item.get("product_name").getAsString(),
+                        orderObj.get("order_code").getAsString(),
+                        item.get("price").getAsLong(),
+                        product.has("stock") ? product.get("stock").getAsInt() : 0,
+                        product.has("description") ? product.get("description").getAsString() : "",
+                        product.has("image") && !product.get("image").isJsonNull()
+                                ? product.get("image").getAsString()
+                                : null
+                );
+            }
+        }
+
+        if (displayProduct == null) {
+            displayProduct = new Product("0", "Pesanan", orderObj.get("order_code").getAsString(), 0, 0, "", null);
+        } else if (names.length() > 0) {
+            displayProduct.setName(names.toString());
+        }
+
+        return new Order(
+                orderObj.get("order_code").getAsString(),
+                displayProduct,
+                quantity,
+                orderObj.get("total").getAsLong(),
+                parseStatus(orderObj.get("status").getAsString())
+        );
+    }
+
+    private Order.Status parseStatus(String status) {
+        return switch (status.toLowerCase()) {
+            case "dalam pengiriman" -> Order.Status.DIKIRIM;
+            case "selesai" -> Order.Status.SELESAI;
+            case "dibatalkan" -> Order.Status.DIBATALKAN;
+            default -> Order.Status.DIPROSES;
+        };
     }
 
     private void refresh() {
@@ -88,6 +172,13 @@ public class OrdersController implements Initializable {
         statusBadge.getStyleClass().add(order.statusCssClass());
         right.getChildren().addAll(total, statusBadge);
 
+        if (order.canCancel()) {
+            Button cancelBtn = new Button("Batalkan");
+            cancelBtn.getStyleClass().add("btn-danger");
+            cancelBtn.setOnAction(e -> cancelOrder(order));
+            right.getChildren().add(cancelBtn);
+        }
+
         HBox row = new HBox(14, imgBox, info, right);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("order-card");
@@ -101,5 +192,42 @@ public class OrdersController implements Initializable {
     @FXML
     private void goBack() {
         try { App.switchScene("chat"); } catch (Exception ignored) {}
+    }
+
+    private void cancelOrder(Order order) {
+        if (Session.currentUser == null) {
+            return;
+        }
+
+        int orderId = parseOrderId(order.getId());
+        new Thread(() -> {
+            try {
+                JsonObject response = ApiService.cancelOrder(Session.currentUser.getId(), orderId);
+                Platform.runLater(() -> {
+                    if (response.has("status") && response.get("status").getAsInt() == 200) {
+                        new Thread(this::loadOrdersFromBackend).start();
+                    } else {
+                        String message = response.has("error")
+                                ? response.get("error").getAsString()
+                                : "Pesanan gagal dibatalkan.";
+                        showAlert(Alert.AlertType.ERROR, "Gagal", message);
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Gagal", "Tidak dapat terhubung ke server."));
+            }
+        }).start();
+    }
+
+    private int parseOrderId(String orderCode) {
+        return Integer.parseInt(orderCode.replaceAll("[^0-9]", ""));
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

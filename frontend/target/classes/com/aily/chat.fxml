@@ -30,6 +30,10 @@
                 styleClass="menu-item-btn">
             <VBox.margin><Insets top="4"/></VBox.margin>
         </Button>
+        <Button fx:id="btnProfil" text="👤  Profil" onAction="#showProfile"
+                styleClass="menu-item-btn">
+            <VBox.margin><Insets top="4"/></VBox.margin>
+        </Button>
 
         <!-- Spacer -->
         <Region VBox.vgrow="ALWAYS"/>

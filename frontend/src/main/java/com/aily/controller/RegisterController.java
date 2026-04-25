@@ -11,6 +11,10 @@ public class RegisterController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField emailField;
+    @FXML private TextField phoneField;
+    @FXML private TextField addressField;
+    @FXML private TextField genderField;
     @FXML private Button registerButton;
     @FXML private Label errorLabel;
 
@@ -18,9 +22,18 @@ public class RegisterController {
     private void handleRegister() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
+        String email = emailField.getText().trim();
+        String phone = phoneField.getText().trim();
+        String address = addressField.getText().trim();
+        String gender = normalizeGender(genderField.getText().trim());
 
-        if (username.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Username dan password wajib diisi.");
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+            errorLabel.setText("Username, password, email, telepon, dan alamat wajib diisi.");
+            return;
+        }
+
+        if (gender.isEmpty()) {
+            errorLabel.setText("Gender harus L atau P.");
             return;
         }
 
@@ -30,7 +43,7 @@ public class RegisterController {
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.register(
-                        username, password, "", "", "", "user");
+                        username, password, email, phone, address, "user", gender);
 
                 Platform.runLater(() -> {
                     registerButton.setDisable(false);
@@ -60,5 +73,16 @@ public class RegisterController {
     private void goBack() {
         try { App.switchScene("landing"); }
         catch (Exception e) { errorLabel.setText("Gagal kembali."); }
+    }
+
+    private String normalizeGender(String value) {
+        String normalized = value.toUpperCase();
+        if (normalized.equals("L") || normalized.equals("LAKI") || normalized.equals("LAKI-LAKI")) {
+            return "L";
+        }
+        if (normalized.equals("P") || normalized.equals("PEREMPUAN") || normalized.equals("WANITA")) {
+            return "P";
+        }
+        return "";
     }
 }

@@ -43,7 +43,8 @@ public class LoginController {
                                 data.get("email").getAsString(),
                                 data.get("phone").getAsString(),
                                 data.get("address").getAsString(),
-                                data.get("role").getAsString()
+                                data.get("role").getAsString(),
+                                data.has("gender") ? data.get("gender").getAsString() : "L"
                         );
                         try {
                             App.switchScene("chat");

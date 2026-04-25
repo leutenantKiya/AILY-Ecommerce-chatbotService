@@ -25,6 +25,7 @@
         <Label text="Menu Utama" styleClass="sidebar-section-label"/>
         <Button text="📊  Overview"       onAction="#goOverview"    styleClass="menu-item-btn-active"/>
         <Button text="📦  Kelola Produk"  onAction="#goProducts"    styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="🏪  Info Toko"      onAction="#goStoreInfo"   styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
         <Button text="💳  Transaksi"      onAction="#goTransactions" styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
         <Button text="💬  Riwayat Chat"   onAction="#goChatHistory"  styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
 

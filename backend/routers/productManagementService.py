@@ -59,12 +59,16 @@ def add_product(product: ProductRequest):
 @router.put("/aily/admin/product/update/{product_id}")
 def update_product(product_id: int, product: ProductRequest):
     db = ProductDB()
+    existing = db.getProductById(product_id)
+    if existing is None:
+        return Response.NotFound("Product not found")
+
     success = db.updateProduct(
         product_id=product_id,
         name=product.name,
         price=product.price,
         stock=product.stock,
-        image=product.image,
+        image=product.image if product.image is not None else existing["image"],
         description=product.description,
         gender=product.gender
     )
