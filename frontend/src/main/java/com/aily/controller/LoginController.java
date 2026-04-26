@@ -17,6 +17,10 @@ public class LoginController {
     @FXML private Label errorLabel;
 
     @FXML
+    public void initialize() {
+        loginButton.setDefaultButton(true);
+    }
+    @FXML
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();

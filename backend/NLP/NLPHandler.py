@@ -103,7 +103,7 @@ NORMALIZATION_DICT = {
 
     # Produk informal
     "jaket":     "jaket",
-    "kaos":      "kaos",
+    "kaos":      "baju",
     "pakaian":   "baju",
     "abju":      "baju",
 }
@@ -115,7 +115,7 @@ NORMALIZATION_DICT = {
 KEYWORD_RULES = {
     "mencari": [
         "cari", "beli", "ingin", "lihat", "tampilkan", "tunjukkan",
-        "baju", "celana", "sepatu", "kaos", "jaket", "rok", "dress",
+        "baju", "celana", "sepatu", "jaket", "rok", "dress",
         "hoodie", "sweater", "kemeja", "gamis", "blazer", "sandal",
         "tas", "topi", "aksesoris", "pakaian","payung"
     ],
