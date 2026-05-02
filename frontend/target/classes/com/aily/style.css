@@ -64,11 +64,11 @@
 }
 
 /* ── Cards ───────────────────────────────────────────────────────── */
-/*.card {*/
-/*    -fx-background-color: #1E2E38;*/
-/*    -fx-background-radius: 16;*/
-/*    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 24, 0, 0, 8);*/
-/*}*/
+.card {
+    -fx-background-color: #1E2E38;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 24, 0, 0, 8);
+}
 
 /* ── Typography ──────────────────────────────────────────────────── */
 .logo-giant {
