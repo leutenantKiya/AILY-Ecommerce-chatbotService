@@ -1,45 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
 
-<StackPane xmlns="http://javafx.com/javafx"
-           xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.aily.controller.RegisterController"
-           styleClass="root-bg"
-           prefWidth="1920" prefHeight="1080">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-    <VBox styleClass="card" alignment="TOP_CENTER" spacing="0"
-          prefWidth="380" maxWidth="380">
+<StackPane
+        prefHeight="Infinity"
+        prefWidth="Infinity"
+        styleClass="root-bg"
+        xmlns="http://javafx.com/javafx/26"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="com.aily.controller.RegisterController">
 
-        <padding><Insets top="36" bottom="36" left="36" right="36"/></padding>
+    <HBox
+            alignment="CENTER"
+            prefHeight="Infinity"
+            prefWidth="Infinity"
+            spacing="0"
+            styleClass="root-bg">
 
-        <Label text="AILY" styleClass="logo-text" alignment="CENTER" maxWidth="Infinity"/>
-        <Label text="Selamat datang" styleClass="heading-white" alignment="CENTER" maxWidth="Infinity">
-            <VBox.margin><Insets top="8" bottom="28"/></VBox.margin>
-        </Label>
+        <VBox
+                alignment="CENTER_LEFT"
+                maxWidth="Infinity"
+                prefWidth="600.0"
+                spacing="15.0"
+                styleClass="login-left-panel"
+                HBox.hgrow="ALWAYS">
+            <padding>
+                <Insets left="80.0" right="40.0" />
+            </padding>
 
-        <Label text="Username" styleClass="field-label"/>
-        <TextField fx:id="usernameField" promptText="Username" styleClass="input-pill">
-            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
-        </TextField>
+            <Label styleClass="logo-giant-left" text="AILY">
+                <font>
+                    <Font name="System Bold" size="48.0" />
+                </font>
+            </Label>
 
-        <Label text="Password" styleClass="field-label"/>
-        <PasswordField fx:id="passwordField" promptText="Password" styleClass="input-pill">
-            <VBox.margin><Insets top="6" bottom="24"/></VBox.margin>
-        </PasswordField>
+            <Label styleClass="login-welcome-title" text="Gabung Sekarang!" />
 
-        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true">
-            <VBox.margin><Insets bottom="8"/></VBox.margin>
-        </Label>
+            <Label
+                    styleClass="login-welcome-desc"
+                    text="Buat akunmu sekarang dan nikmati pengalaman berbelanja yang lebih personal dan menguntungkan."
+                    wrapText="true" />
 
-        <Button fx:id="registerButton" text="Daftar" onAction="#handleRegister"
-                styleClass="btn-teal" maxWidth="Infinity" prefHeight="46"/>
+            <Region styleClass="login-divider-teal" />
 
-        <HBox alignment="CENTER_RIGHT">
-            <VBox.margin><Insets top="14"/></VBox.margin>
-            <Hyperlink text="← Kembali" onAction="#goBack" styleClass="link-back"/>
-        </HBox>
-    </VBox>
+            <HBox spacing="10.0">
+                <Label styleClass="text-teal" text="✦" />
+                <Label styleClass="login-feature-text" text="Akses promo eksklusif member" />
+            </HBox>
 
+            <HBox spacing="10.0">
+                <Label styleClass="text-teal" text="✦" />
+                <Label styleClass="login-feature-text" text="Simpan alamat untuk checkout cepat" />
+            </HBox>
+        </VBox>
+
+        <VBox
+                alignment="CENTER_LEFT"
+                minWidth="100.0"
+                prefWidth="1200"
+                spacing="10.0"
+                styleClass="login-right-panel">
+            <padding>
+                <Insets left="50.0" right="50.0" />
+            </padding>
+
+            <Label styleClass="login-form-title" text="Register" />
+            <Label styleClass="subheading-gray" text="Buat akun baru untuk mulai belanja" />
+
+            <VBox spacing="8.0">
+                <Label styleClass="field-label" text="Username" />
+                <TextField
+                        fx:id="usernameField"
+                        promptText="Pilih username unik"
+                        styleClass="input-pill"
+                        prefHeight="40.0" />
+            </VBox>
+
+            <VBox spacing="8.0">
+                <Label styleClass="field-label" text="Password" />
+                <PasswordField
+                        fx:id="passwordField"
+                        promptText="Minimal 8 karakter"
+                        styleClass="input-pill"
+                        prefHeight="40.0" />
+            </VBox>
+
+            <Label
+                    fx:id="errorLabel"
+                    styleClass="error-label"
+                    wrapText="true"
+                    text="" />
+
+            <Button
+                    fx:id="registerButton"
+                    maxWidth="Infinity"
+                    onAction="#handleRegister"
+                    prefHeight="45.0"
+                    styleClass="btn-teal"
+                    text="Daftar Akun" />
+
+            <HBox alignment="CENTER" spacing="10.0">
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+                <Label styleClass="text-gray" text="Sudah punya akun?" />
+                <Hyperlink onAction="#goBack" styleClass="link-teal" text="Login" />
+                <Label styleClass="text-gray" text="|" />
+                <Hyperlink onAction="#goBack" styleClass="link-back" text="← Kembali" />
+            </HBox>
+
+        </VBox>
+    </HBox>
 </StackPane>
