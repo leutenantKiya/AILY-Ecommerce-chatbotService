@@ -68,15 +68,15 @@
         </HBox>
 
         <!-- Messages scroll area -->
-        <StackPane VBox.vgrow="ALWAYS">
+        <StackPane VBox.vgrow="ALWAYS" style="-fx-background-color: #0D2230;">
+            <!-- Watermark -->
+            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.06"/>
             <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="chat-scroll"
                         vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                 <content>
                     <VBox fx:id="messageContainer" styleClass="message-container" spacing="8"/>
                 </content>
             </ScrollPane>
-            <!-- Watermark -->
-            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.15"/>
         </StackPane>
 
         <!-- Quick action chips -->

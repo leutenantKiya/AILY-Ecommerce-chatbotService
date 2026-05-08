@@ -399,16 +399,16 @@
 }
 
 .chat-scroll {
-    -fx-background-color: #0D2230;
-    -fx-background: #0D2230;
+    -fx-background-color: transparent;
+    -fx-background: transparent;
 }
 
 .chat-scroll .viewport {
-    -fx-background-color: #0D2230;
+    -fx-background-color: transparent;
 }
 
 .message-container {
-    -fx-background-color: #0D2230;
+    -fx-background-color: transparent;
     -fx-padding: 16 0 16 0;
 }
 
@@ -542,8 +542,8 @@
 .watermark {
     -fx-font-size: 96px;
     -fx-font-weight: bold;
-    -fx-text-fill: #152230;
-    -fx-opacity: 0.7;
+    -fx-text-fill: #E8F0F3;
+    -fx-opacity: 0.06;
 }
 
 /* ── Cart / Orders screens ────────────────────────────────────────── */
