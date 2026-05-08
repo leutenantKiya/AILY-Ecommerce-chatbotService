@@ -110,7 +110,7 @@
                     fx:id="errorLabel"
                     styleClass="error-label"
                     wrapText="true"
-                    text="(error message)" />
+                    text="" />
 
             <Button
                     fx:id="loginButton"
