@@ -49,7 +49,7 @@
             </VBox>
         </HBox>
 
-        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+        <Button text="← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
     </VBox>
 
     <!-- ═══ MAIN CHAT AREA ═══ -->
