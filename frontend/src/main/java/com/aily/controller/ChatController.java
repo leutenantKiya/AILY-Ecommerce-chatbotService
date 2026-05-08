@@ -459,7 +459,7 @@ public class ChatController implements Initializable {
                         .toUpperCase()
                     : "ME")
                 : "A");
-        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #07161E;");
+        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: " + (isUser ? "#00D4A3" : "#07161E") + ";");
         avatar.getChildren().add(avLbl);
         avatar.setMinSize(30, 30);
         avatar.setMaxSize(30, 30);
