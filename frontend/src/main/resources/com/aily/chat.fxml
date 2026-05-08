@@ -91,7 +91,7 @@
         <!-- Input bar -->
         <HBox styleClass="input-bar" alignment="CENTER" spacing="10">
             <TextField fx:id="messageInput"
-                       promptText="Ketik pesan kamu... (coba: 'cari laptop', 'FAQ', 'keranjang')"
+                       promptText="Mau cari apa hari ini? (coba: 'cari laptop', 'FAQ', 'keranjang')"
                        styleClass="chat-input" HBox.hgrow="ALWAYS"/>
             <Button fx:id="sendButton" text="➤" onAction="#handleSend" styleClass="send-btn"/>
         </HBox>
