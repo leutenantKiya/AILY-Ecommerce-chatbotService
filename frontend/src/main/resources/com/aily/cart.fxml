@@ -30,7 +30,7 @@
                         <Label text="Keranjang kamu masih kosong" styleClass="empty-state-label"/>
                         <Button text="Mulai belanja" onAction="#goBack" styleClass="btn-outline" prefWidth="160"/>
                         <!-- AILY watermark -->
-                        <Label text="AILY" styleClass="watermark" opacity="0.12"/>
+                        <Label text="AILY" styleClass="watermark" opacity="0.06"/>
                     </VBox>
 
                     <!-- Item list -->
