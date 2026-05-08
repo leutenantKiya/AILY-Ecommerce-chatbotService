@@ -25,7 +25,7 @@
             <content>
                 <StackPane>
                     <!-- Empty state -->
-                    <VBox fx:id="emptyState" alignment="CENTER" spacing="16" visible="true">
+                    <VBox fx:id="emptyState" alignment="CENTER" spacing="16" visible="true" VBox.vgrow="ALWAYS" minHeight="500">
                         <Label text="🛒" style="-fx-font-size: 48px;"/>
                         <Label text="Keranjang kamu masih kosong" styleClass="empty-state-label"/>
                         <Button text="Mulai belanja" onAction="#goBack" styleClass="btn-outline" prefWidth="160"/>
