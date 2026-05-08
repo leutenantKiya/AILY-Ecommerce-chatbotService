@@ -36,7 +36,7 @@
                         <Label text="📦" style="-fx-font-size: 48px;"/>
                         <Label text="Belum ada pesanan" styleClass="empty-state-label"/>
                         <Button text="Mulai belanja" onAction="#goBack" styleClass="btn-outline" prefWidth="160"/>
-                        <Label text="AILY" styleClass="watermark" opacity="0.12"/>
+                        <Label text="AILY" styleClass="watermark" opacity="0.06"/>
                     </VBox>
                     <!-- Order list -->
                     <VBox fx:id="ordersBox" spacing="10" visible="false" managed="false">
