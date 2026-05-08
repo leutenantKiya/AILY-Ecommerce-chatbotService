@@ -49,6 +49,7 @@
 .login-right-panel {
     -fx-background-color: #1E2E38;
     -fx-background-radius: 0 16 16 0;
+    -fx-alignment: CENTER_LEFT;
 }
 
 .login-form-title {
@@ -135,7 +136,7 @@
     -fx-min-height: 14px;
 }
 
-/* ── Input fields — pill shaped ──────────────────────────────────── */
+/* ── Input fields ────────────────────────────────────────────────── */
 .input-pill {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -145,6 +146,7 @@
     -fx-padding: 10 18 10 18;
     -fx-font-size: 13px;
     -fx-pref-height: 42px;
+    -fx-max-width: Infinity;
 }
 
 .input-pill:focused {
@@ -153,7 +155,6 @@
     -fx-border-width: 1;
 }
 
-/* Textarea variant */
 .textarea-dark {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -171,7 +172,6 @@
     -fx-border-width: 1;
 }
 
-/* Number spinner / small input */
 .input-dark-sm {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -412,7 +412,6 @@
     -fx-padding: 16 0 16 0;
 }
 
-/* Bot bubble */
 .bubble-bot {
     -fx-background-color: #1E2E38;
     -fx-background-radius: 0 14 14 14;
@@ -425,7 +424,6 @@
     -fx-font-size: 13px;
 }
 
-/* User bubble */
 .bubble-user {
     -fx-background-color: #00D4A3;
     -fx-background-radius: 14 14 0 14;
@@ -445,7 +443,6 @@
     -fx-padding: 2 4 0 4;
 }
 
-/* Avatar circle (small, user messages) */
 .msg-avatar {
     -fx-background-color: #243E4A;
     -fx-background-radius: 16;
@@ -472,7 +469,6 @@
     -fx-alignment: CENTER;
 }
 
-/* Quick action chips */
 .chip-bar {
     -fx-background-color: #182A34;
     -fx-border-color: #243E4A;
@@ -494,7 +490,6 @@
     -fx-text-fill: #07161E;
 }
 
-/* Input bar */
 .input-bar {
     -fx-background-color: #182A34;
     -fx-border-color: #243E4A;
@@ -538,7 +533,6 @@
     -fx-background-color: #1E4D40;
 }
 
-/* Watermark text */
 .watermark {
     -fx-font-size: 96px;
     -fx-font-weight: bold;
