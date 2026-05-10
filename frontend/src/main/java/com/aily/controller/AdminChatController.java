@@ -77,31 +77,34 @@ public class AdminChatController implements Initializable {
                                 String userId = userObj.has("user_id") ? userObj.get("user_id").getAsString() : "";
                                 String username = userObj.has("username") ? userObj.get("username").getAsString() : "Unknown";
                                 boolean openConnection = userObj.has("open_connection") && userObj.get("open_connection").getAsBoolean();
-                                boolean adminNeeded = userObj.has("admin_needed") && userObj.get("admin_needed").getAsBoolean();
-                                boolean adminConnected = userObj.has("admin_connected") && userObj.get("admin_connected").getAsBoolean();
-                                int chatCount = countChats(userObj);
-                                int previousCount = knownChatCounts.getOrDefault(userId, chatCount);
-                                String lastRole = getLastRole(userObj);
-                                boolean newIncomingMessage = chatHistoryLoaded
-                                        && chatCount > previousCount
-                                        && "user".equalsIgnoreCase(lastRole);
+                                if (!username.equals("Admin")){
+                                    boolean adminNeeded = userObj.has("admin_needed") && userObj.get("admin_needed").getAsBoolean();
+                                    boolean adminConnected = userObj.has("admin_connected") && userObj.get("admin_connected").getAsBoolean();
+                                    int chatCount = countChats(userObj);
+                                    int previousCount = knownChatCounts.getOrDefault(userId, chatCount);
+                                    String lastRole = getLastRole(userObj);
+                                    boolean newIncomingMessage = chatHistoryLoaded
+                                            && chatCount > previousCount
+                                            && "user".equalsIgnoreCase(lastRole);
 
-                                if (adminNeeded || newIncomingMessage) {
-                                    unreadUserIds.add(userId);
-                                } else if (chatCount > previousCount && "bot".equalsIgnoreCase(lastRole)) {
-                                    unreadUserIds.remove(userId);
-                                }
+                                    if (adminNeeded || newIncomingMessage) {
+                                        unreadUserIds.add(userId);
+                                    } else if (chatCount > previousCount && "bot".equalsIgnoreCase(lastRole)) {
+                                        unreadUserIds.remove(userId);
+                                    }
 
-                                boolean hasNotification = unreadUserIds.contains(userId) || adminNeeded;
-                                if (hasNotification) {
-                                    unreadCount++;
-                                }
-                                knownChatCounts.put(userId, chatCount);
+                                    boolean hasNotification = unreadUserIds.contains(userId) || adminNeeded;
+                                    if (hasNotification) {
+                                        unreadCount++;
+                                    }
+                                    knownChatCounts.put(userId, chatCount);
 
-                                chatHistoryBox.getChildren().add(buildUserBubble(username, userId, openConnection, adminNeeded, adminConnected, hasNotification));
-                            }
+                                    chatHistoryBox.getChildren().add(buildUserBubble(username, userId, openConnection, adminNeeded, adminConnected, hasNotification));
+                            }   
                             chatHistoryLoaded = true;
                             updateAdminNotification(unreadCount);
+                                }
+                                
                         } else {
                             showEmpty();
                         }
@@ -124,15 +127,31 @@ public class AdminChatController implements Initializable {
         updateAdminNotification(0);
     }
 
-    private HBox buildUserBubble(String username, String userId, boolean openConnection, boolean adminNeeded, boolean adminConnected, boolean hasNotification) {
-        String displayText = username + (userId.isBlank() ? "" : "  -  ID " + userId);
+    private HBox buildUserBubble(
+            String username,
+            String userId,
+            boolean openConnection,
+            boolean adminNeeded,
+            boolean adminConnected,
+            boolean hasNotification
+    ) {
+
+        String displayText = username;
+
         Label userLabel = new Label(displayText);
         userLabel.getStyleClass().add("table-cell-bold");
         userLabel.setWrapText(true);
+
+        // Agar label mengambil sisa ruang
+        userLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(userLabel, Priority.ALWAYS);
 
-        Label statusLabel = new Label(buildConnectionLabel(openConnection, adminNeeded, adminConnected));
+        Label statusLabel = new Label(
+                buildConnectionLabel(openConnection, adminNeeded, adminConnected)
+        );
+
         statusLabel.getStyleClass().add("connection-indicator");
+
         if (adminConnected) {
             statusLabel.getStyleClass().add("indicator-open");
         } else if (adminNeeded || openConnection) {
@@ -141,55 +160,128 @@ public class AdminChatController implements Initializable {
 
         Label notificationLabel = new Label("Pesan baru");
         notificationLabel.getStyleClass().add("notification-badge");
+
         notificationLabel.setVisible(hasNotification);
         notificationLabel.setManaged(hasNotification);
 
         Button renameBtn = new Button("✎");
         renameBtn.getStyleClass().add("clear-btn");
-        renameBtn.setStyle("-fx-font-size: 12px; -fx-padding: 4 10 4 10;");
+
+        renameBtn.setStyle("""
+        -fx-font-size: 12px;
+        -fx-padding: 4 10 4 10;
+    """);
+
+        renameBtn.setPrefWidth(40);
+
         renameBtn.setOnAction(e -> {
+
             TextInputDialog dialog = new TextInputDialog(username);
+
             dialog.setTitle("Rename User");
             dialog.setHeaderText("Ganti username untuk " + username);
             dialog.setContentText("Username baru:");
+
             Optional<String> result = dialog.showAndWait();
+
             result.ifPresent(newName -> {
+
                 String trimmed = newName.trim();
-                if (trimmed.isEmpty() || trimmed.equals(username)) return;
+
+                if (trimmed.isEmpty() || trimmed.equals(username)) {
+                    return;
+                }
+
                 new Thread(() -> {
+
                     try {
+
                         JsonObject resp = ApiService.renameUser(userId, trimmed);
+
                         Platform.runLater(() -> {
-                            if (resp.has("status") && resp.get("status").getAsInt() == 200) {
+
+                            if (
+                                    resp.has("status") &&
+                                            resp.get("status").getAsInt() == 200
+                            ) {
+
                                 loadChatHistory();
+
                             } else {
-                                String err = resp.has("error") ? resp.get("error").getAsString() : "Gagal rename";
-                                new Alert(Alert.AlertType.ERROR, err, ButtonType.OK).showAndWait();
+
+                                String err = resp.has("error")
+                                        ? resp.get("error").getAsString()
+                                        : "Gagal rename";
+
+                                new Alert(
+                                        Alert.AlertType.ERROR,
+                                        err,
+                                        ButtonType.OK
+                                ).showAndWait();
                             }
                         });
+
                     } catch (Exception ex) {
+
                         Platform.runLater(() -> {
-                            new Alert(Alert.AlertType.ERROR, "Gagal terhubung ke server", ButtonType.OK).showAndWait();
+
+                            new Alert(
+                                    Alert.AlertType.ERROR,
+                                    "Gagal terhubung ke server",
+                                    ButtonType.OK
+                            ).showAndWait();
+
                         });
                     }
+
                 }).start();
             });
         });
 
         Button lihatBtn = new Button("Lihat");
         lihatBtn.getStyleClass().add("btn-teal");
-        lihatBtn.setStyle("-fx-font-size: 12px; -fx-padding: 6 18 6 18;");
+
+        lihatBtn.setStyle("""
+        -fx-font-size: 12px;
+        -fx-padding: 6 18 6 18;
+    """);
+
+        // Supaya semua tombol konsisten
+        lihatBtn.setPrefWidth(90);
+
         lihatBtn.setOnAction(e -> {
+
             unreadUserIds.remove(userId);
+
             Session.adminSelectedChatUserId = userId;
             Session.adminSelectedChatUsername = username;
-            try { App.switchScene("admin_chat_detail"); } catch (Exception ignored) {}
+
+            try {
+                App.switchScene("admin_chat_detail");
+            } catch (Exception ignored) {
+            }
         });
 
-        HBox row = new HBox(12, userLabel, statusLabel, notificationLabel, renameBtn, lihatBtn);
+        // Spacer agar tombol selalu rata kanan
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox row = new HBox(
+                12,
+                userLabel,
+                spacer,
+                statusLabel,
+                notificationLabel,
+                renameBtn,
+                lihatBtn
+        );
+
         row.setAlignment(Pos.CENTER_LEFT);
+
         row.getStyleClass().add("order-card");
+
         row.setPadding(new Insets(14, 16, 14, 16));
+
         return row;
     }
 
@@ -240,13 +332,15 @@ public class AdminChatController implements Initializable {
     }
 
     private String buildConnectionLabel(boolean openConnection, boolean adminNeeded, boolean adminConnected) {
+        String out;
         if (adminConnected) {
-            return "Admin terhubung";
+            out = "Admin terhubung";
+        } else if (adminNeeded || openConnection) {
+            out = "Butuh admin";
+        }else{
+            out = "Bot";
         }
-        if (adminNeeded || openConnection) {
-            return "Butuh admin";
-        }
-        return "Bot";
+        return  "%-25s".formatted(out);
     }
 
     @FXML private void goOverview()     { stopAutoRefresh(); try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }

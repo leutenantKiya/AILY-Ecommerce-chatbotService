@@ -43,8 +43,10 @@ class ChatSaveRequest(BaseModel):
 
 class ChatConnectionRequest(BaseModel):
     user_id: str
-
-
+    
+class AdminConnectionRequest(BaseModel):
+    user_id: str
+    
 class StoreInfoRequest(BaseModel):
     question: str
     answer: str
@@ -770,3 +772,18 @@ def searchBarangResult(name: str, gender: str):
             "gender": product[6],
         })
     return {"products": formatted, "type": "mencari"}
+
+@router.post("/aily/admin/chat/disconnect")
+def disconnect_admin_chat(body:AdminConnectionRequest):
+    set_chat_state(
+        body.user_id,
+        open_connection=False,
+        admin_needed=False,
+        admin_connected=False,
+        connection_status="bot"
+    )
+
+
+    return Response.Ok(data={
+        "message": "Admin disconnected"
+    })

@@ -17,6 +17,7 @@ class OrderStatusRequest(BaseModel):
     status: str
 
 
+
 def _resolve_user(user_token: str):
     db = SQLite()
     return db.resolveUser(user_token)
@@ -279,3 +280,5 @@ def get_admin_chat_history_by_user(user_id: str):
         state = _chat_state_from_doc(None)
 
     return Response.Ok(data={"user_id": user_id, "username": username, "groups": groups, **state})
+
+    

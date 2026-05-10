@@ -110,6 +110,7 @@ public class ApiService {
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
+
     public static JsonObject getAdminChatHistoryByUser(String userId) throws Exception {
         String url = BASE_URL + "/aily/admin/chat/history/user?user_id=" + encode(userId);
 
@@ -174,6 +175,25 @@ public class ApiService {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject disconnectAdminChat(String userId) throws Exception {
+
+        JsonObject body = new JsonObject();
+        body.addProperty("user_id", userId);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/aily/admin/chat/disconnect"))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
         return gson.fromJson(response.body(), JsonObject.class);
     }
 

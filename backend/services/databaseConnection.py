@@ -34,6 +34,16 @@ class MongoDB:
         return self.collection.find_one(query)
 
     def update(self, query, data):
+        if not isinstance(data, dict):
+            self.collection.update_one(query, {"$set": {"value": data}})
+            return
+
+        # If caller already supplies Mongo update operators (e.g. {"$set": {...}}),
+        # do not wrap again.
+        if any(str(key).startswith("$") for key in data.keys()):
+            self.collection.update_one(query, data)
+            return
+
         self.collection.update_one(query, {"$set": data})
 
     def push(self, query, data):

@@ -784,7 +784,45 @@ public class AdminChatDetailController implements Initializable {
         return row;
     }
 
-    @FXML private void backToList() { stopAutoRefresh(); try { App.switchScene("admin_chat"); } catch (Exception ignored) {} }
+    @FXML
+    private void backToList() {
+
+        stopAutoRefresh();
+
+        String userId = Session.adminSelectedChatUserId != null
+                ? Session.adminSelectedChatUserId
+                : "";
+
+        if (!userId.isBlank()) {
+
+            new Thread(() -> {
+
+                try {
+
+                    ApiService.disconnectAdminChat(userId);
+
+                } catch (Exception ignored) {
+                }
+
+                Platform.runLater(() -> {
+
+                    try {
+                        App.switchScene("admin_chat");
+                    } catch (Exception ignored) {
+                    }
+
+                });
+
+            }).start();
+
+        } else {
+
+            try {
+                App.switchScene("admin_chat");
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     @FXML private void goOverview()     { stopAutoRefresh(); try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
     @FXML private void goProducts()     { stopAutoRefresh(); try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
@@ -795,6 +833,16 @@ public class AdminChatDetailController implements Initializable {
     @FXML
     private void handleLogout() {
         stopAutoRefresh();
+        String userId = Session.adminSelectedChatUserId != null ? Session.adminSelectedChatUserId : "";
+        if (!userId.isBlank()) {
+            new Thread(() -> {
+                try {
+                    ApiService.connectAdminChat(userId);
+                    Platform.runLater(() -> updateConnectionState(false, false, false));
+                } catch (Exception ignored) { }
+            }).start();
+        }
+
         Session.clear();
         try { App.switchScene("landing"); } catch (Exception ignored) {}
     }
