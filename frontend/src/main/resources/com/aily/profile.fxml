@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aily.controller.ProfileController"
+            styleClass="root-bg"
+            prefWidth="1920" prefHeight="1080">
+
+    <top>
+        <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="16">
+            <Button text="←" onAction="#goBack" styleClass="back-btn"/>
+            <Label text="AILY" styleClass="logo-text-sm"/>
+            <Label text="Profil Pengguna" styleClass="page-title" HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="chat-scroll" hbarPolicy="NEVER">
+            <content>
+                <VBox styleClass="admin-content" spacing="24">
+                    <VBox styleClass="form-card" spacing="16" maxWidth="720">
+                        <Label text="Data Pribadi" styleClass="form-section-title"/>
+                        <Region styleClass="form-divider" prefHeight="1"/>
+
+                        <HBox spacing="16">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Username" styleClass="field-label"/>
+                                <TextField fx:id="usernameField" promptText="Username" styleClass="input-dark-sm"/>
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Gender" styleClass="field-label"/>
+                                <TextField fx:id="genderField" promptText="L / P" styleClass="input-dark-sm"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="16">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Email" styleClass="field-label"/>
+                                <TextField fx:id="emailField" promptText="email@domain.com" styleClass="input-dark-sm"/>
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="No. Telepon" styleClass="field-label"/>
+                                <TextField fx:id="phoneField" promptText="08xxxxxxxxxx" styleClass="input-dark-sm"/>
+                            </VBox>
+                        </HBox>
+
+                        <VBox spacing="6">
+                            <Label text="Alamat" styleClass="field-label"/>
+                            <TextArea fx:id="addressField" promptText="Alamat lengkap"
+                                      styleClass="textarea-dark" prefHeight="90" wrapText="true"/>
+                        </VBox>
+
+                        <Label fx:id="statusLabel" styleClass="error-label" wrapText="true"/>
+
+                        <HBox spacing="12">
+                            <Button fx:id="saveButton" text="Simpan Profil" onAction="#handleSave"
+                                    styleClass="btn-teal" prefWidth="180"/>
+                            <Button text="Kembali" onAction="#goBack" styleClass="btn-outline" prefWidth="140"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

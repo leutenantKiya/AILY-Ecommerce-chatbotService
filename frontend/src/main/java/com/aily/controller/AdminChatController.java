@@ -5,6 +5,8 @@ import com.aily.Session;
 import com.aily.service.ApiService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,6 +14,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -20,36 +23,51 @@ public class AdminChatController implements Initializable {
 
     @FXML private VBox chatHistoryBox;
 
+    private Timeline autoRefreshTimer;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        loadMessage();
+        startAutoRefresh();
+    }
+
+    private void startAutoRefresh() {
+        autoRefreshTimer = new Timeline(new KeyFrame(Duration.seconds(10), e -> loadChatHistory()));
+        autoRefreshTimer.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimer.play();
+    }
+
+    private void stopAutoRefresh() {
+        if (autoRefreshTimer != null) {
+            autoRefreshTimer.stop();
+        }
+    }
+
+    // Backward-compatible name with FXML/event expectations
+    private void loadMessage() {
         loadChatHistory();
     }
 
     private void loadChatHistory() {
         chatHistoryBox.getChildren().clear();
-
-        // Load chat history for current admin user
-        if (Session.currentUser == null) return;
+        chatHistoryBox.setSpacing(10);
 
         new Thread(() -> {
             try {
-                JsonObject response = ApiService.getChatHistory(Session.currentUser.getId());
+                JsonObject response = ApiService.getAdminChatHistory();
                 Platform.runLater(() -> {
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = response.getAsJsonObject("data");
-                        if (data.has("chat_history")) {
-                            JsonArray chats = data.getAsJsonArray("chat_history");
-                            if (chats.isEmpty()) {
-                                showEmpty();
-                                return;
-                            }
-                            for (int i = 0; i < chats.size(); i++) {
-                                JsonObject chat = chats.get(i).getAsJsonObject();
-                                String user = chat.has("username") ? chat.get("username").getAsString() : "Unknown";
-                                String msg = chat.has("message") ? formatMessage(chat.get("message")) : "";
-                                String role = chat.has("role") ? chat.get("role").getAsString() : "user";
-                                String time = chat.has("time") ? chat.get("time").getAsString() : "";
-                                chatHistoryBox.getChildren().add(buildRow(user, msg, role, time));
+                        if (data.has("users") && data.get("users").isJsonArray()) {
+                            JsonArray users = data.getAsJsonArray("users");
+                            if (users.isEmpty()) { showEmpty(); return; }
+
+                            for (int u = 0; u < users.size(); u++) {
+                                JsonObject userObj = users.get(u).getAsJsonObject();
+                                String userId = userObj.has("user_id") ? userObj.get("user_id").getAsString() : "";
+                                String username = userObj.has("username") ? userObj.get("username").getAsString() : "Unknown";
+
+                                chatHistoryBox.getChildren().add(buildUserBubble(username, userId));
                             }
                         } else {
                             showEmpty();
@@ -64,17 +82,6 @@ public class AdminChatController implements Initializable {
         }).start();
     }
 
-    private String formatMessage(com.google.gson.JsonElement element) {
-        if (element.isJsonPrimitive()) {
-            return element.getAsString();
-        } else if (element.isJsonObject()) {
-            JsonObject obj = element.getAsJsonObject();
-            if (obj.has("message")) return obj.get("message").getAsString();
-            return obj.toString();
-        }
-        return element.toString();
-    }
-
     private void showEmpty() {
         chatHistoryBox.getChildren().clear();
         Label empty = new Label("Belum ada riwayat chat.");
@@ -83,42 +90,40 @@ public class AdminChatController implements Initializable {
         chatHistoryBox.getChildren().add(empty);
     }
 
-    private HBox buildRow(String user, String lastMsg, String role, String time) {
-        VBox info = new VBox(4);
-        Label userName = new Label(user);
-        userName.getStyleClass().add("table-cell-bold");
-        Label msg = new Label(lastMsg);
-        msg.getStyleClass().add("text-gray");
-        msg.setMaxWidth(400);
-        msg.setWrapText(true);
-        info.getChildren().addAll(userName, msg);
-        HBox.setHgrow(info, Priority.ALWAYS);
+    private HBox buildUserBubble(String username, String userId) {
+        // Username - ID label
+        String displayText = username + (userId.isBlank() ? "" : "  -  ID " + userId);
+        Label userLabel = new Label(displayText);
+        userLabel.getStyleClass().add("table-cell-bold");
+        userLabel.setWrapText(true);
+        HBox.setHgrow(userLabel, Priority.ALWAYS);
 
-        VBox rightBox = new VBox(4);
-        rightBox.setAlignment(Pos.CENTER_RIGHT);
+        // "Lihat" button
+        Button lihatBtn = new Button("Lihat");
+        lihatBtn.getStyleClass().add("btn-teal");
+        lihatBtn.setStyle("-fx-font-size: 12px; -fx-padding: 6 18 6 18;");
+        lihatBtn.setOnAction(e -> {
+            Session.adminSelectedChatUserId = userId;
+            Session.adminSelectedChatUsername = username;
+            try { App.switchScene("admin_chat_detail"); } catch (Exception ignored) {}
+        });
 
-        Label badge = new Label("bot".equals(role) ? "Bot" : "User");
-        badge.getStyleClass().add("bot".equals(role) ? "status-terjawab" : "status-belum-terjawab");
-
-        Label timeLabel = new Label(time);
-        timeLabel.getStyleClass().add("text-gray");
-
-        rightBox.getChildren().addAll(badge, timeLabel);
-
-        HBox row = new HBox(info, rightBox);
+        HBox row = new HBox(12, userLabel, lihatBtn);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("order-card");
         row.setPadding(new Insets(14, 16, 14, 16));
         return row;
     }
 
-    @FXML private void goOverview()     { try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
-    @FXML private void goProducts()     { try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
-    @FXML private void goTransactions() { try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
+    @FXML private void goOverview()     { stopAutoRefresh(); try { App.switchScene("admin_overview"); } catch (Exception ignored) {} }
+    @FXML private void goProducts()     { stopAutoRefresh(); try { App.switchScene("admin_products"); } catch (Exception ignored) {} }
+    @FXML private void goStoreInfo()    { stopAutoRefresh(); try { App.switchScene("admin_store"); } catch (Exception ignored) {} }
+    @FXML private void goTransactions() { stopAutoRefresh(); try { App.switchScene("admin_transactions"); } catch (Exception ignored) {} }
     @FXML private void goChatHistory()  { /* already here */ }
 
     @FXML
     private void handleLogout() {
+        stopAutoRefresh();
         Session.clear();
         try { App.switchScene("landing"); } catch (Exception ignored) {}
     }

@@ -5,6 +5,7 @@ Membuat virtual environment (venv) dan menginstall semua
 dependency dari requirements.txt secara otomatis.
 
 Cara pakai:
+    .\venv\Scripts\activate
     python setup_env.py
 """
 

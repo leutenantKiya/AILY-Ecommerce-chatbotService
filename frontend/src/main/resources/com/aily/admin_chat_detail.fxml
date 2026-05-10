@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aily.controller.AdminChatDetailController"
+      styleClass="root-bg"
+      prefWidth="1920" prefHeight="1080">
+
+    <!-- Sidebar (admin) -->
+    <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
+        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="AILY" styleClass="logo-text"/>
+            <Label text="ADMIN" styleClass="admin-badge"/>
+        </HBox>
+        <Region styleClass="sidebar-divider" prefHeight="1">
+            <VBox.margin><Insets top="16" bottom="16"/></VBox.margin>
+        </Region>
+
+        <Label text="Menu Utama" styleClass="sidebar-section-label"/>
+        <Button text="📊  Overview"      onAction="#goOverview"     styleClass="menu-item-btn"/>
+        <Button text="📦  Kelola Produk" onAction="#goProducts"     styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="🏪  Info Toko"     onAction="#goStoreInfo"    styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💳  Transaksi"     onAction="#goTransactions" styleClass="menu-item-btn"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+        <Button text="💬  Riwayat Chat"  onAction="#goChatHistory"  styleClass="menu-item-btn-active"><VBox.margin><Insets top="4"/></VBox.margin></Button>
+
+        <Region VBox.vgrow="ALWAYS"/>
+        <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
+    </VBox>
+
+    <!-- MAIN CHAT AREA -->
+    <VBox HBox.hgrow="ALWAYS">
+
+        <!-- Top bar -->
+        <HBox styleClass="chat-topbar" alignment="CENTER_LEFT" spacing="12">
+            <Button text="←" onAction="#backToList" styleClass="clear-btn"/>
+
+            <StackPane styleClass="bot-avatar">
+                <Label text="A" style="-fx-text-fill: #07161E; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </StackPane>
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label fx:id="chatWithLabel" text="Chat User" styleClass="heading-white" style="-fx-font-size: 15px;"/>
+                <Label fx:id="chatSubLabel" text="History &amp; reply as bot" styleClass="text-gray" style="-fx-font-size: 11px;"/>
+            </VBox>
+
+            <Button text="Refresh" onAction="#refresh" styleClass="clear-btn"/>
+        </HBox>
+
+        <!-- Messages scroll area -->
+        <StackPane VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="chat-scroll"
+                        vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox fx:id="messageContainer" styleClass="message-container" spacing="8"/>
+                </content>
+            </ScrollPane>
+            <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.12"/>
+        </StackPane>
+
+        <!-- Input bar -->
+        <HBox styleClass="input-bar" alignment="CENTER" spacing="10">
+            <TextField fx:id="messageInput"
+                       promptText="Ketik balasan sebagai bot..."
+                       styleClass="chat-input" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="sendButton" text="➤" onAction="#handleSend" styleClass="send-btn"/>
+        </HBox>
+    </VBox>
+
+</HBox>
+

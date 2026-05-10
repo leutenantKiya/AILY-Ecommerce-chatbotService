@@ -21,7 +21,7 @@ class CartUpdateRequest(BaseModel):
 
 def _resolve_user(user_token: str):
     db = SQLite()
-    return db.findUserByPassword(user_token)
+    return db.resolveUser(user_token)
 
 
 def _build_cart_payload(user_id: int):
@@ -148,3 +148,10 @@ def perform_get_cart_summary(user_token: str):
         "type": "cart",
         "cart_summary": payload,
     }
+
+@router.get("/aily/admin/cart/list")
+def get_cart():
+    cart_db = CartDB()
+    payload = cart_db.getAllCart()
+    
+    return Response.Ok(data=payload)

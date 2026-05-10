@@ -10,6 +10,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,6 +29,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.net.URL;
@@ -43,12 +46,18 @@ public class ChatController implements Initializable {
     @FXML private Label usernameLabel;
     @FXML private Label roleLabel;
     @FXML private Label avatarLabel;
+    @FXML private Label chatModeLabel;
+    @FXML private Button toggleModeButton;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH.mm");
     private static final String WELCOME_MESSAGE =
             "Selamat datang di AILY \uD83D\uDC4B\uD83D\uDE0A\n" +
             "Saya siap membantu kamu berbelanja.\n" +
             "Coba ketik nama produk yang ingin kamu cari!";
+
+    private boolean adminChatMode = false;
+    private Timeline autoRefreshTimer;
+    private int lastMessageCount = 0;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -66,6 +75,81 @@ public class ChatController implements Initializable {
         }
 
         messageInput.setOnAction(e -> handleSend());
+        updateModeUI();
+        startAutoRefresh();
+    }
+
+    private void startAutoRefresh() {
+        autoRefreshTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> refreshIfAdminMode()));
+        autoRefreshTimer.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimer.play();
+    }
+
+    private void stopAutoRefresh() {
+        if (autoRefreshTimer != null) {
+            autoRefreshTimer.stop();
+        }
+    }
+
+    private void refreshIfAdminMode() {
+        if (!adminChatMode) return;
+        User user = Session.currentUser;
+        if (user == null) return;
+
+        new Thread(() -> {
+            try {
+                JsonObject response = ApiService.getChatHistory(user.getId());
+                String status = asString(response.get("status"), "");
+                Platform.runLater(() -> {
+                    if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
+                        JsonObject data = asJsonObject(response.get("data"));
+                        JsonArray chats = data == null ? null : asJsonArray(data.get("chat_history"));
+                        int newCount = chats != null ? chats.size() : 0;
+                        if (newCount > lastMessageCount) {
+                            // Only append new messages starting from lastMessageCount
+                            for (int i = lastMessageCount; i < newCount; i++) {
+                                JsonObject chatObj = asJsonObject(chats.get(i));
+                                if (chatObj == null) continue;
+                                String role = asString(chatObj.get("role"), "");
+                                JsonElement message = chatObj.get("message");
+                                if ("bot".equalsIgnoreCase(role)) {
+                                    renderBotHistoryMessage(message);
+                                } else if (message != null && !message.isJsonNull()) {
+                                    addUserMessage(asString(message, ""));
+                                }
+                            }
+                            lastMessageCount = newCount;
+                            scrollToBottom();
+                        }
+                    }
+                });
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
+    @FXML
+    private void toggleChatMode() {
+        adminChatMode = !adminChatMode;
+        updateModeUI();
+        messageContainer.getChildren().clear();
+        lastMessageCount = 0;
+        User user = Session.currentUser;
+        if (user != null) {
+            if (adminChatMode) {
+                addBotMessage("Mode: Chat ke Admin.\nPesan kamu akan dikirim ke admin.");
+            } else {
+                new Thread(() -> loadChatHistory(user)).start();
+            }
+        }
+    }
+
+    private void updateModeUI() {
+        if (chatModeLabel != null) {
+            chatModeLabel.setText(adminChatMode ? "Mode: Admin" : "Mode: NLP Bot");
+        }
+        if (toggleModeButton != null) {
+            toggleModeButton.setText(adminChatMode ? "💬 Chat ke NLP" : "👤 Chat ke Admin");
+        }
     }
 
     private void loadChatHistory(User user) {
@@ -95,8 +179,10 @@ public class ChatController implements Initializable {
                                 addUserMessage(asString(message, ""));
                             }
                         }
+                        lastMessageCount = chats.size();
                         scrollToBottom();
                     } else {
+                        lastMessageCount = 0;
                         showWelcomeMessage();
                     }
                 } else {
@@ -127,6 +213,26 @@ public class ChatController implements Initializable {
             return;
         }
 
+        if (adminChatMode) {
+            // Send message to admin via saveChatMessage
+            new Thread(() -> {
+                try {
+                    ApiService.saveChatMessage(user.getId(), user.getUsername(), "user", text);
+                    Platform.runLater(() -> {
+                        sendButton.setDisable(false);
+                        lastMessageCount++; // track locally so refresh doesn't re-render immediately
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        sendButton.setDisable(false);
+                        addBotMessage("Gagal mengirim pesan ke admin.");
+                    });
+                }
+            }).start();
+            return;
+        }
+
+        // Normal NLP mode
         new Thread(() -> {
             try {
                 JsonObject response = ApiService.sendMessage(user.getId(), text);
@@ -178,6 +284,13 @@ public class ChatController implements Initializable {
     }
 
     private String buildBotReply(JsonObject data, String intent) {
+        if (intent != null && intent.equalsIgnoreCase("help")) {
+            String formatted = formatHelpResponse(data);
+            if (!formatted.isBlank()) {
+                return formatted;
+            }
+        }
+
         if (data != null && data.has("action_data") && !data.get("action_data").isJsonNull()) {
             try {
                 JsonArray products = extractProducts(data.get("action_data"));
@@ -266,6 +379,82 @@ public class ChatController implements Initializable {
         };
     }
 
+    private String formatHelpResponse(JsonObject data) {
+        if (data == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        JsonObject nlp = asJsonObject(data.get("nlp_result"));
+        if (nlp != null) {
+            String header = asString(nlp.get("respons"), "").trim();
+            if (!header.isBlank()) {
+                sb.append(header);
+            }
+
+            JsonArray konten = asJsonArray(nlp.get("konten"));
+            if (konten != null && !konten.isEmpty()) {
+                if (sb.length() > 0) sb.append("\n\n");
+                sb.append("Menu bantuan:\n");
+                int idx = 0;
+                for (JsonElement el : konten) {
+                    JsonObject item = asJsonObject(el);
+                    if (item == null) continue;
+                    String it = titleCase(asString(item.get("intent"), ""));
+                    String desc = asString(item.get("deskripsi"), "").trim();
+                    if (it.isBlank() && desc.isBlank()) continue;
+                    idx++;
+                    sb.append(idx).append(". ").append(it.isBlank() ? "-" : it);
+                    if (!desc.isBlank()) sb.append(" — ").append(desc);
+                    sb.append("\n");
+                }
+                if (idx > 0) {
+                    // trim last newline
+                    sb.setLength(sb.length() - 1);
+                }
+            }
+        }
+
+        // Optional: FAQ cepat dari action_data.data.result (pairs)
+        JsonObject action = asJsonObject(data.get("action_data"));
+        JsonObject actionData = action == null ? null : asJsonObject(action.get("data"));
+        JsonArray pairs = actionData == null ? null : asJsonArray(actionData.get("result"));
+        if (pairs != null && !pairs.isEmpty()) {
+            if (sb.length() > 0) sb.append("\n\n");
+            sb.append("FAQ cepat:\n");
+            for (JsonElement pairEl : pairs) {
+                JsonArray pair = asJsonArray(pairEl);
+                if (pair == null || pair.size() < 2) continue;
+                String key = asString(pair.get(0), "").trim();
+                String val = asString(pair.get(1), "").trim();
+                if (key.isBlank() && val.isBlank()) continue;
+                sb.append("- ").append(key.isBlank() ? "-" : key).append(": ").append(val).append("\n");
+            }
+            // trim last newline
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') {
+                sb.setLength(sb.length() - 1);
+            }
+        }
+
+        return sb.toString().trim();
+    }
+
+    private String titleCase(String raw) {
+        if (raw == null) return "";
+        String s = raw.trim();
+        if (s.isEmpty()) return "";
+        String[] parts = s.replace('_', ' ').split("\\s+");
+        StringBuilder out = new StringBuilder();
+        for (String p : parts) {
+            if (p.isBlank()) continue;
+            if (out.length() > 0) out.append(' ');
+            out.append(Character.toUpperCase(p.charAt(0)));
+            if (p.length() > 1) out.append(p.substring(1));
+        }
+        return out.toString();
+    }
+
     @FXML private void chipCariProduk() { sendChip("carikan aku baju"); }
     @FXML private void chipFaq() { sendChip("informasi toko"); }
     @FXML private void chipKeranjang() { sendChip("lihat keranjang"); }
@@ -279,11 +468,13 @@ public class ChatController implements Initializable {
     }
 
     @FXML private void showChat() { }
-    @FXML private void showCart() { try { App.switchScene("cart"); } catch (Exception ignored) { } }
-    @FXML private void showOrders() { try { App.switchScene("orders"); } catch (Exception ignored) { } }
+    @FXML private void showCart() { stopAutoRefresh(); try { App.switchScene("cart"); } catch (Exception ignored) { } }
+    @FXML private void showOrders() { stopAutoRefresh(); try { App.switchScene("orders"); } catch (Exception ignored) { } }
+    @FXML private void showProfile() { stopAutoRefresh(); try { App.switchScene("profile"); } catch (Exception ignored) { } }
 
     @FXML
     private void handleLogout() {
+        stopAutoRefresh();
         Session.clear();
         try {
             App.switchScene("landing");
@@ -459,7 +650,7 @@ public class ChatController implements Initializable {
                         .toUpperCase()
                     : "ME")
                 : "A");
-        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: " + (isUser ? "#00D4A3" : "#07161E") + ";");
+        avLbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #07161E;");
         avatar.getChildren().add(avLbl);
         avatar.setMinSize(30, 30);
         avatar.setMaxSize(30, 30);
