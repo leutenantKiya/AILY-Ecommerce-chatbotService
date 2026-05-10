@@ -57,7 +57,6 @@
     -fx-font-weight: bold;
     -fx-text-fill: #E8F0F3;
 }
-
 /* ── Root / full-window background ──────────────────────────────── */
 .root-bg {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0D2230, #07161E);
@@ -81,6 +80,7 @@
 
 .logo-text {
     -fx-font-size: 40px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #00D4A3;
 }
@@ -136,7 +136,7 @@
     -fx-min-height: 14px;
 }
 
-/* ── Input fields ────────────────────────────────────────────────── */
+/* ── Input fields — pill shaped ──────────────────────────────────── */
 .input-pill {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -146,7 +146,6 @@
     -fx-padding: 10 18 10 18;
     -fx-font-size: 13px;
     -fx-pref-height: 42px;
-    -fx-max-width: Infinity;
 }
 
 .input-pill:focused {
@@ -155,6 +154,7 @@
     -fx-border-width: 1;
 }
 
+/* Textarea variant */
 .textarea-dark {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -172,6 +172,7 @@
     -fx-border-width: 1;
 }
 
+/* Number spinner / small input */
 .input-dark-sm {
     -fx-background-color: #152230;
     -fx-border-color: transparent;
@@ -399,19 +400,20 @@
 }
 
 .chat-scroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
+    -fx-background-color: #0D2230;
+    -fx-background: #0D2230;
 }
 
 .chat-scroll .viewport {
-    -fx-background-color: transparent;
+    -fx-background-color: #0D2230;
 }
 
 .message-container {
-    -fx-background-color: transparent;
+    -fx-background-color: #0D2230;
     -fx-padding: 16 0 16 0;
 }
 
+/* Bot bubble */
 .bubble-bot {
     -fx-background-color: #1E2E38;
     -fx-background-radius: 0 14 14 14;
@@ -424,6 +426,7 @@
     -fx-font-size: 13px;
 }
 
+/* User bubble */
 .bubble-user {
     -fx-background-color: #00D4A3;
     -fx-background-radius: 14 14 0 14;
@@ -443,6 +446,7 @@
     -fx-padding: 2 4 0 4;
 }
 
+/* Avatar circle (small, user messages) */
 .msg-avatar {
     -fx-background-color: #243E4A;
     -fx-background-radius: 16;
@@ -469,6 +473,7 @@
     -fx-alignment: CENTER;
 }
 
+/* Quick action chips */
 .chip-bar {
     -fx-background-color: #182A34;
     -fx-border-color: #243E4A;
@@ -490,6 +495,7 @@
     -fx-text-fill: #07161E;
 }
 
+/* Input bar */
 .input-bar {
     -fx-background-color: #182A34;
     -fx-border-color: #243E4A;
@@ -533,11 +539,12 @@
     -fx-background-color: #1E4D40;
 }
 
+/* Watermark text */
 .watermark {
     -fx-font-size: 96px;
     -fx-font-weight: bold;
-    -fx-text-fill: #E8F0F3;
-    -fx-opacity: 0.06;
+    -fx-text-fill: #152230;
+    -fx-opacity: 0.7;
 }
 
 /* ── Cart / Orders screens ────────────────────────────────────────── */
@@ -922,4 +929,41 @@
     -fx-font-size: 13px;
     -fx-text-fill: #E8F0F3;
     -fx-font-family: "Courier New", monospace;
+}
+
+.connection-indicator {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7A9098;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 12;
+    -fx-background-color: #243E4A;
+}
+
+.indicator-open {
+    -fx-text-fill: #07161E;
+    -fx-background-color: #00D4A3;
+}
+
+.indicator-waiting {
+    -fx-text-fill: #07161E;
+    -fx-background-color: #E0B352;
+}
+
+.notification-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07161E;
+    -fx-padding: 3 9 3 9;
+    -fx-background-radius: 12;
+    -fx-background-color: #c09434;
+}
+
+.admin-notification-banner {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07161E;
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 10;
+    -fx-background-color: #E0B352;
 }

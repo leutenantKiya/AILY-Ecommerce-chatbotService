@@ -172,7 +172,9 @@ public class AdminChatDetailController implements Initializable {
         if (incomingFromUser) {
             showIncomingAdminNotification();
         }
-        scrollPane.setVvalue(1.0);
+        messageContainer.layout();
+        scrollPane.layout();
+        Platform.runLater(() -> scrollPane.setVvalue(1.0));
     }
 
     private void renderHistory(JsonObject response) {
@@ -227,7 +229,11 @@ public class AdminChatDetailController implements Initializable {
             }
         }
 
-        Platform.runLater(() -> scrollPane.setVvalue(1.0));
+        Platform.runLater(() -> {
+            messageContainer.layout();
+            scrollPane.layout();
+            Platform.runLater(() -> scrollPane.setVvalue(1.0));
+        });
     }
 
     @FXML
@@ -252,7 +258,9 @@ public class AdminChatDetailController implements Initializable {
                         addBotMessage(msg, LocalTime.now().format(TIME_FMT));
                         lastChatCount++;
                         updateConnectionState(true, false, true);
-                        scrollPane.setVvalue(1.0);
+                        messageContainer.layout();
+                        scrollPane.layout();
+                        Platform.runLater(() -> scrollPane.setVvalue(1.0));
                     } else {
                         messageInput.setText(msg);
                         addSystemLine("Gagal mengirim balasan admin.");

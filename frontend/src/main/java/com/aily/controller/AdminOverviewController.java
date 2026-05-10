@@ -35,9 +35,50 @@ public class AdminOverviewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         totalProdukLabel.setText(String.valueOf(countProduct()));
-        chatActiveLabel .setText("0");
-        chatActiveSub   .setText("0 Belum Terjawab");
+        chatActiveLabel .setText("...");
+        chatActiveSub   .setText("Memuat...");
         new Thread(this::loadOrdersFromBackend).start();
+        new Thread(this::loadActiveChatCount).start();
+    }
+
+    private void loadActiveChatCount() {
+        try {
+            JsonObject response = ApiService.getAdminChatHistory();
+            if (response.has("status") && response.get("status").getAsInt() == 200) {
+                JsonObject data = response.getAsJsonObject("data");
+                if (data.has("users") && data.get("users").isJsonArray()) {
+                    JsonArray users = data.getAsJsonArray("users");
+                    int activeCount = 0;
+                    int needAdminCount = 0;
+                    for (int i = 0; i < users.size(); i++) {
+                        JsonObject userObj = users.get(i).getAsJsonObject();
+                        String username = userObj.has("username") ? userObj.get("username").getAsString() : "";
+                        if ("Admin".equals(username)) continue;
+
+                        // Setiap user non-Admin dihitung sebagai 1 sesi chat aktif
+                        activeCount++;
+
+                        boolean adminNeeded = userObj.has("admin_needed") && userObj.get("admin_needed").getAsBoolean();
+                        boolean adminConnected = userObj.has("admin_connected") && userObj.get("admin_connected").getAsBoolean();
+                        if (adminNeeded && !adminConnected) {
+                            needAdminCount++;
+                        }
+                    }
+                    final int active = activeCount;
+                    final int unanswered = needAdminCount;
+                    Platform.runLater(() -> {
+                        chatActiveLabel.setText(String.valueOf(active));
+                        chatActiveSub.setText(unanswered + " Belum Terjawab");
+                    });
+                    return;
+                }
+            }
+        } catch (Exception ignored) { }
+
+        Platform.runLater(() -> {
+            chatActiveLabel.setText("0");
+            chatActiveSub.setText("0 Belum Terjawab");
+        });
     }
 
     private void loadOrdersFromBackend() {

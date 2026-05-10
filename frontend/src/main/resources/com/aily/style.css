@@ -10,6 +10,53 @@
      orange    : #E07A30   purple    : #8A52E0
    ═══════════════════════════════════════════════════════════════════ */
 
+.login-left-panel {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0D2230, #07161E);
+    -fx-background-radius: 30 0 0 30;
+}
+
+.logo-giant-left {
+    -fx-font-size: 70px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00D4A3;
+}
+
+.login-welcome-title {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E8F0F3;
+}
+
+.login-welcome-desc {
+    -fx-font-size: 15px;
+    -fx-text-fill: #7A9098;
+    -fx-line-spacing: 3;
+}
+
+.login-divider-teal {
+    -fx-background-color: #00D4A3;
+    -fx-pref-height: 2;
+    -fx-pref-width: 48;
+    -fx-max-width: 48;
+    -fx-background-radius: 2;
+}
+
+.login-feature-text {
+    -fx-font-size: 15px;
+    -fx-text-fill: #7A9098;
+}
+
+.login-right-panel {
+    -fx-background-color: #1E2E38;
+    -fx-background-radius: 0 16 16 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.login-form-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E8F0F3;
+}
 /* ── Root / full-window background ──────────────────────────────── */
 .root-bg {
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0D2230, #07161E);

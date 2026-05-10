@@ -60,6 +60,7 @@ public class ChatController implements Initializable {
 
     private boolean adminChatMode = false;
     private boolean adminConnected = false;
+    private boolean userManuallyToggledToNlp = false;
     private Timeline autoRefreshTimer;
     private int lastMessageCount = 0;
     private boolean sendingMessage = false;
@@ -121,6 +122,11 @@ public class ChatController implements Initializable {
     @FXML
     private void toggleChatMode() {
         adminChatMode = !adminChatMode;
+        if (adminChatMode) {
+            userManuallyToggledToNlp = false;
+        } else {
+            userManuallyToggledToNlp = true;
+        }
         updateModeUI();
         User user = Session.currentUser;
         if (user != null) {
@@ -132,6 +138,7 @@ public class ChatController implements Initializable {
                 }).start();
                 addSystemLine("Open connection aktif. Pesan berikutnya akan diteruskan ke admin.");
             } else {
+                addSystemLine("Beralih ke mode NLP Bot. Pesan akan diproses otomatis.");
                 messageContainer.getChildren().clear();
                 lastMessageCount = 0;
                 chatLogMemoryCache.clear();
@@ -164,8 +171,16 @@ public class ChatController implements Initializable {
             return;
         }
         boolean openConnection = asBoolean(data.get("open_connection"), adminChatMode);
-        adminChatMode = openConnection;
         adminConnected = asBoolean(data.get("admin_connected"), adminConnected);
+
+        // If server says open_connection is off, sync and clear the manual flag
+        if (!openConnection) {
+            adminChatMode = false;
+            userManuallyToggledToNlp = false;
+        } else if (!userManuallyToggledToNlp) {
+            // Only override to admin mode if user hasn't manually switched to NLP
+            adminChatMode = true;
+        }
         updateModeUI();
     }
 
@@ -780,7 +795,11 @@ public class ChatController implements Initializable {
     }
 
     private void scrollToBottom() {
-        Platform.runLater(() -> scrollPane.setVvalue(1.0));
+        Platform.runLater(() -> {
+            messageContainer.layout();
+            scrollPane.layout();
+            Platform.runLater(() -> scrollPane.setVvalue(1.0));
+        });
     }
 
     private void showWelcomeMessage() {
