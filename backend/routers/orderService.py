@@ -32,6 +32,21 @@ def _sanitize_for_json(obj):
     return obj
 
 
+def _chat_state_from_doc(doc):
+    open_connection = bool(doc.get("open_connection", False)) if doc is not None else False
+    admin_needed = bool(doc.get("admin_needed", False)) if doc is not None else False
+    admin_connected = bool(doc.get("admin_connected", False)) if doc is not None else False
+    connection_status = doc.get("connection_status") if doc is not None else None
+    if not connection_status:
+        connection_status = "openconnection" if open_connection else "bot"
+    return {
+        "open_connection": open_connection,
+        "admin_needed": admin_needed,
+        "admin_connected": admin_connected,
+        "connection_status": connection_status
+    }
+
+
 def extract_order_ref(message: str):
     if not message:
         return None
@@ -186,6 +201,7 @@ def get_admin_chat_history_grouped():
         for doc in chat_log.find({}):
             user_id = str(doc.get("user_id", "")).strip()
             chats = _sanitize_for_json(doc.get("chats", [])) or []
+            state = _chat_state_from_doc(doc)
 
             resolved = sqlite.resolveUser(user_id)
             username = resolved[1] if resolved is not None else ""
@@ -217,7 +233,8 @@ def get_admin_chat_history_grouped():
             users.append({
                 "user_id": user_id,
                 "username": username,
-                "groups": date_groups
+                "groups": date_groups,
+                **state
             })
     except Exception:
         users = []
@@ -239,6 +256,7 @@ def get_admin_chat_history_by_user(user_id: str):
 
         doc = chat_log.find_one({"user_id": user_id})
         chats = _sanitize_for_json(doc.get("chats", [])) if doc is not None else []
+        state = _chat_state_from_doc(doc)
 
         by_date = {}
         for chat in chats or []:
@@ -258,5 +276,6 @@ def get_admin_chat_history_by_user(user_id: str):
             groups.append({"datetime": date_key, "chats": items})
     except Exception:
         groups = []
+        state = _chat_state_from_doc(None)
 
-    return Response.Ok(data={"user_id": user_id, "username": username, "groups": groups})
+    return Response.Ok(data={"user_id": user_id, "username": username, "groups": groups, **state})

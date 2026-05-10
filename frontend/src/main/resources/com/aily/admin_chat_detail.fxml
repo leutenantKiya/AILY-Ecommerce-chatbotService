@@ -44,6 +44,7 @@
             <VBox spacing="2" HBox.hgrow="ALWAYS">
                 <Label fx:id="chatWithLabel" text="Chat User" styleClass="heading-white" style="-fx-font-size: 15px;"/>
                 <Label fx:id="chatSubLabel" text="History &amp; reply as bot" styleClass="text-gray" style="-fx-font-size: 11px;"/>
+                <Label fx:id="connectionStatusLabel" text="Bot aktif" styleClass="connection-indicator"/>
             </VBox>
 
             <Button text="Refresh" onAction="#refresh" styleClass="clear-btn"/>

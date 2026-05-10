@@ -39,6 +39,7 @@ public class AdminChatDetailController implements Initializable {
 
     @FXML private Label chatWithLabel;
     @FXML private Label chatSubLabel;
+    @FXML private Label connectionStatusLabel;
     @FXML private ScrollPane scrollPane;
     @FXML private VBox messageContainer;
     @FXML private TextField messageInput;
@@ -56,7 +57,17 @@ public class AdminChatDetailController implements Initializable {
         chatSubLabel.setText(userId.isBlank() ? "History & reply as bot" : ("ID " + userId));
 
         sendButton.setDefaultButton(true);
+        
         messageInput.setOnAction(e -> handleSend());
+
+        if (!userId.isBlank()) {
+            new Thread(() -> {
+                try {
+                    ApiService.connectAdminChat(userId);
+                    Platform.runLater(() -> updateConnectionState(true, false, true));
+                } catch (Exception ignored) { }
+            }).start();
+        }
 
         refresh();
         startAutoRefresh();
@@ -111,6 +122,11 @@ public class AdminChatDetailController implements Initializable {
 
         JsonObject data = response.getAsJsonObject("data");
         if (data == null || !data.has("groups") || !data.get("groups").isJsonArray()) return;
+        updateConnectionState(
+                asBoolean(data.get("open_connection"), false),
+                asBoolean(data.get("admin_needed"), false),
+                asBoolean(data.get("admin_connected"), false)
+        );
 
         JsonArray groups = data.getAsJsonArray("groups");
 
@@ -127,6 +143,7 @@ public class AdminChatDetailController implements Initializable {
 
         // Walk through groups and skip the first lastChatCount entries, render the rest
         int skipped = 0;
+        boolean incomingFromUser = false;
         for (int g = 0; g < groups.size(); g++) {
             JsonObject group = groups.get(g).getAsJsonObject();
             if (!group.has("chats") || !group.get("chats").isJsonArray()) continue;
@@ -146,11 +163,15 @@ public class AdminChatDetailController implements Initializable {
                     renderBotHistoryMessage(message, time);
                 } else {
                     addUserMessage(formatMessage(message), time);
+                    incomingFromUser = true;
                 }
             }
         }
 
         lastChatCount = totalChats;
+        if (incomingFromUser) {
+            showIncomingAdminNotification();
+        }
         scrollPane.setVvalue(1.0);
     }
 
@@ -167,6 +188,11 @@ public class AdminChatDetailController implements Initializable {
             addSystemLine("Belum ada chat.");
             return;
         }
+        updateConnectionState(
+                asBoolean(data.get("open_connection"), false),
+                asBoolean(data.get("admin_needed"), false),
+                asBoolean(data.get("admin_connected"), false)
+        );
 
         JsonArray groups = data.getAsJsonArray("groups");
         if (groups.isEmpty()) {
@@ -213,17 +239,70 @@ public class AdminChatDetailController implements Initializable {
         if (msg.isBlank()) return;
 
         messageInput.clear();
-        addBotMessage(msg, LocalTime.now().format(TIME_FMT));
-        lastChatCount++;
-        scrollPane.setVvalue(1.0);
+        
 
         new Thread(() -> {
             try {
                 // Admin replies as bot into user's chat log
-                ApiService.saveChatMessage(userId, "AILY Assistant", "bot", msg);
-            } catch (Exception ignored) {
+                JsonObject response = ApiService.saveChatMessage(userId, "AILY Assistant", "bot", msg,
+                        true, false, true, "openconnection");
+                Platform.runLater(() -> {
+                    
+                    if (isOkResponse(response)) {
+                        addBotMessage(msg, LocalTime.now().format(TIME_FMT));
+                        lastChatCount++;
+                        updateConnectionState(true, false, true);
+                        scrollPane.setVvalue(1.0);
+                    } else {
+                        messageInput.setText(msg);
+                        addSystemLine("Gagal mengirim balasan admin.");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    
+                    messageInput.setText(msg);
+                    addSystemLine("Gagal mengirim balasan admin.");
+                });
             }
         }).start();
+    }
+
+    private boolean isOkResponse(JsonObject response) {
+        if (response == null || !response.has("status")) {
+            return false;
+        }
+        try {
+            return response.get("status").getAsInt() == 200;
+        } catch (Exception ignored) {
+            return "ok".equalsIgnoreCase(response.get("status").getAsString());
+        }
+    }
+
+    private void updateConnectionState(boolean openConnection, boolean adminNeeded, boolean adminConnected) {
+        if (connectionStatusLabel == null) {
+            return;
+        }
+        connectionStatusLabel.getStyleClass().removeAll("indicator-open", "indicator-waiting");
+        if (adminConnected) {
+            connectionStatusLabel.setText("Admin terhubung");
+            connectionStatusLabel.getStyleClass().add("indicator-open");
+        } else if (adminNeeded || openConnection) {
+            connectionStatusLabel.setText("Butuh balasan admin");
+            connectionStatusLabel.getStyleClass().add("indicator-waiting");
+        } else {
+            connectionStatusLabel.setText("Bot aktif");
+        }
+    }
+
+    private void showIncomingAdminNotification() {
+        if (connectionStatusLabel == null) {
+            return;
+        }
+        connectionStatusLabel.getStyleClass().removeAll("indicator-open", "indicator-waiting");
+        connectionStatusLabel.setText("Pesan baru dari user");
+        connectionStatusLabel.getStyleClass().add("indicator-waiting");
     }
 
     private String formatMessage(JsonElement element) {
@@ -609,6 +688,19 @@ public class AdminChatDetailController implements Initializable {
 
         try {
             return normalized.getAsString();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private boolean asBoolean(JsonElement element, boolean fallback) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return fallback;
+        }
+
+        try {
+            return normalized.getAsBoolean();
         } catch (Exception ignored) {
             return fallback;
         }

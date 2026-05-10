@@ -32,6 +32,7 @@
         <content>
             <VBox styleClass="admin-content" spacing="24">
                 <Label text="Riwayat Chat" styleClass="page-title"/>
+                <Label fx:id="adminNotificationLabel" text="" visible="false" managed="false" styleClass="admin-notification-banner"/>
 
                 <VBox fx:id="chatHistoryBox" spacing="10"/>
             </VBox>

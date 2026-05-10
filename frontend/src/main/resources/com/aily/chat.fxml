@@ -67,6 +67,7 @@
             <VBox spacing="2" HBox.hgrow="ALWAYS">
                 <Label text="AILY Assistant" styleClass="heading-white" style="-fx-font-size: 15px;"/>
                 <Label fx:id="chatModeLabel" text="Mode: NLP Bot" styleClass="text-teal" style="-fx-font-size: 11px;"/>
+                <Label fx:id="connectionIndicatorLabel" text="Bot aktif" styleClass="connection-indicator"/>
             </VBox>
             <Button fx:id="toggleModeButton" text="&#x1F464; Chat ke Admin" onAction="#toggleChatMode" styleClass="chip"/>
             <Button text="Bersihkan chat" onAction="#clearChat" styleClass="clear-btn"/>

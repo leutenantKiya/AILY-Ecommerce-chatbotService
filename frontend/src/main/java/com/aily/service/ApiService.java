@@ -124,6 +124,15 @@ public class ApiService {
 
     public static JsonObject saveChatMessage(String userId, String username,
                                              String role, String message) throws Exception {
+        return saveChatMessage(userId, username, role, message, null, null, null, null);
+    }
+
+    public static JsonObject saveChatMessage(String userId, String username,
+                                             String role, String message,
+                                             Boolean openConnection,
+                                             Boolean adminNeeded,
+                                             Boolean adminConnected,
+                                             String connectionStatus) throws Exception {
         String url = BASE_URL + "/aily/user/conversation/chat/save";
 
         JsonObject body = new JsonObject();
@@ -131,9 +140,49 @@ public class ApiService {
         body.addProperty("username", username);
         body.addProperty("role", role);
         body.addProperty("message", message);
+        if (openConnection != null) {
+            body.addProperty("open_connection", openConnection);
+        }
+        if (adminNeeded != null) {
+            body.addProperty("admin_needed", adminNeeded);
+        }
+        if (adminConnected != null) {
+            body.addProperty("admin_connected", adminConnected);
+        }
+        if (connectionStatus != null) {
+            body.addProperty("connection_status", connectionStatus);
+        }
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject openAdminConnection(String userId) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("user_id", userId);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/aily/user/conversation/chat/openconnection"))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject connectAdminChat(String userId) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("user_id", userId);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/aily/admin/chat/connect"))
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .header("Content-Type", "application/json")
                 .build();
@@ -357,6 +406,23 @@ public class ApiService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .POST(HttpRequest.BodyPublishers.ofString(dataList.toString()))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(response.body(), JsonObject.class);
+    }
+
+    public static JsonObject renameUser(String userToken, String newUsername) throws Exception {
+        String url = BASE_URL + "/aily/admin/user/rename";
+
+        JsonObject body = new JsonObject();
+        body.addProperty("user_token", userToken);
+        body.addProperty("new_username", newUsername);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .header("Content-Type", "application/json")
                 .build();
 

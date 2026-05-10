@@ -35,7 +35,9 @@ import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ChatController implements Initializable {
@@ -47,6 +49,7 @@ public class ChatController implements Initializable {
     @FXML private Label roleLabel;
     @FXML private Label avatarLabel;
     @FXML private Label chatModeLabel;
+    @FXML private Label connectionIndicatorLabel;
     @FXML private Button toggleModeButton;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH.mm");
@@ -56,8 +59,11 @@ public class ChatController implements Initializable {
             "Coba ketik nama produk yang ingin kamu cari!";
 
     private boolean adminChatMode = false;
+    private boolean adminConnected = false;
     private Timeline autoRefreshTimer;
     private int lastMessageCount = 0;
+    private boolean sendingMessage = false;
+    private final List<String> chatLogMemoryCache = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -80,7 +86,7 @@ public class ChatController implements Initializable {
     }
 
     private void startAutoRefresh() {
-        autoRefreshTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> refreshIfAdminMode()));
+        autoRefreshTimer = new Timeline(new KeyFrame(Duration.seconds(2), e -> refreshChatLogCache()));
         autoRefreshTimer.setCycleCount(Timeline.INDEFINITE);
         autoRefreshTimer.play();
     }
@@ -91,10 +97,10 @@ public class ChatController implements Initializable {
         }
     }
 
-    private void refreshIfAdminMode() {
-        if (!adminChatMode) return;
+    private void refreshChatLogCache() {
         User user = Session.currentUser;
         if (user == null) return;
+        if (sendingMessage) return;
 
         new Thread(() -> {
             try {
@@ -103,24 +109,9 @@ public class ChatController implements Initializable {
                 Platform.runLater(() -> {
                     if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
                         JsonObject data = asJsonObject(response.get("data"));
+                        updateConnectionState(data);
                         JsonArray chats = data == null ? null : asJsonArray(data.get("chat_history"));
-                        int newCount = chats != null ? chats.size() : 0;
-                        if (newCount > lastMessageCount) {
-                            // Only append new messages starting from lastMessageCount
-                            for (int i = lastMessageCount; i < newCount; i++) {
-                                JsonObject chatObj = asJsonObject(chats.get(i));
-                                if (chatObj == null) continue;
-                                String role = asString(chatObj.get("role"), "");
-                                JsonElement message = chatObj.get("message");
-                                if ("bot".equalsIgnoreCase(role)) {
-                                    renderBotHistoryMessage(message);
-                                } else if (message != null && !message.isJsonNull()) {
-                                    addUserMessage(asString(message, ""));
-                                }
-                            }
-                            lastMessageCount = newCount;
-                            scrollToBottom();
-                        }
+                        appendNewHistoryMessages(chats);
                     }
                 });
             } catch (Exception ignored) {}
@@ -131,13 +122,19 @@ public class ChatController implements Initializable {
     private void toggleChatMode() {
         adminChatMode = !adminChatMode;
         updateModeUI();
-        messageContainer.getChildren().clear();
-        lastMessageCount = 0;
         User user = Session.currentUser;
         if (user != null) {
             if (adminChatMode) {
-                addBotMessage("Mode: Chat ke Admin.\nPesan kamu akan dikirim ke admin.");
+                new Thread(() -> {
+                    try {
+                        ApiService.openAdminConnection(user.getId());
+                    } catch (Exception ignored) { }
+                }).start();
+                addSystemLine("Open connection aktif. Pesan berikutnya akan diteruskan ke admin.");
             } else {
+                messageContainer.getChildren().clear();
+                lastMessageCount = 0;
+                chatLogMemoryCache.clear();
                 new Thread(() -> loadChatHistory(user)).start();
             }
         }
@@ -147,9 +144,103 @@ public class ChatController implements Initializable {
         if (chatModeLabel != null) {
             chatModeLabel.setText(adminChatMode ? "Mode: Admin" : "Mode: NLP Bot");
         }
+        if (connectionIndicatorLabel != null) {
+            if (adminChatMode) {
+                connectionIndicatorLabel.setText(adminConnected ? "Admin terhubung" : "Menunggu admin");
+                connectionIndicatorLabel.getStyleClass().removeAll("indicator-open", "indicator-waiting");
+                connectionIndicatorLabel.getStyleClass().add(adminConnected ? "indicator-open" : "indicator-waiting");
+            } else {
+                connectionIndicatorLabel.setText("Bot aktif");
+                connectionIndicatorLabel.getStyleClass().removeAll("indicator-open", "indicator-waiting");
+            }
+        }
         if (toggleModeButton != null) {
             toggleModeButton.setText(adminChatMode ? "💬 Chat ke NLP" : "👤 Chat ke Admin");
         }
+    }
+
+    private void updateConnectionState(JsonObject data) {
+        if (data == null) {
+            return;
+        }
+        boolean openConnection = asBoolean(data.get("open_connection"), adminChatMode);
+        adminChatMode = openConnection;
+        adminConnected = asBoolean(data.get("admin_connected"), adminConnected);
+        updateModeUI();
+    }
+
+    private void appendNewHistoryMessages(JsonArray chats) {
+        int newCount = chats != null ? chats.size() : 0;
+        List<String> serverCacheKeys = buildServerCacheKeys(chats);
+        if (newCount < chatLogMemoryCache.size() || !isServerCachePrefixSynced(serverCacheKeys)) {
+            messageContainer.getChildren().clear();
+            chatLogMemoryCache.clear();
+            lastMessageCount = 0;
+        }
+        if (newCount <= chatLogMemoryCache.size()) {
+            return;
+        }
+
+        // Only append new messages starting from lastMessageCount
+        for (int i = chatLogMemoryCache.size(); i < newCount; i++) {
+            JsonObject chatObj = asJsonObject(chats.get(i));
+            if (chatObj == null) continue;
+            String role = asString(chatObj.get("role"), "");
+            JsonElement message = chatObj.get("message");
+            if ("bot".equalsIgnoreCase(role)) {
+                renderBotHistoryMessage(message);
+            } else if (message != null && !message.isJsonNull()) {
+                addUserMessage(asString(message, ""));
+            }
+            chatLogMemoryCache.add(serverCacheKeys.get(i));
+        }
+        lastMessageCount = chatLogMemoryCache.size();
+        scrollToBottom();
+    }
+
+    private List<String> buildServerCacheKeys(JsonArray chats) {
+        List<String> keys = new ArrayList<>();
+        if (chats == null) {
+            return keys;
+        }
+        for (int i = 0; i < chats.size(); i++) {
+            JsonObject chatObj = asJsonObject(chats.get(i));
+            keys.add(chatObj == null ? i + "||" : buildChatCacheKey(chatObj, i));
+        }
+        return keys;
+    }
+
+    private boolean isServerCachePrefixSynced(List<String> serverCacheKeys) {
+        if (chatLogMemoryCache.size() > serverCacheKeys.size()) {
+            return false;
+        }
+        for (int i = 0; i < chatLogMemoryCache.size(); i++) {
+            if (!chatLogMemoryCache.get(i).equals(serverCacheKeys.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String buildChatCacheKey(JsonObject chatObj, int index) {
+        String role = asString(chatObj.get("role"), "");
+        JsonElement message = chatObj.get("message");
+        String messageKey = message == null || message.isJsonNull() ? "" : normalizeJsonElement(message).toString();
+        return index + "|" + role.toLowerCase() + "|" + messageKey;
+    }
+
+    private void rememberLocalChat(String role, JsonElement message) {
+        String messageKey = message == null || message.isJsonNull() ? "" : normalizeJsonElement(message).toString();
+        chatLogMemoryCache.add(chatLogMemoryCache.size() + "|" + role.toLowerCase() + "|" + messageKey);
+        lastMessageCount = chatLogMemoryCache.size();
+    }
+
+    private void rememberLocalChat(String role, String message) {
+        rememberLocalChat(role, JsonParser.parseString(gsonSafeString(message)));
+    }
+
+    private String gsonSafeString(String value) {
+        return "\"" + (value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"")) + "\"";
     }
 
     private void loadChatHistory(User user) {
@@ -161,28 +252,14 @@ public class ChatController implements Initializable {
             Platform.runLater(() -> {
                 if ("200".equals(status) || "ok".equalsIgnoreCase(status)) {
                     JsonObject data = asJsonObject(response.get("data"));
+                    updateConnectionState(data);
                     JsonArray chats = data == null ? null : asJsonArray(data.get("chat_history"));
 
                     if (chats != null && !chats.isEmpty()) {
-                        for (JsonElement chatElement : chats) {
-                            JsonObject chatObj = asJsonObject(chatElement);
-                            if (chatObj == null) {
-                                continue;
-                            }
-
-                            String role = asString(chatObj.get("role"), "");
-                            JsonElement message = chatObj.get("message");
-
-                            if ("bot".equalsIgnoreCase(role)) {
-                                renderBotHistoryMessage(message);
-                            } else if (message != null && !message.isJsonNull()) {
-                                addUserMessage(asString(message, ""));
-                            }
-                        }
-                        lastMessageCount = chats.size();
-                        scrollToBottom();
+                        appendNewHistoryMessages(chats);
                     } else {
                         lastMessageCount = 0;
+                        chatLogMemoryCache.clear();
                         showWelcomeMessage();
                     }
                 } else {
@@ -205,10 +282,12 @@ public class ChatController implements Initializable {
         addUserMessage(text);
         messageInput.clear();
         sendButton.setDisable(true);
+        sendingMessage = true;
 
         User user = Session.currentUser;
         if (user == null) {
             sendButton.setDisable(false);
+            sendingMessage = false;
             addBotMessage("Sesi habis. Silakan login ulang.");
             return;
         }
@@ -217,14 +296,17 @@ public class ChatController implements Initializable {
             // Send message to admin via saveChatMessage
             new Thread(() -> {
                 try {
-                    ApiService.saveChatMessage(user.getId(), user.getUsername(), "user", text);
+                    ApiService.saveChatMessage(user.getId(), user.getUsername(), "user", text,
+                            true, !adminConnected, adminConnected, "openconnection");
                     Platform.runLater(() -> {
                         sendButton.setDisable(false);
-                        lastMessageCount++; // track locally so refresh doesn't re-render immediately
+                        sendingMessage = false;
+                        rememberLocalChat("user", text);
                     });
                 } catch (Exception e) {
                     Platform.runLater(() -> {
                         sendButton.setDisable(false);
+                        sendingMessage = false;
                         addBotMessage("Gagal mengirim pesan ke admin.");
                     });
                 }
@@ -238,19 +320,24 @@ public class ChatController implements Initializable {
                 JsonObject response = ApiService.sendMessage(user.getId(), text);
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
+                    sendingMessage = false;
 
                     if (response.has("status") && response.get("status").getAsInt() == 200) {
                         JsonObject data = asJsonObject(response.get("data"));
                         String intent = "";
 
                         if (data != null) {
+                            updateConnectionState(data);
                             JsonObject nlp = asJsonObject(data.get("nlp_result"));
                             if (nlp != null && nlp.has("intent")) {
                                 intent = asString(nlp.get("intent"), "");
                             }
                         }
 
-                        if (data != null
+                        if ("admin_handoff".equalsIgnoreCase(intent)) {
+                            rememberLocalChat("user", text);
+                            addSystemLine("Open connection aktif. Pertanyaan kamu menunggu balasan admin.");
+                        } else if (data != null
                                 && intent.equalsIgnoreCase("mencari")
                                 && data.has("action_data")
                                 && !data.get("action_data").isJsonNull()) {
@@ -261,11 +348,21 @@ public class ChatController implements Initializable {
                                 } else {
                                     addBotMessage(buildBotReply(data, intent));
                                 }
+                                rememberLocalChat("user", text);
+                                rememberLocalChat("bot", data.get("action_data"));
                             } catch (Exception ex) {
                                 addBotMessage("Maaf, terjadi kesalahan saat menampilkan produk.");
+                                rememberLocalChat("user", text);
+                                rememberLocalChat("bot", data.get("action_data"));
                             }
                         } else {
-                            addBotMessage(buildBotReply(data, intent));
+                            String reply = buildBotReply(data, intent);
+                            addBotMessage(reply);
+                            rememberLocalChat("user", text);
+                            JsonElement botPayload = data != null && data.has("action_data") && !data.get("action_data").isJsonNull()
+                                    ? data.get("action_data")
+                                    : JsonParser.parseString(gsonSafeString(reply));
+                            rememberLocalChat("bot", botPayload);
                         }
                     } else {
                         String msg = response.has("error")
@@ -277,6 +374,7 @@ public class ChatController implements Initializable {
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     sendButton.setDisable(false);
+                    sendingMessage = false;
                     addBotMessage("Tidak dapat terhubung ke server. Pastikan server berjalan.");
                 });
             }
@@ -490,6 +588,10 @@ public class ChatController implements Initializable {
                     ApiService.deleteChat(user.getId());
                     Platform.runLater(() -> {
                         messageContainer.getChildren().clear();
+                        lastMessageCount = 0;
+                        adminChatMode = false;
+                        adminConnected = false;
+                        updateModeUI();
                         addBotMessage("Chat berhasil dibersihkan dari server. Ada yang bisa saya bantu?");
                     });
                 } catch (Exception e) {
@@ -619,6 +721,14 @@ public class ChatController implements Initializable {
 
     private void addBotMessage(String text) {
         messageContainer.getChildren().add(buildBubbleRow(text, false));
+        scrollToBottom();
+    }
+
+    private void addSystemLine(String text) {
+        Label lbl = new Label(text);
+        lbl.getStyleClass().add("text-gray");
+        lbl.setPadding(new Insets(12, 20, 12, 20));
+        messageContainer.getChildren().add(lbl);
         scrollToBottom();
     }
 
@@ -892,6 +1002,19 @@ public class ChatController implements Initializable {
 
         try {
             return normalized.getAsString();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private boolean asBoolean(JsonElement element, boolean fallback) {
+        JsonElement normalized = normalizeJsonElement(element);
+        if (normalized == null || normalized.isJsonNull()) {
+            return fallback;
+        }
+
+        try {
+            return normalized.getAsBoolean();
         } catch (Exception ignored) {
             return fallback;
         }

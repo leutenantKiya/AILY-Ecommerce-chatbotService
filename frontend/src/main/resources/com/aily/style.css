@@ -882,3 +882,40 @@
     -fx-text-fill: #E8F0F3;
     -fx-font-family: "Courier New", monospace;
 }
+
+.connection-indicator {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7A9098;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 12;
+    -fx-background-color: #243E4A;
+}
+
+.indicator-open {
+    -fx-text-fill: #07161E;
+    -fx-background-color: #00D4A3;
+}
+
+.indicator-waiting {
+    -fx-text-fill: #07161E;
+    -fx-background-color: #E0B352;
+}
+
+.notification-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07161E;
+    -fx-padding: 3 9 3 9;
+    -fx-background-radius: 12;
+    -fx-background-color: #c09434;
+}
+
+.admin-notification-banner {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07161E;
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 10;
+    -fx-background-color: #E0B352;
+}

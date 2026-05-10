@@ -226,6 +226,14 @@ class SQLite:
         self.conn.commit()
         return True
 
+    def renameUser(self, user_token, new_username):
+        user = self.resolveUser(user_token)
+        if user is None:
+            return False, "User tidak ditemukan"
+        if self.findUser(new_username):
+            return False, "Username sudah digunakan"
+        return self.update("user", "username", new_username, user[0]), ""
+
     def delete(self, query):
         self.cursor.execute(f"DELETE FROM {self.table} WHERE {query}")
         self.conn.commit()
