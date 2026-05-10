@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 
 public class LoginController {
 
@@ -17,17 +18,38 @@ public class LoginController {
     @FXML private Label errorLabel;
 
     @FXML
+    private void initialize() {
+        
+        loginButton.setDefaultButton(true);
+
+        
+        usernameField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                handleLogin();
+                e.consume();
+            }
+        });
+        passwordField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                handleLogin();
+                e.consume();
+            }
+        });
+        hideMessage();
+    }
+
+    @FXML
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Username dan password tidak boleh kosong.");
+            showError("Username dan password tidak boleh kosong.");
             return;
         }
 
         loginButton.setDisable(true);
-        errorLabel.setText("");
+        hideMessage();
 
         new Thread(() -> {
             try {
@@ -43,23 +65,24 @@ public class LoginController {
                                 data.get("email").getAsString(),
                                 data.get("phone").getAsString(),
                                 data.get("address").getAsString(),
-                                data.get("role").getAsString()
+                                data.get("role").getAsString(),
+                                data.has("gender") ? data.get("gender").getAsString() : "L"
                         );
                         try {
                             App.switchScene("chat");
                         } catch (Exception e) {
-                            errorLabel.setText("Gagal membuka halaman chat.");
+                            showError("Gagal membuka halaman chat.");
                         }
                     } else {
                         String msg = response.has("error")
                                 ? response.get("error").getAsString() : "Login gagal.";
-                        errorLabel.setText(msg);
+                        showError(msg);
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     loginButton.setDisable(false);
-                    errorLabel.setText("Tidak dapat terhubung ke server.");
+                    showError("Tidak dapat terhubung ke server.");
                 });
             }
         }).start();
@@ -68,19 +91,35 @@ public class LoginController {
     @FXML
     private void goToRegister() {
         try { App.switchScene("register"); }
-        catch (Exception e) { errorLabel.setText("Gagal membuka halaman register."); }
+        catch (Exception e) { showError("Gagal membuka halaman register."); }
     }
 
     @FXML
     private void goBack() {
         try { App.switchScene("landing"); }
-        catch (Exception e) { errorLabel.setText("Gagal kembali."); }
+        catch (Exception e) { showError("Gagal kembali."); }
     }
 
     @FXML
     private void handleForgotPassword() {
         // placeholder — backend belum ada endpoint reset password
-        errorLabel.setStyle("-fx-text-fill: #00D4A3;");
-        errorLabel.setText("Link reset password telah dikirim ke email kamu");
+        showMessage("Link reset password telah dikirim ke email kamu", "#00D4A3");
+    }
+
+    private void hideMessage() {
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+    }
+
+    private void showError(String message) {
+        showMessage(message, "#E05252");
+    }
+
+    private void showMessage(String message, String color) {
+        errorLabel.setStyle("-fx-text-fill: " + color + ";");
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
     }
 }

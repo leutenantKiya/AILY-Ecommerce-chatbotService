@@ -13,6 +13,7 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Stage primaryStage;
+    private static boolean firstSceneLoaded = false;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -32,16 +33,29 @@ public class App extends Application {
         FXMLLoader loader = new FXMLLoader(App.class.getResource(fxmlName + ".fxml"));
         Parent root = loader.load();
 
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        Scene scene = new Scene(root, bounds.getWidth(), bounds.getHeight());
+        Scene scene;
+        if (!firstSceneLoaded) {
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            scene = new Scene(root, bounds.getWidth(), bounds.getHeight());
+        } else {
+            scene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+        }
         scene.getStylesheets().add(App.class.getResource("style.css").toExternalForm());
 
+        boolean wasMaximized = primaryStage.isMaximized();
         primaryStage.setScene(scene);
-        primaryStage.setX(bounds.getMinX());
-        primaryStage.setY(bounds.getMinY());
-        primaryStage.setWidth(bounds.getWidth());
-        primaryStage.setHeight(bounds.getHeight());
-        primaryStage.setMaximized(true);
+
+        if (!firstSceneLoaded) {
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            primaryStage.setX(bounds.getMinX());
+            primaryStage.setY(bounds.getMinY());
+            primaryStage.setWidth(bounds.getWidth());
+            primaryStage.setHeight(bounds.getHeight());
+            primaryStage.setMaximized(true);
+            firstSceneLoaded = true;
+        } else if (wasMaximized) {
+            primaryStage.setMaximized(true);
+        }
     }
 
     public static Stage getPrimaryStage() { return primaryStage; }

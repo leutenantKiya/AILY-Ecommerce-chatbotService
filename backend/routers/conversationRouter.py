@@ -8,6 +8,11 @@ from pydantic import BaseModel
 
 from NLP.NLPHandler import process as nlp_process
 from routers.cartService import perform_add_to_cart, perform_get_cart_summary
+from routers.orderService import (
+    perform_cancel_order,
+    perform_checkout,
+    perform_get_order_status,
+)
 from routers.productManagementService import (
     perform_add_product,
     perform_delete_product,
@@ -30,6 +35,21 @@ class ChatSaveRequest(BaseModel):
     username: str
     role: str
     message: Any
+    open_connection: Optional[bool] = None
+    admin_needed: Optional[bool] = None
+    admin_connected: Optional[bool] = None
+    connection_status: Optional[str] = None
+
+
+class ChatConnectionRequest(BaseModel):
+    user_id: str
+    
+class AdminConnectionRequest(BaseModel):
+    user_id: str
+    
+class StoreInfoRequest(BaseModel):
+    question: str
+    answer: str
 
 
 USER_ALLOWED_INTENTS = [
@@ -41,6 +61,9 @@ USER_ALLOWED_INTENTS = [
 ]
 
 ADMIN_ONLY_INTENTS = ["crud"]
+
+ADMIN_HANDOFF_INTENT = "admin_handoff"
+ADMIN_HANDOFF_KEYWORDS = ("pertanyaan", "saya ingin bertanya", "tanya")
 
 PRODUCT_FIELD_MAP = {
     "nama": "name",
@@ -278,6 +301,74 @@ def try_handle_cart_command(user_token: str, user: tuple, message: str):
     }
 
 
+def extract_search_keyword(message: str):
+    cleaned = re.sub(
+        r"\b(cari|carikan|mencari|beli|ingin|mau|lihat|tampilkan|tunjukkan|produk|barang|untuk|yang|ada|dong|tolong|saya|aku)\b",
+        " ",
+        message,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ,.-")
+    return cleaned
+
+
+def is_admin_handoff_request(message: str):
+    lowered = (message or "").lower()
+    return any(keyword in lowered for keyword in ADMIN_HANDOFF_KEYWORDS)
+
+
+def default_chat_state():
+    return {
+        "open_connection": False,
+        "admin_needed": False,
+        "admin_connected": False,
+        "connection_status": "bot"
+    }
+
+
+def chat_state_from_doc(doc):
+    state = default_chat_state()
+    if doc is not None:
+        state["open_connection"] = bool(doc.get("open_connection", False))
+        state["admin_needed"] = bool(doc.get("admin_needed", False))
+        state["admin_connected"] = bool(doc.get("admin_connected", False))
+        status = doc.get("connection_status")
+        if status:
+            state["connection_status"] = status
+        elif state["open_connection"]:
+            state["connection_status"] = "openconnection"
+    return state
+
+
+def set_chat_state(user_id: str, **updates):
+    try:
+        chatLog = MongoDB("chatUserLog")
+        doc = chatLog.find_one({"user_id": user_id})
+        if doc is None:
+            initial_data = {
+                "user_id": user_id,
+                "chats": []
+            }
+            initial_data.update(default_chat_state())
+            chatLog.insert(initial_data)
+
+        clean_updates = {key: value for key, value in updates.items() if value is not None}
+        if clean_updates:
+            chatLog.update({"user_id": user_id}, clean_updates)
+    except Exception as e:
+        print("Gagal memperbarui status chat:", e)
+
+
+def open_admin_connection(user_id: str, admin_connected: bool = False):
+    set_chat_state(
+        user_id,
+        open_connection=True,
+        admin_needed=not admin_connected,
+        admin_connected=admin_connected,
+        connection_status="openconnection"
+    )
+
+
 @router.post("/aily/conversation")
 def chat(body: ChatMessage):
     return handle_chat(body.id, body)
@@ -293,7 +384,7 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
         return Response.ValidationError("User tidak ditemukan, silahkan login ulang")
 
     db = SQLite()
-    user = db.findUserByPassword(user_token)
+    user = db.resolveUser(user_token)
     try:
         if user is None:
             return Response.NotFound("User tidak ditemukan, silahkan login ulang")
@@ -302,6 +393,34 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
         username = user[1]
 
         save_chat(user_token, username, role, body.message)
+
+        if role != "admin" and is_admin_handoff_request(body.message):
+            open_admin_connection(user_token)
+            result = {
+                "intent": ADMIN_HANDOFF_INTENT,
+                "konten": body.message,
+                "respons": ""
+            }
+            action_data = {
+                "message": "Pertanyaan kamu sudah diteruskan ke admin. Tunggu balasan admin di chat ini.",
+                "type": ADMIN_HANDOFF_INTENT,
+                "open_connection": True,
+                "admin_needed": True,
+                "admin_connected": False,
+                "connection_status": "openconnection"
+            }
+            return sanitize_for_json(Response.Ok(data={
+                "user_id": user_token,
+                "username": username,
+                "role": role,
+                "input": body.message,
+                "nlp_result": result,
+                "action_data": action_data,
+                "open_connection": True,
+                "admin_needed": True,
+                "admin_connected": False,
+                "connection_status": "openconnection"
+            }))
 
         cart_action = try_handle_cart_command(user_token, user, body.message)
         if cart_action is not None:
@@ -317,8 +436,18 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
                 return Response.Error(message="Anda tidak memiliki akses untuk fitur ini. Hanya admin yang bisa mengelola produk.")
 
             if intent == "mencari" and str(konten).strip() == "":
-                action_data = {"message": "Panjenengan puniki nggolek apa si sakjane", "type": "mencari"}
-            elif intent in ("faq", "tanya_toko"):
+                keyword = extract_search_keyword(body.message)
+                if keyword:
+                    gender = result.get("atribut", {}).get("gender", "default_user")
+                    if gender == "default_user":
+                        gender = user[7]
+                    action_data = searchBarangResult(keyword, gender)
+                else:
+                    action_data = {"message": "Sebutkan nama produk yang ingin dicari.", "type": "mencari"}
+            elif intent == "faq":
+                action_data = faqResult(body.message)
+                action_data["type"] = "faq"
+            elif intent == "tanya_toko":
                 action_data = tentangToko()
                 action_data["type"] = "tanya_toko"
             elif intent == "help":
@@ -331,7 +460,11 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
                     gender = user[7]
                 action_data = searchBarangResult(str(konten), gender)
             elif intent == "checkout":
-                action_data = {"message": "Silakan buka halaman keranjang untuk melanjutkan checkout.", "type": "checkout"}
+                action_data = perform_checkout(user_token)
+            elif intent in ("status_pesanan", "lacak_kiriman"):
+                action_data = perform_get_order_status(user_token, body.message)
+            elif intent == "batal_pesanan":
+                action_data = perform_cancel_order(user_token, body.message)
             elif intent in ("salam", "terima_kasih", "selamat_tinggal", "tidak_diketahui"):
                 action_data = {"message": result.get("respons", ""), "type": intent}
 
@@ -372,36 +505,144 @@ def help():
     })
 
 
+def faqResult(message: str):
+    db = SQLite()
+    result = db.searchHelp(message)
+    return Response.Ok(data={
+        "result": result
+    })
+
+
+@router.get("/aily/admin/store-info/list")
+def list_store_info():
+    db = SQLite()
+    result = []
+    for row in db.getTentangTokoWithId():
+        result.append({
+            "id": row[0],
+            "question": row[1],
+            "answer": row[2],
+        })
+    return Response.Ok(data={
+        "store_info": result
+    })
+
+
+@router.post("/aily/admin/store-info/add")
+def add_store_info(body: StoreInfoRequest):
+    if not body.question.strip() or not body.answer.strip():
+        return Response.ValidationError("Pertanyaan dan jawaban wajib diisi.")
+
+    db = SQLite()
+    info_id = db.addTentangToko(body.question.strip(), body.answer.strip())
+    return Response.Ok(data={
+        "id": info_id,
+        "message": "Informasi toko berhasil ditambahkan."
+    })
+
+
+@router.put("/aily/admin/store-info/update/{info_id}")
+def update_store_info(info_id: int, body: StoreInfoRequest):
+    if not body.question.strip() or not body.answer.strip():
+        return Response.ValidationError("Pertanyaan dan jawaban wajib diisi.")
+
+    db = SQLite()
+    success = db.updateTentangToko(info_id, body.question.strip(), body.answer.strip())
+    if not success:
+        return Response.NotFound("Informasi toko tidak ditemukan.")
+
+    return Response.Ok(data={
+        "message": "Informasi toko berhasil diperbarui."
+    })
+
+
+@router.delete("/aily/admin/store-info/delete/{info_id}")
+def delete_store_info(info_id: int):
+    db = SQLite()
+    success = db.deleteTentangToko(info_id)
+    if not success:
+        return Response.NotFound("Informasi toko tidak ditemukan.")
+
+    return Response.Ok(data={
+        "message": "Informasi toko berhasil dihapus."
+    })
+
+
 @router.post("/aily/user/conversation/chat/save")
 def save_chat_endpoint(body: ChatSaveRequest):
+    state_updates = {}
+    if body.open_connection is not None:
+        state_updates["open_connection"] = body.open_connection
+    if body.admin_needed is not None:
+        state_updates["admin_needed"] = body.admin_needed
+    if body.admin_connected is not None:
+        state_updates["admin_connected"] = body.admin_connected
+    if body.connection_status is not None:
+        state_updates["connection_status"] = body.connection_status
+
+    if state_updates:
+        set_chat_state(body.user_id, **state_updates)
+
     save_chat(body.user_id, body.username, body.role, body.message)
     return Response.Ok(data={
         "message": "Chat successfully saved"
     })
 
 
+@router.post("/aily/user/conversation/chat/openconnection")
+def open_connection_endpoint(body: ChatConnectionRequest):
+    open_admin_connection(body.user_id)
+    return Response.Ok(data={
+        "message": "Open connection created",
+        "open_connection": True,
+        "admin_needed": True,
+        "admin_connected": False,
+        "connection_status": "openconnection"
+    })
+
+
+@router.post("/aily/admin/chat/connect")
+def admin_connect_endpoint(body: ChatConnectionRequest):
+    open_admin_connection(body.user_id, admin_connected=True)
+    return Response.Ok(data={
+        "message": "Admin connected",
+        "open_connection": True,
+        "admin_needed": False,
+        "admin_connected": True,
+        "connection_status": "openconnection"
+    })
+
+
 def save_chat(user_id, username: str, role: str, message: Any):
-    chatLog = MongoDB("chatUserLog")
-    now = datetime.now()
+    try:
+        chatLog = MongoDB("chatUserLog")
+        now = datetime.now()
 
-    chat_message = {
-        "username": username,
-        "role": role,
-        "message": message,
-        "datetime": now.strftime("%b, %d %Y"),
-        "time": now.strftime("%H:%M")
-    }
-
-    user_doc = chatLog.find_one({"user_id": user_id})
-
-    if user_doc is None:
-        chat_data = {
-            "user_id": user_id,
-            "chats": [chat_message]
+        chat_message = {
+            "username": username,
+            "role": role,
+            "message": message,
+            "datetime": now.strftime("%b, %d %Y"),
+            "time": now.strftime("%H:%M")
         }
-        chatLog.insert(chat_data)
-    else:
-        chatLog.push({"user_id": user_id}, {"chats": chat_message})
+
+        user_doc = chatLog.find_one({"user_id": user_id})
+        print(f"[save_chat] user_id={user_id}, role={role}, doc_found={user_doc is not None}")
+
+        if user_doc is None:
+            chat_data = {
+                "user_id": user_id,
+                "chats": [chat_message]
+            }
+            chatLog.insert(chat_data)
+            print(f"[save_chat] inserted new doc for user_id={user_id}")
+        else:
+            chatLog.push({"user_id": user_id}, {"chats": chat_message})
+            print(f"[save_chat] pushed chat to user_id={user_id}")
+    except Exception as e:
+        print("Gagal menyimpan chat:", e)
+        import traceback
+        traceback.print_exc()
 
 
 def sanitize_for_json(obj):
@@ -416,46 +657,79 @@ def sanitize_for_json(obj):
 
 @router.get("/aily/user/conversation/chat/load")
 def load_chat(user_id: str):
-    chatLog = MongoDB("chatUserLog")
-    user_doc = chatLog.find_one({"user_id": user_id})
+    try:
+        chatLog = MongoDB("chatUserLog")
+        user_doc = chatLog.find_one({"user_id": user_id})
 
-    if user_doc is None:
-        chat_data = {
-            "user_id": user_id,
-            "chats": []
-        }
-        chatLog.insert(chat_data)
+        if user_doc is None:
+            chat_data = {
+                "user_id": user_id,
+                "chats": []
+            }
+            chat_data.update(default_chat_state())
+            chatLog.insert(chat_data)
+            all_chats = []
+            state = default_chat_state()
+        else:
+            all_chats = user_doc.get("chats", [])
+            state = chat_state_from_doc(user_doc)
+    except Exception:
         all_chats = []
-    else:
-        all_chats = user_doc.get("chats", [])
+        state = default_chat_state()
 
     safe_chats = sanitize_for_json(all_chats)
 
     return Response.Ok(data={
         "user_id": user_id,
-        "chat_history": safe_chats
+        "chat_history": safe_chats,
+        **state
     })
 
 
 @router.delete("/aily/user/conversation/chat/delete")
 def delete_chat(user_id: str):
-    chatLog = MongoDB("chatUserLog")
-    chatLog.delete({"user_id": user_id})
+    try:
+        chatLog = MongoDB("chatUserLog")
+        chatLog.delete({"user_id": user_id})
+    except Exception:
+        pass
     return Response.Ok(data={
         "message": "Chat deleted successfully"
+    })
+
+
+@router.get("/aily/user/profile")
+def get_profile(id: str):
+    db = SQLite()
+    user = db.resolveUser(id)
+    if user is None:
+        return Response.NotFound("User tidak ditemukan")
+
+    return Response.Ok(data={
+        "id": user[0],
+        "username": user[1],
+        "email": user[3],
+        "phone": user[4],
+        "address": user[5],
+        "role": user[6],
+        "gender": user[7] if len(user) > 7 else "L",
     })
 
 
 @router.post("/aily/user/updateUser")
 def modifyProfile(id: str, dataList: List[list] = Body(...)):
     db = SQLite()
-    user = db.findUserByPassword(id)
+    user = db.resolveUser(id)
     if user is None:
         return Response.NotFound("User tidak ditemukan")
 
     user_id = user[0]
+    failed_fields = []
     for item in dataList:
-        updateUser(user_id, item[0], item[1])
+        if not updateUser(user_id, item[0], item[1]):
+            failed_fields.append(item[0])
+    if failed_fields:
+        return Response.ValidationError(f"Field tidak valid: {', '.join(failed_fields)}")
     return Response.Ok(data={
         "message": "Profile updated successfully"
     })
@@ -463,7 +737,24 @@ def modifyProfile(id: str, dataList: List[list] = Body(...)):
 
 def updateUser(id, colum_name, data_new):
     db = SQLite()
-    db.update("user", colum_name, data_new, id)
+    return db.update("user", colum_name, data_new, id)
+
+
+class RenameUserRequest(BaseModel):
+    user_token: str
+    new_username: str
+
+
+@router.post("/aily/admin/user/rename")
+def admin_rename_user(body: RenameUserRequest):
+    db = SQLite()
+    success, error_msg = db.renameUser(body.user_token, body.new_username)
+    if not success:
+        return Response.ValidationError(error_msg or "Gagal mengganti username")
+    return Response.Ok(data={
+        "message": "Username berhasil diganti",
+        "new_username": body.new_username
+    })
 
 
 def searchBarangResult(name: str, gender: str):
@@ -481,3 +772,18 @@ def searchBarangResult(name: str, gender: str):
             "gender": product[6],
         })
     return {"products": formatted, "type": "mencari"}
+
+@router.post("/aily/admin/chat/disconnect")
+def disconnect_admin_chat(body:AdminConnectionRequest):
+    set_chat_state(
+        body.user_id,
+        open_connection=False,
+        admin_needed=False,
+        admin_connected=False,
+        connection_status="bot"
+    )
+
+
+    return Response.Ok(data={
+        "message": "Admin disconnected"
+    })

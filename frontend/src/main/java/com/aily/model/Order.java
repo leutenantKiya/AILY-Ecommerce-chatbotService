@@ -1,7 +1,7 @@
 package com.aily.model;
 
 public class Order {
-    public enum Status { PENDING, DIPROSES, DIKIRIM, SELESAI }
+    public enum Status { PENDING, DIPROSES, DIKIRIM, SELESAI, DIBATALKAN }
 
     private String id;
     private Product product;
@@ -35,6 +35,7 @@ public class Order {
             case DIPROSES -> "Diproses";
             case DIKIRIM  -> "Dikirim";
             case SELESAI  -> "Selesai";
+            case DIBATALKAN -> "Dibatalkan";
         };
     }
 
@@ -44,6 +45,11 @@ public class Order {
             case DIPROSES -> "status-diproses";
             case DIKIRIM  -> "status-dikirim";
             case SELESAI  -> "status-selesai";
+            case DIBATALKAN -> "status-pending";
         };
+    }
+
+    public boolean canCancel() {
+        return status == Status.PENDING || status == Status.DIPROSES;
     }
 }
