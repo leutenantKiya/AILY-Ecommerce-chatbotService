@@ -96,13 +96,20 @@ public class AdminTransactionsController implements Initializable {
     }
 
     private Order.Status parseStatus(String status) {
-        return switch (status.toLowerCase()) {
-            case "dalam pengiriman" -> Order.Status.DIKIRIM;
-            case "selesai" -> Order.Status.SELESAI;
-            case "dibatalkan" -> Order.Status.DIBATALKAN;
-            default -> Order.Status.DIPROSES;
-        };
-    }
+    return switch (status.toLowerCase()) {
+        case "dalam pengiriman":
+            yield Order.Status.DIKIRIM;
+
+        case "selesai":
+            yield Order.Status.SELESAI;
+
+        case "dibatalkan":
+            yield Order.Status.DIBATALKAN;
+
+        default:
+            yield Order.Status.DIPROSES;
+    };
+}
 
     private HBox buildRow(Order o) {
         Label statusLbl = new Label(o.statusLabel());
