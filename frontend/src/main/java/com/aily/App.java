@@ -21,6 +21,7 @@ public class App extends Application {
         stage.setTitle("AILY E-commerce Chatbot");
         stage.setResizable(true);
         switchScene("landing");
+        stage.sizeToScene();
         stage.show();
     }
 
