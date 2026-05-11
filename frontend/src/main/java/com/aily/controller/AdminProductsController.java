@@ -33,6 +33,7 @@ public class AdminProductsController implements Initializable {
     @FXML private Label     produkCountLabel;
     @FXML private VBox      productRowsBox;
     @FXML private Label     imageNameLabel;
+    @FXML private TextField searchField;
 
     private String currentImageBase64 = null;
 
@@ -43,6 +44,11 @@ public class AdminProductsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadProductsFromBackend();
+
+        // Real-time search listener
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> filterProducts(newVal));
+        }
     }
 
     private void loadProductsFromBackend() {
@@ -138,9 +144,26 @@ public class AdminProductsController implements Initializable {
     }
 
     private void refreshTable() {
+        String query = searchField != null ? searchField.getText() : "";
+        filterProducts(query);
+    }
+
+    private void filterProducts(String query) {
         productRowsBox.getChildren().clear();
-        produkCountLabel.setText(products.size() + " produk");
+        String keyword = (query == null) ? "" : query.trim().toLowerCase();
+
+        List<Product> filtered = new ArrayList<>();
         for (Product p : products) {
+            if (keyword.isEmpty()
+                    || p.getName().toLowerCase().contains(keyword)
+                    || p.getCode().toLowerCase().contains(keyword)
+                    || p.getId().toLowerCase().contains(keyword)) {
+                filtered.add(p);
+            }
+        }
+
+        produkCountLabel.setText(filtered.size() + " produk");
+        for (Product p : filtered) {
             productRowsBox.getChildren().add(buildProductRow(p));
         }
     }

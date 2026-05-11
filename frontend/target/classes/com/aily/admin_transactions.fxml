@@ -37,6 +37,10 @@
                     <Label text="Semua Transaksi" styleClass="form-section-title"/>
                     <Region styleClass="form-divider" prefHeight="1"><VBox.margin><Insets top="12" bottom="8"/></VBox.margin></Region>
 
+                    <TextField fx:id="searchField" promptText="🔍 Cari transaksi berdasarkan ID, produk, atau status..." styleClass="input-dark-sm">
+                        <VBox.margin><Insets bottom="10"/></VBox.margin>
+                    </TextField>
+
                     <HBox styleClass="table-header-row">
                         <Label text="ID Transaksi" styleClass="table-col-label" prefWidth="140"/>
                         <Label text="Pembeli"      styleClass="table-col-label" prefWidth="160"/>

@@ -16,15 +16,24 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class AdminTransactionsController implements Initializable {
 
     @FXML private VBox txRowsBox;
+    @FXML private TextField searchField;
+
+    private final List<Order> allOrders = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         new Thread(this::loadOrdersFromBackend).start();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> filterOrders(newVal));
+        }
     }
 
     private void loadOrdersFromBackend() {
@@ -37,6 +46,8 @@ public class AdminTransactionsController implements Initializable {
                 for (JsonElement orderEl : orders) {
                     Session.orders.add(parseOrder(orderEl.getAsJsonObject()));
                 }
+                allOrders.clear();
+                allOrders.addAll(Session.orders);
             }
         } catch (Exception ignored) {
         }
@@ -45,9 +56,21 @@ public class AdminTransactionsController implements Initializable {
     }
 
     private void refresh() {
+        String query = searchField != null ? searchField.getText() : "";
+        filterOrders(query);
+    }
+
+    private void filterOrders(String query) {
         txRowsBox.getChildren().clear();
-        for (Order o : Session.orders) {
-            txRowsBox.getChildren().add(buildRow(o));
+        String keyword = (query == null) ? "" : query.trim().toLowerCase();
+
+        for (Order o : allOrders) {
+            if (keyword.isEmpty()
+                    || o.getId().toLowerCase().contains(keyword)
+                    || o.getProduct().getName().toLowerCase().contains(keyword)
+                    || o.statusLabel().toLowerCase().contains(keyword)) {
+                txRowsBox.getChildren().add(buildRow(o));
+            }
         }
     }
 
