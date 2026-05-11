@@ -44,8 +44,7 @@
                     <HBox styleClass="table-header-row">
                         <Label text="ID Transaksi" styleClass="table-col-label" prefWidth="140"/>
                         <Label text="Pembeli"      styleClass="table-col-label" prefWidth="160"/>
-                        <Label text="Produk"       styleClass="table-col-label" prefWidth="200"/>
-                        <Label text="Jumlah"       styleClass="table-col-label" prefWidth="80"/>
+                        <Label text="Produk (Nama ~ Jumlah)" styleClass="table-col-label" prefWidth="280"/>
                         <Label text="Total"        styleClass="table-col-label" prefWidth="160"/>
                         <Label text="Status"       styleClass="table-col-label" prefWidth="120"/>
                     </HBox>
