@@ -84,6 +84,10 @@
                     </HBox>
                     <Region styleClass="form-divider" prefHeight="1"><VBox.margin><Insets top="12" bottom="8"/></VBox.margin></Region>
 
+                    <TextField fx:id="searchField" promptText="🔍 Cari produk berdasarkan nama, kode, atau ID..." styleClass="input-dark-sm">
+                        <VBox.margin><Insets bottom="10"/></VBox.margin>
+                    </TextField>
+
                     <HBox styleClass="table-header-row">
                         <Label text="ID"     styleClass="table-col-label" prefWidth="120"/>
                         <Label text="NAMA"   styleClass="table-col-label" prefWidth="200"/>

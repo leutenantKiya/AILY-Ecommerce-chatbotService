@@ -16,15 +16,24 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class AdminTransactionsController implements Initializable {
 
     @FXML private VBox txRowsBox;
+    @FXML private TextField searchField;
+
+    private final List<Order> allOrders = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         new Thread(this::loadOrdersFromBackend).start();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> filterOrders(newVal));
+        }
     }
 
     private void loadOrdersFromBackend() {
@@ -37,6 +46,8 @@ public class AdminTransactionsController implements Initializable {
                 for (JsonElement orderEl : orders) {
                     Session.orders.add(parseOrder(orderEl.getAsJsonObject()));
                 }
+                allOrders.clear();
+                allOrders.addAll(Session.orders);
             }
         } catch (Exception ignored) {
         }
@@ -45,9 +56,21 @@ public class AdminTransactionsController implements Initializable {
     }
 
     private void refresh() {
+        String query = searchField != null ? searchField.getText() : "";
+        filterOrders(query);
+    }
+
+    private void filterOrders(String query) {
         txRowsBox.getChildren().clear();
-        for (Order o : Session.orders) {
-            txRowsBox.getChildren().add(buildRow(o));
+        String keyword = (query == null) ? "" : query.trim().toLowerCase();
+
+        for (Order o : allOrders) {
+            if (keyword.isEmpty()
+                    || o.getId().toLowerCase().contains(keyword)
+                    || o.getProduct().getName().toLowerCase().contains(keyword)
+                    || o.statusLabel().toLowerCase().contains(keyword)) {
+                txRowsBox.getChildren().add(buildRow(o));
+            }
         }
     }
 
@@ -56,21 +79,25 @@ public class AdminTransactionsController implements Initializable {
                 ? orderObj.getAsJsonArray("items")
                 : new JsonArray();
 
-        StringBuilder names = new StringBuilder();
+        StringBuilder details = new StringBuilder();
         int quantity = 0;
         Product product = null;
 
         for (int i = 0; i < items.size(); i++) {
             JsonObject item = items.get(i).getAsJsonObject();
+            String itemName = item.get("product_name").getAsString();
+            int itemQty = item.get("quantity").getAsInt();
+            quantity += itemQty;
+
             if (i > 0) {
-                names.append(", ");
+                details.append("\n");
             }
-            names.append(item.get("product_name").getAsString());
-            quantity += item.get("quantity").getAsInt();
+            details.append(itemName).append(" ~ ").append(itemQty);
+
             if (product == null) {
                 product = new Product(
                         item.get("product_id").getAsString(),
-                        item.get("product_name").getAsString(),
+                        itemName,
                         orderObj.get("order_code").getAsString(),
                         item.get("price").getAsLong(),
                         0,
@@ -82,8 +109,8 @@ public class AdminTransactionsController implements Initializable {
 
         if (product == null) {
             product = new Product("0", "Pesanan", orderObj.get("order_code").getAsString(), 0, 0, "", null);
-        } else if (names.length() > 0) {
-            product.setName(names.toString());
+        } else {
+            product.setName(details.toString());
         }
 
         return new Order(
@@ -117,8 +144,13 @@ public class AdminTransactionsController implements Initializable {
 
         Label id      = new Label(o.getId());                  id.getStyleClass().add("table-cell-text");  id.setPrefWidth(140);
         Label buyer   = new Label("User");                     buyer.getStyleClass().add("table-cell-bold"); buyer.setPrefWidth(160);
-        Label product = new Label(o.getProduct().getName());   product.getStyleClass().add("table-cell-text"); product.setPrefWidth(200);
-        Label qty     = new Label(String.valueOf(o.getQuantity())); qty.getStyleClass().add("table-cell-text"); qty.setPrefWidth(80);
+
+        // Detail produk multi-line: "Nama ~ qty" per baris
+        Label product = new Label(o.getProduct().getName());
+        product.getStyleClass().add("table-cell-text");
+        product.setPrefWidth(280);
+        product.setWrapText(true);
+
         Label total   = new Label(o.formattedTotal());         total.getStyleClass().add("table-cell-teal"); total.setPrefWidth(160);
         StackPane statusBox = new StackPane(statusLbl);        statusBox.setPrefWidth(120);
 
@@ -136,7 +168,7 @@ public class AdminTransactionsController implements Initializable {
             actions.getChildren().add(doneBtn);
         }
 
-        HBox row = new HBox(id, buyer, product, qty, total, statusBox, actions);
+        HBox row = new HBox(id, buyer, product, total, statusBox, actions);
         row.getStyleClass().add("table-row");
         row.setPadding(new Insets(10, 0, 10, 0));
         return row;
