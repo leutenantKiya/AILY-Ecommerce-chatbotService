@@ -232,15 +232,13 @@ public class ApiService {
     }
 
     public static JsonObject addProduct(String name, int price, int stock,
-                                        String description, String category,
-                                        String gender, String warna, String image) throws Exception {
+                                        String description, String gender, String warna, String image) throws Exception {
         JsonObject body = new JsonObject();
         body.addProperty("name", name);
         body.addProperty("price", price);
         body.addProperty("stock", stock);
         body.addProperty("image", image);
         body.addProperty("description", description);
-        body.addProperty("category", category);
         body.addProperty("gender", gender != null ? gender : "U");
         body.addProperty("warna", warna);
 
@@ -255,15 +253,13 @@ public class ApiService {
     }
 
     public static JsonObject updateProduct(int productId, String name, int price, int stock,
-                                           String description, String category,
-                                           String gender, String warna, String image) throws Exception {
+                                           String description, String gender, String warna, String image) throws Exception {
         JsonObject body = new JsonObject();
         body.addProperty("name", name);
         body.addProperty("price", price);
         body.addProperty("stock", stock);
         body.addProperty("image", image);
         body.addProperty("description", description);
-        body.addProperty("category", category);
         body.addProperty("gender", gender != null ? gender : "U");
         body.addProperty("warna", warna);
 

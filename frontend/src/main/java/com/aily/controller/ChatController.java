@@ -568,7 +568,7 @@ public class ChatController implements Initializable {
         return out.toString();
     }
 
-    @FXML private void chipCariProduk() { sendChip("carikan aku baju"); }
+    @FXML private void chipCariProduk() { sendChip("carikan aku kaos"); }
     @FXML private void chipFaq() { sendChip("informasi toko"); }
     @FXML private void chipKeranjang() { sendChip("lihat keranjang"); }
     @FXML private void chipStatusPesanan() { sendChip("status pesanan saya"); }
