@@ -29,6 +29,15 @@ public class LandingController {
     }
 
     @FXML
+    private void goToGuestChat() {
+        try {
+            App.switchScene("guest_chat");
+        } catch (Exception e) {
+            showToast("Gagal membuka halaman guest chat.");
+        }
+    }
+
+    @FXML
     private void goToRegister() {
         try {
             App.switchScene("register");
