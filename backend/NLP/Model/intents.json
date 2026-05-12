@@ -1,0 +1,358 @@
+{
+    "intents": [
+        {
+            "tag": "salam",
+            "patterns": [
+                "Halo", "Hai", "Hey", "Selamat pagi", "Selamat siang",
+                "Selamat sore", "Selamat malam", "Apa kabar",
+                "Halo apa kabar", "Pagi", "Siang", "Sore", "Malam",
+                "Helo", "Hay", "Assalamualaikum", "Permisi", "Halooo",
+                "Hai kak", "Halo min"
+            ],
+            "responses": [
+                "Halo! Ada yang bisa saya bantu?",
+                "Hai! Selamat datang, ada yang bisa dibantu?",
+                "Halo! Senang bertemu dengan Anda."
+            ]
+        },
+        {
+            "tag": "faq",
+            "patterns": [
+                "Apakah barang ini bisa dikembalikan",
+                "Bagaimana cara retur barang",
+                "Bisa tukar barang tidak",
+                "Berapa lama garansi produk",
+                "Apakah ada garansi",
+                "Cara mengajukan retur",
+                "Kapan batas waktu pengembalian",
+                "Apakah bisa refund",
+                "Bagaimana kebijakan pengembalian",
+                "Apakah ada jaminan produk",
+                "Bagaimana jika barang rusak",
+                "Produk cacat bisa ditukar",
+                "Berapa hari bisa retur",
+                "Apakah uang bisa dikembalikan",
+                "Bagaimana cara klaim garansi",
+                "Apakah ada syarat pengembalian",
+                "Metode pembayaran apa saja",
+                "Bisa bayar pakai apa",
+                "Terima transfer bank tidak",
+                "Bisa pakai e-wallet",
+                "Apakah bisa bayar COD",
+                "Berapa ongkos kirim",
+                "Ongkir ke Jakarta berapa",
+                "Apakah ada gratis ongkir",
+                "Minimal belanja berapa untuk free ongkir",
+                "Pengiriman pakai ekspedisi apa",
+                "Ongkir berapa ya",
+                "Bayar bisa pake apa aja",
+                "Bisa cicilan gak",
+                "Ada diskon gak",
+                "Promo apa aja",
+                "Mau tanya dong",
+                "Nanya dong"
+            ],
+            "responses": [
+                "Silakan hubungi CS kami untuk info lebih lanjut mengenai FAQ.",
+                "Untuk pertanyaan umum, Anda bisa cek halaman FAQ kami."
+            ]
+        },
+        {
+            "tag": "mencari",
+            "patterns": [
+                "Cari baju wanita",
+                "Carikan celana pria",
+                "Tampilkan sepatu laki-laki",
+                "Lihat katalog tas perempuan",
+                "Cari jaket untuk pria",
+                "Ada rok wanita tidak",
+                "Tunjukkan koleksi kemeja pria",
+                "Saya mau cari kaos",
+                "Cari produk dress",
+                "Ada celana jeans tidak",
+                "Tampilkan baju anak",
+                "Carikan sepatu olahraga",
+                "Lihat daftar produk",
+                "Cari hoodie",
+                "Ada sweater wanita",
+                "Tampilkan katalog terbaru",
+                "Carikan saya topi",
+                "Cari sandal",
+                "Ada blazer pria tidak",
+                "Tampilkan gamis wanita",
+                "Cari baju muslim",
+                "Ada produk baru",
+                "Lihat koleksi terbaru",
+                "Cari aksesoris wanita",
+                "Tampilkan tas ransel",
+                "Aku mau beli baju",
+                "Mau beli celana",
+                "Beli sepatu dong",
+                "Cariin aku baju",
+                "Carikan baju",
+                "Cari baju dong",
+                "Baju dong",
+                "Mau baju pria",
+                "Carikan pakaian",
+                "Aku cari kaos",
+                "Pengen beli jaket",
+                "Mau liat baju",
+                "Ada baju cowok gak",
+                "Baju cewek ada",
+                "Lihat baju",
+                "Tampilkan baju",
+                "Aku butuh sepatu",
+                "Mau pesan baju",
+                "Ada kaos gak",
+                "Cari celana jeans cowok",
+                "Mau beli rok",
+                "Liat kaos pria",
+                "Beli hoodie dong",
+                "Ada jaket perempuan",
+                "Cari tas wanita",
+                "Mau beli topi",
+                "Sepatu cowok ada",
+                "Baju lanang ada gak",
+                "Aku pengen baju",
+                "Mau cari baju buat cewek"
+            ],
+            "responses": [
+                "Berikut hasil pencarian produk untuk Anda."
+            ]
+        },
+        {
+            "tag": "crud",
+            "patterns": [
+                "Tambahkan stok sepatu bola sebanyak 50",
+                "Tambah produk baru",
+                "Update harga baju",
+                "Ubah deskripsi produk",
+                "Hapus produk lama",
+                "Tambahkan stok celana",
+                "Edit nama produk",
+                "Perbarui harga sepatu",
+                "Masukkan produk baru ke katalog",
+                "Kurangi stok jaket",
+                "Tambah stok kaos sebanyak 100",
+                "Hapus item dari katalog",
+                "Update gambar produk",
+                "Ubah kategori produk",
+                "Tambahkan varian warna baru",
+                "Ganti harga diskon produk",
+                "Masukkan data produk baru",
+                "Perbarui informasi produk",
+                "Set harga produk",
+                "Atur ulang stok barang",
+                "Input produk baru",
+                "Delete produk ini",
+                "Ubah stok barang",
+                "Ganti foto produk"
+            ],
+            "responses": [
+                "Perintah admin diterima. Silakan lengkapi data produk."
+            ]
+        },
+        {
+            "tag": "checkout",
+            "patterns": [
+                "Proses pembayaranku sekarang",
+                "Saya mau checkout",
+                "Bayar sekarang",
+                "Lanjut ke pembayaran",
+                "Saya ingin membayar",
+                "Proses transaksi saya",
+                "Checkout keranjang belanja",
+                "Mau bayar pesanan",
+                "Selesaikan pembayaran",
+                "Konfirmasi pembayaran",
+                "Saya mau bayar",
+                "Lanjutkan ke pembayaran",
+                "Proses pesanan saya",
+                "Bayar belanjaan saya",
+                "Saya siap bayar",
+                "Aku mau bayar",
+                "Bayar dong",
+                "Checkout sekarang",
+                "Proses bayar",
+                "Mau checkout nih"
+            ],
+            "responses": [
+                "Mengarahkan Anda ke proses pembayaran.",
+                "Silakan lanjutkan ke halaman checkout."
+            ]
+        },
+        {
+            "tag": "lacak_kiriman",
+            "patterns": [
+                "Sampai mana paketku",
+                "Lacak pengiriman",
+                "Dimana posisi paket saya",
+                "Tracking pesanan",
+                "Cek status pengiriman",
+                "Paket saya sudah sampai mana",
+                "Kapan paket sampai",
+                "Lacak kiriman saya",
+                "Nomor resi pengiriman",
+                "Cek resi",
+                "Status pengiriman pesanan saya",
+                "Estimasi paket sampai kapan",
+                "Paket sudah dikirim belum",
+                "Dimana barang kiriman saya",
+                "Sudah sampai mana pengiriman",
+                "Mana paketku",
+                "Paket udah sampai mana",
+                "Track paket dong",
+                "Cek kiriman",
+                "Barang udah dikirim belum"
+            ],
+            "responses": [
+                "Silakan berikan nomor resi untuk melacak pengiriman Anda.",
+                "Saya akan cek status pengiriman Anda."
+            ]
+        },
+        {
+            "tag": "tanya_toko",
+            "patterns": [
+                "Alamat toko offline ada di mana",
+                "Dimana lokasi toko",
+                "Alamat toko",
+                "Toko buka jam berapa",
+                "Jam operasional toko",
+                "Kapan toko buka",
+                "Ada cabang toko tidak",
+                "Nomor telepon toko",
+                "Kontak toko",
+                "Email toko berapa",
+                "Toko tutup jam berapa",
+                "Hari apa saja toko buka",
+                "Informasi toko",
+                "Profil toko",
+                "Tentang toko ini",
+                "Toko dimana ya",
+                "Lokasinya mana",
+                "Buka kapan",
+                "Telpon toko berapa",
+                "Toko ada dimana aja"
+            ],
+            "responses": [
+                "Berikut informasi toko kami.",
+                "Silakan cek halaman profil toko untuk informasi lengkap."
+            ]
+        },
+        {
+            "tag": "status_pesanan",
+            "patterns": [
+                "Apakah pesananku sudah siap kirim",
+                "Cek status pesanan",
+                "Pesanan saya sudah diproses belum",
+                "Bagaimana status order saya",
+                "Apakah pesanan sudah dikonfirmasi",
+                "Sudah dikemas belum pesanan saya",
+                "Pesanan saya sudah jadi belum",
+                "Kapan pesanan saya dikirim",
+                "Update pesanan terakhir",
+                "Status order saya bagaimana",
+                "Apakah pesanan sudah selesai",
+                "Pesanan dalam proses tidak",
+                "Cek progres pesanan saya",
+                "Apakah orderan saya sudah siap",
+                "Pesanan saya sampai kapan",
+                "Orderan udah jadi belum",
+                "Gimana pesanan aku",
+                "Pesananku gimana",
+                "Udah siap belum pesanannya",
+                "Cek orderan dong"
+            ],
+            "responses": [
+                "Saya akan cek status pesanan Anda.",
+                "Mohon berikan nomor pesanan untuk pengecekan."
+            ]
+        },
+        {
+            "tag": "batal_pesanan",
+            "patterns": [
+                "Tolong batalkan pesanan terakhirku",
+                "Batalkan pesanan",
+                "Cancel order saya",
+                "Saya mau membatalkan pesanan",
+                "Batal pesan",
+                "Hapus pesanan saya",
+                "Jangan proses pesanan saya",
+                "Saya ingin cancel order",
+                "Batalkan transaksi terakhir",
+                "Tolong cancel pesanan",
+                "Saya tidak jadi pesan",
+                "Urungkan pesanan saya",
+                "Batalkan pembelian saya",
+                "Pesanan saya mau dibatalkan",
+                "Tolong hapus orderan saya",
+                "Gak jadi pesan",
+                "Cancel aja",
+                "Batal ya pesanannya",
+                "Aku mau cancel",
+                "Batalin pesanan dong"
+            ],
+            "responses": [
+                "Pesanan Anda akan dibatalkan. Mohon konfirmasi nomor pesanan.",
+                "Proses pembatalan dimulai. Silakan berikan detail pesanan."
+            ]
+        },
+        {
+            "tag": "help",
+            "patterns": [
+                "Bantuan",
+                "Help",
+                "Bisa apa saja",
+                "Menu",
+                "Apa yang bisa kamu lakukan",
+                "Fitur apa saja",
+                "Daftar perintah",
+                "Perintah apa saja yang tersedia",
+                "Cara pakai chatbot",
+                "Panduan penggunaan",
+                "Tolong bantu saya",
+                "Bagaimana cara menggunakan",
+                "Apa saja layanan yang tersedia",
+                "Tampilkan menu bantuan",
+                "Saya bingung mau apa",
+                "Bisa ngapain aja",
+                "Fungsinya apa aja",
+                "Kamu bisa apa",
+                "Ada fitur apa",
+                "Gimana cara pakenya"
+            ],
+            "responses": [
+                "Berikut daftar layanan yang bisa saya bantu."
+            ]
+        },
+        {
+            "tag": "terima_kasih",
+            "patterns": [
+                "Terima kasih", "Makasih", "Thanks",
+                "Terima kasih banyak", "Makasih ya", "Trims",
+                "Thank you", "Tengkyu", "Makasi", "Thx",
+                "Nuhun", "Matur nuwun"
+            ],
+            "responses": [
+                "Sama-sama!",
+                "Dengan senang hati!",
+                "Tidak masalah, senang bisa membantu!"
+            ]
+        },
+        {
+            "tag": "selamat_tinggal",
+            "patterns": [
+                "Sampai jumpa", "Bye", "Dadah",
+                "Selamat tinggal", "Sampai nanti",
+                "Permisi saya pergi dulu", "Dah",
+                "Bye bye", "See you", "Cabut dulu",
+                "Duluan ya", "Pamit dulu"
+            ],
+            "responses": [
+                "Sampai jumpa lagi!",
+                "Semoga harimu menyenangkan!",
+                "Bye! Jangan ragu untuk kembali."
+            ]
+        }
+    ]
+}

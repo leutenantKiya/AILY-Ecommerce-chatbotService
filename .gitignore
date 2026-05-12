@@ -1,0 +1,62 @@
+# Python
+tempCodeRunnerFile.py
+.venv
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+aily.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Maven build artifacts
+target/
+frontend/target/
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+frontend/hs_err_pid*.log
+
+# Temporary files
+*.tmp
+*.temp
+revert_marker.txt
+memory.md
+

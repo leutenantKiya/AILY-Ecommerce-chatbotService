@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aily.controller.OrdersController"
+            styleClass="root-bg"
+            prefWidth="1920" prefHeight="1080">
+
+    <top>
+        <VBox>
+            <!-- Header -->
+            <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="16">
+                <Button text="←" onAction="#goBack" styleClass="back-btn"/>
+                <Label text="AILY" styleClass="logo-text-sm"/>
+                <Label text="Pesanan" styleClass="page-title" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="itemCountLabel" text="0 item" styleClass="item-count-badge"/>
+            </HBox>
+            <!-- Tab bar -->
+            <HBox styleClass="tab-bar" spacing="0">
+                <Button fx:id="tabSemua"    text="Semua"    onAction="#filterSemua"    styleClass="tab-btn-active"/>
+                <Button fx:id="tabDiproses" text="Diproses" onAction="#filterDiproses" styleClass="tab-btn"/>
+                <Button fx:id="tabSelesai"  text="Selesai"  onAction="#filterSelesai"  styleClass="tab-btn"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="chat-scroll" hbarPolicy="NEVER">
+            <content>
+                <StackPane minHeight="600">
+                    <!-- Empty state -->
+                    <VBox fx:id="emptyState" alignment="CENTER" spacing="16">
+                        <Label text="📦" style="-fx-font-size: 48px;"/>
+                        <Label text="Belum ada pesanan" styleClass="empty-state-label"/>
+                        <Button text="Mulai belanja" onAction="#goBack" styleClass="btn-outline" prefWidth="160"/>
+                        <Label text="AILY" styleClass="watermark" opacity="0.12"/>
+                    </VBox>
+                    <!-- Order list -->
+                    <VBox fx:id="ordersBox" spacing="10" visible="false" managed="false">
+                        <padding><Insets top="20" bottom="20" left="24" right="24"/></padding>
+                    </VBox>
+                </StackPane>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

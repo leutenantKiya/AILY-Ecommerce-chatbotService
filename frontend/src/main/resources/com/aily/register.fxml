@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.aily.controller.RegisterController"
+           styleClass="root-bg"
+           prefWidth="1920" prefHeight="1080">
+
+    <VBox styleClass="card" alignment="TOP_CENTER" spacing="0"
+          prefWidth="430" maxWidth="430">
+
+        <padding><Insets top="36" bottom="36" left="36" right="36"/></padding>
+
+        <Label text="AILY" styleClass="logo-text" alignment="CENTER" maxWidth="Infinity"/>
+        <Label text="Selamat datang" styleClass="heading-white" alignment="CENTER" maxWidth="Infinity">
+            <VBox.margin><Insets top="8" bottom="20"/></VBox.margin>
+        </Label>
+
+        <Label text="Username" styleClass="field-label"/>
+        <TextField fx:id="usernameField" promptText="Username" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </TextField>
+
+        <Label text="Password" styleClass="field-label"/>
+        <PasswordField fx:id="passwordField" promptText="Password" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </PasswordField>
+
+        <Label text="Email" styleClass="field-label"/>
+        <TextField fx:id="emailField" promptText="email@domain.com" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </TextField>
+
+        <Label text="No. Telepon" styleClass="field-label"/>
+        <TextField fx:id="phoneField" promptText="08xxxxxxxxxx" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </TextField>
+
+        <Label text="Alamat" styleClass="field-label"/>
+        <TextField fx:id="addressField" promptText="Alamat lengkap" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </TextField>
+
+        <Label text="Gender" styleClass="field-label"/>
+        <TextField fx:id="genderField" promptText="L / P" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="20"/></VBox.margin>
+        </TextField>
+
+        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true">
+            <VBox.margin><Insets bottom="8"/></VBox.margin>
+        </Label>
+
+        <Button fx:id="registerButton" text="Daftar" onAction="#handleRegister"
+                styleClass="btn-teal" maxWidth="Infinity" prefHeight="46"/>
+
+        <HBox alignment="CENTER_RIGHT">
+            <VBox.margin><Insets top="14"/></VBox.margin>
+            <Hyperlink text="← Kembali" onAction="#goBack" styleClass="link-back"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

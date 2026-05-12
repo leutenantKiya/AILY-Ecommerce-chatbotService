@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.aily.controller.LoginController"
+           styleClass="root-bg"
+           prefWidth="1920" prefHeight="1080">
+
+    <!-- Login card centered -->
+    <VBox styleClass="card" alignment="TOP_LEFT" spacing="0"
+          prefWidth="380" maxWidth="380">
+
+        <padding><Insets top="36" bottom="36" left="36" right="36"/></padding>
+
+        <!-- Logo + header -->
+        <Label text="AILY" styleClass="logo-text"/>
+        <Label text="Selamat datang kembali" styleClass="heading-white">
+            <VBox.margin><Insets top="8"/></VBox.margin>
+        </Label>
+        <Label text="Masuk Ke akun Pembeli" styleClass="subheading-gray">
+            <VBox.margin><Insets top="2" bottom="24"/></VBox.margin>
+        </Label>
+
+        <!-- Username -->
+        <Label text="Username" styleClass="field-label"/>
+        <TextField fx:id="usernameField" promptText="Username" styleClass="input-pill">
+            <VBox.margin><Insets top="6" bottom="16"/></VBox.margin>
+        </TextField>
+
+        <!-- Password -->
+        <Label text="Password" styleClass="field-label"/>
+        <PasswordField fx:id="passwordField" promptText="Password" styleClass="input-pill">
+            <VBox.margin><Insets top="6"/></VBox.margin>
+        </PasswordField>
+
+        <!-- Lupa password -->
+        <HBox alignment="CENTER_RIGHT">
+            <VBox.margin><Insets top="4" bottom="20"/></VBox.margin>
+            <Hyperlink text="Lupa Password?" onAction="#handleForgotPassword" styleClass="link-gray"/>
+        </HBox>
+
+        <!-- Error -->
+        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true">
+            <VBox.margin><Insets bottom="8"/></VBox.margin>
+        </Label>
+
+        <!-- Masuk button -->
+        <Button fx:id="loginButton" text="Masuk" onAction="#handleLogin"
+                styleClass="btn-teal" maxWidth="Infinity" prefHeight="46"/>
+
+        <!-- Footer links -->
+        <HBox alignment="CENTER" spacing="16">
+            <VBox.margin><Insets top="16"/></VBox.margin>
+            <HBox spacing="4" alignment="CENTER">
+                <Label text="Belum punya akun?" styleClass="text-gray"/>
+                <Hyperlink text="Register" onAction="#goToRegister" styleClass="link-teal"/>
+            </HBox>
+            <Hyperlink text="← Kembali" onAction="#goBack" styleClass="link-back"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

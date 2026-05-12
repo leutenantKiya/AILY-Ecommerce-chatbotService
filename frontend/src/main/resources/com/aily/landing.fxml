@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.aily.controller.LandingController"
+           styleClass="root-bg"
+           prefWidth="1920" prefHeight="1080">
+
+    <!-- Center content -->
+    <VBox alignment="CENTER" spacing="20">
+        <Label text="AILY" styleClass="logo-giant"/>
+
+        <VBox alignment="CENTER" spacing="4">
+            <Label text="Chatbot Customer Service untuk E-Commerce." styleClass="tagline"/>
+            <Label text="Responsif, 24/7, dan terintegrasi penuh." styleClass="tagline"/>
+        </VBox>
+
+        <HBox spacing="20" alignment="CENTER">
+            <padding><Insets top="12"/></padding>
+            <Button text="Masuk Sebagai User" onAction="#goToUserLogin" styleClass="btn-teal"
+                    prefWidth="220" prefHeight="48"/>
+            <Button text="Masuk Sebagai Admin" onAction="#goToAdminLogin" styleClass="btn-outline"
+                    prefWidth="220" prefHeight="48"/>
+        </HBox>
+
+        <VBox alignment="CENTER" spacing="4">
+            <padding><Insets top="8"/></padding>
+            <Label text="Belum Memiliki akun?" styleClass="text-gray"/>
+            <Hyperlink text="Register" onAction="#goToRegister" styleClass="link-teal"/>
+        </VBox>
+    </VBox>
+
+    <!-- Toast bottom-right (mouseTransparent agar tidak block klik) -->
+    <StackPane alignment="BOTTOM_RIGHT" mouseTransparent="true">
+        <padding><Insets bottom="30" right="30"/></padding>
+        <VBox fx:id="toastBox" styleClass="toast" visible="false" managed="false">
+            <Label fx:id="toastLabel" styleClass="toast-text"/>
+        </VBox>
+    </StackPane>
+
+</StackPane>
