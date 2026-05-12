@@ -383,18 +383,24 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
     if not user_token:
         return Response.ValidationError("User tidak ditemukan, silahkan login ulang")
 
+    is_guest = len(user_token) < 5
+
     db = SQLite()
-    user = db.resolveUser(user_token)
+    user = db.resolveUser(user_token) if not is_guest else None
     try:
-        if user is None:
+        if is_guest:
+            role = "guest"
+            username = "Guest"
+        elif user is None:
             return Response.NotFound("User tidak ditemukan, silahkan login ulang")
+        else:
+            role = user[6].lower()
+            username = user[1]
 
-        role = user[6].lower()
-        username = user[1]
+        if not is_guest:
+            save_chat(user_token, username, role, body.message)
 
-        save_chat(user_token, username, role, body.message)
-
-        if role != "admin" and is_admin_handoff_request(body.message):
+        if role not in ("admin", "guest") and is_admin_handoff_request(body.message):
             open_admin_connection(user_token)
             result = {
                 "intent": ADMIN_HANDOFF_INTENT,
@@ -422,7 +428,7 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
                 "connection_status": "openconnection"
             }))
 
-        cart_action = try_handle_cart_command(user_token, user, body.message)
+        cart_action = None if is_guest else try_handle_cart_command(user_token, user, body.message)
         if cart_action is not None:
             result = {"intent": "cart", "konten": body.message}
             action_data = cart_action
@@ -440,31 +446,46 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
                 if keyword:
                     gender = result.get("atribut", {}).get("gender", "default_user")
                     if gender == "default_user":
-                        gender = user[7]
+                        gender = user[7] if user else "U"
                     action_data = searchBarangResult(keyword, gender)
                 else:
                     action_data = {"message": "Sebutkan nama produk yang ingin dicari.", "type": "mencari"}
             elif intent == "faq":
-                action_data = faqResult(body.message)
+                faq_response = faqResult(body.message)
+                action_data = faq_response.get("data", {}) if isinstance(faq_response, dict) else {}
                 action_data["type"] = "faq"
             elif intent == "tanya_toko":
-                action_data = tentangToko()
+                toko_response = tentangToko()
+                action_data = toko_response.get("data", {}) if isinstance(toko_response, dict) else {}
                 action_data["type"] = "tanya_toko"
             elif intent == "help":
-                action_data = help()
+                help_response = help()
+                print(f"[DEBUG] help_response: {help_response}")
+                action_data = help_response.get("data", {}) if isinstance(help_response, dict) else {}
+                print(f"[DEBUG] action_data after extract: {action_data}")
+                action_data["type"] = "help"
             elif intent == "crud" and role == "admin":
                 action_data = handle_admin_product_command(body.message)
             elif intent == "mencari":
                 gender = result.get("atribut", {}).get("gender", "default_user")
                 if gender == "default_user":
-                    gender = user[7]
+                    gender = user[7] if user else "U"
                 action_data = searchBarangResult(str(konten), gender)
             elif intent == "checkout":
-                action_data = perform_checkout(user_token)
+                if is_guest:
+                    action_data = {"message": "Fitur checkout hanya tersedia untuk user yang sudah login.", "type": "checkout"}
+                else:
+                    action_data = perform_checkout(user_token)
             elif intent in ("status_pesanan", "lacak_kiriman"):
-                action_data = perform_get_order_status(user_token, body.message)
+                if is_guest:
+                    action_data = {"message": "Fitur status pesanan hanya tersedia untuk user yang sudah login.", "type": intent}
+                else:
+                    action_data = perform_get_order_status(user_token, body.message)
             elif intent == "batal_pesanan":
-                action_data = perform_cancel_order(user_token, body.message)
+                if is_guest:
+                    action_data = {"message": "Fitur batal pesanan hanya tersedia untuk user yang sudah login.", "type": "batal_pesanan"}
+                else:
+                    action_data = perform_cancel_order(user_token, body.message)
             elif intent in ("salam", "terima_kasih", "selamat_tinggal", "tidak_diketahui"):
                 action_data = {"message": result.get("respons", ""), "type": intent}
 
@@ -472,7 +493,8 @@ def handle_chat(user_token: Optional[str], body: ChatMessage):
                 action_data = {"message": result.get("respons", ""), "type": intent or "unknown"}
 
         bot_response_text = sanitize_for_json(action_data)
-        save_chat(user_token, "AILY Bot", "bot", bot_response_text)
+        if not is_guest:
+            save_chat(user_token, "AILY Bot", "bot", bot_response_text)
 
         return sanitize_for_json(Response.Ok(data={
             "user_id": user_token,

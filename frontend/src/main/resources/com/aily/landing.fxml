@@ -30,6 +30,7 @@
             <padding><Insets top="8"/></padding>
             <Label text="Belum Memiliki akun?" styleClass="text-gray"/>
             <Hyperlink text="Register" onAction="#goToRegister" styleClass="link-teal"/>
+            <Hyperlink text="Continue As Guest" onAction="#goToGuestChat" styleClass="link-teal"/>
         </VBox>
     </VBox>
 
