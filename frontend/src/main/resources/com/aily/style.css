@@ -239,6 +239,24 @@
     -fx-cursor: hand;
 }
 
+.btn-guest {
+    -fx-background-color: transparent;
+    -fx-border-color: #00D4A3;
+    -fx-border-radius: 24;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #00D4A3;
+    -fx-font-size: 13px;
+    -fx-background-radius: 24;
+    -fx-padding: 11 28 11 28;
+    -fx-cursor: hand;
+}
+
+.btn-guest:hover {
+    -fx-background-color: #00D4A3;
+    -fx-text-fill: #07161E;
+    -fx-font-weight: bold;
+}
+
 /* ── Hyperlinks ───────────────────────────────────────────────────── */
 .link-teal {
     -fx-text-fill: #00D4A3;

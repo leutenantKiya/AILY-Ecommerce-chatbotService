@@ -26,11 +26,16 @@
                     prefWidth="220" prefHeight="48"/>
         </HBox>
 
-        <VBox alignment="CENTER" spacing="4">
+        <VBox alignment="CENTER" spacing="8">
             <padding><Insets top="8"/></padding>
             <Label text="Belum Memiliki akun?" styleClass="text-gray"/>
             <Hyperlink text="Register" onAction="#goToRegister" styleClass="link-teal"/>
-            <Hyperlink text="Continue As Guest" onAction="#goToGuestChat" styleClass="link-teal"/>
+        </VBox>
+
+        <VBox alignment="CENTER">
+            <padding><Insets top="4"/></padding>
+            <Button text="Continue As Guest" onAction="#goToGuestChat" styleClass="btn-guest"
+                    prefWidth="220" prefHeight="42"/>
         </VBox>
     </VBox>
 
