@@ -79,6 +79,13 @@ public class ProfileController implements Initializable {
             return;
         }
 
+        try {
+            Integer.parseInt(phone);
+        } catch (NumberFormatException e) {
+            statusLabel.setText("Nomor Telephon harus berupa angka");
+            return;
+        }
+
         saveButton.setDisable(true);
         statusLabel.setText("");
 
