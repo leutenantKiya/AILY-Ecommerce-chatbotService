@@ -24,10 +24,8 @@ wheels/
 *.egg
 
 # Database files
-*.db
 *.db-shm
 *.db-wal
-aily.db
 
 # Environment variables
 .env
