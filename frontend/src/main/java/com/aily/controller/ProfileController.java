@@ -69,6 +69,11 @@ public class ProfileController implements Initializable {
         String address = addressField.getText().trim();
         String gender = normalizeGender(genderField.getText().trim());
 
+        if(phone == null || phone.length() < 11 ||  phone.matches("\\d+") == false) {
+            statusLabel.setText("Tolong ini nomor telp yang valid");
+            return;
+        }
+
         if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
             statusLabel.setText("Semua field wajib diisi.");
             return;

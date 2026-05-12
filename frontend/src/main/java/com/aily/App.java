@@ -39,7 +39,10 @@ public class App extends Application {
             Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
             scene = new Scene(root, bounds.getWidth(), bounds.getHeight());
         } else {
-            scene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            double width = primaryStage.isMaximized() ? bounds.getWidth() : primaryStage.getWidth();
+            double height = primaryStage.isMaximized() ? bounds.getHeight() : primaryStage.getHeight();
+            scene = new Scene(root, width, height);
         }
         scene.getStylesheets().add(App.class.getResource("style.css").toExternalForm());
 
