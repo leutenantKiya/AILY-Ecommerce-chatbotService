@@ -10,7 +10,10 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 
@@ -34,6 +37,7 @@ public class AdminProductsController implements Initializable {
     @FXML private VBox      productRowsBox;
     @FXML private Label     imageNameLabel;
     @FXML private TextField searchField;
+    @FXML private ImageView productPreview;
 
     private String currentImageBase64 = null;
 
@@ -149,9 +153,8 @@ public class AdminProductsController implements Initializable {
         stokField.clear();
         deskripsiField.clear();
         currentImageBase64 = null;
-        if (imageNameLabel != null) {
-            imageNameLabel.setText("Belum ada gambar");
-        }
+        if (imageNameLabel != null) imageNameLabel.setText("Belum ada gambar");
+        setPreview(null);
     }
 
     private void refreshTable() {
@@ -180,14 +183,20 @@ public class AdminProductsController implements Initializable {
     }
 
     private HBox buildProductRow(Product p) {
-        Label id    = new Label(p.getId());         id.getStyleClass().add("table-cell-text");  id.setPrefWidth(60);
-        Label name  = new Label(p.getName());       name.getStyleClass().add("table-cell-bold"); name.setPrefWidth(200);
-        Label gender  = new Label(p.getGender());       gender.getStyleClass().add("table-cell-text"); gender.setPrefWidth(120);
-        Label price = new Label(p.formattedPrice()); price.getStyleClass().add("table-cell-teal"); price.setPrefWidth(160);
+        Label id    = new Label(p.getId());             id.getStyleClass().add("table-cell-text");      id.setPrefWidth(60);
+        Label name  = new Label(p.getName());           name.getStyleClass().add("table-cell-bold");    name.setPrefWidth(200);
+        Label gender  = new Label(p.getGender());       gender.getStyleClass().add("table-cell-text");  gender.setPrefWidth(70);
+        Label price = new Label(p.formattedPrice());    price.getStyleClass().add("table-cell-teal");   price.setPrefWidth(160);
+
+        id.setAlignment(Pos.CENTER_LEFT);
+        name.setAlignment(Pos.CENTER_LEFT);
+        gender.setAlignment(Pos.CENTER);
+        price.setAlignment(Pos.CENTER);
 
         Label stokLbl = new Label(p.getStock() + " UNIT");
         stokLbl.getStyleClass().add("status-diproses");
-        StackPane stokBox = new StackPane(stokLbl); stokBox.setPrefWidth(100);
+        StackPane stokBox = new StackPane(stokLbl); stokBox.setPrefWidth(140);
+        stokBox.setAlignment(Pos.CENTER);
 
         Button editBtn = new Button("Edit");
         editBtn.getStyleClass().add("btn-gray");
@@ -197,9 +206,9 @@ public class AdminProductsController implements Initializable {
         delBtn.getStyleClass().add("btn-danger");
         delBtn.setOnAction(e -> handleDelete(p));
 
-        HBox aksi = new HBox(6, editBtn, delBtn); aksi.setPrefWidth(120);
+        HBox aksi = new HBox(6, editBtn, delBtn); aksi.setPrefWidth(170); aksi.setAlignment(Pos.CENTER);
 
-        HBox row = new HBox(id, name, gender, price, stokBox, aksi);
+        HBox row = new HBox(id, name, price, stokBox, gender, aksi);
         row.getStyleClass().add("table-row");
         row.setPadding(new Insets(10, 0, 10, 0));
         return row;
@@ -228,7 +237,19 @@ public class AdminProductsController implements Initializable {
         if (imageNameLabel != null) {
             imageNameLabel.setText(currentImageBase64 != null ? "Gambar tersimpan" : "Belum ada gambar");
         }
+        setPreview(currentImageBase64);
         saveButton.setText("Update Produk");
+    }
+
+    private void setPreview(String base64) {
+        if (productPreview == null) return;
+        if (base64 == null) { productPreview.setImage(null); return; }
+        try {
+            byte[] bytes = Base64.getDecoder().decode(base64);
+            productPreview.setImage(new Image(new java.io.ByteArrayInputStream(bytes)));
+        } catch (Exception e) {
+            productPreview.setImage(null);
+        }
     }
 
     @FXML
@@ -243,9 +264,8 @@ public class AdminProductsController implements Initializable {
             try {
                 byte[] fileContent = Files.readAllBytes(file.toPath());
                 currentImageBase64 = Base64.getEncoder().encodeToString(fileContent);
-                if (imageNameLabel != null) {
-                    imageNameLabel.setText(file.getName());
-                }
+                if (imageNameLabel != null) imageNameLabel.setText(file.getName());
+                setPreview(currentImageBase64);
             } catch (Exception e) {
                 e.printStackTrace();
             }
