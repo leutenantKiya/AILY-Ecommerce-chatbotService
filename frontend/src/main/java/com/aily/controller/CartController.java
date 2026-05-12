@@ -118,13 +118,11 @@ public class CartController implements Initializable {
         imgBox.getChildren().add(imgLbl);
 
         VBox info = new VBox(4);
-        Label name = new Label(product.getName());
-        name.getStyleClass().add("table-cell-bold");
-        Label code = new Label(product.getCode());
-        code.getStyleClass().add("table-cell-muted");
-        Label stock = new Label("Stok tersedia: " + product.getStock());
-        stock.getStyleClass().add("text-muted");
-        info.getChildren().addAll(name, code, stock);
+        Label name = new Label(product.getName());name.getStyleClass().add("table-cell-bold");
+        Label gender = new Label(product.getGender()); gender.getStyleClass().add("table-cell-muted");
+        Label stock = new Label("Stok tersedia: " + product.getStock()); stock.getStyleClass().add("text-muted");
+
+        info.getChildren().addAll(name, gender, stock);
         HBox.setHgrow(info, Priority.ALWAYS);
 
         Button minus = new Button("-");

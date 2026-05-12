@@ -12,10 +12,6 @@ public class RegisterController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private TextField emailField;
-    @FXML private TextField phoneField;
-    @FXML private TextField addressField;
-    @FXML private TextField genderField;
     @FXML private Button registerButton;
     @FXML private Label errorLabel;
 
@@ -42,18 +38,13 @@ public class RegisterController {
     private void handleRegister() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
-        String email = emailField.getText().trim();
-        String phone = phoneField.getText().trim();
-        String address = addressField.getText().trim();
-        String gender = normalizeGender(genderField.getText().trim());
+        String email = "";
+        String phone = "";
+        String address = "";
+        String gender = "L";
 
-        if (username.isEmpty() || password.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-            errorLabel.setText("Username, password, email, telepon, dan alamat wajib diisi.");
-            return;
-        }
-
-        if (gender.isEmpty()) {
-            errorLabel.setText("Gender harus L atau P.");
+        if (username.isEmpty() || password.isEmpty()) {
+            errorLabel.setText("Username, password wajib diisi.");
             return;
         }
 

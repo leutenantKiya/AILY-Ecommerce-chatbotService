@@ -157,7 +157,7 @@ public class OrdersController implements Initializable {
         VBox info = new VBox(4);
         Label name = new Label(order.getProduct().getName());
         name.getStyleClass().add("table-cell-bold");
-        Label code = new Label(order.getProduct().getCode());
+        Label code = new Label(order.getProduct().getGender());
         code.getStyleClass().add("table-cell-muted");
         Label qty = new Label("x" + order.getQuantity());
         qty.getStyleClass().add("text-gray");
