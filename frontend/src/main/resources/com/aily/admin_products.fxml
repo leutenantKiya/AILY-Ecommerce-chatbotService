@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <HBox prefHeight="1080" prefWidth="1920" styleClass="root-bg" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aily.controller.AdminProductsController">
@@ -31,45 +32,55 @@
                 <Label styleClass="page-title" text="Kelola Produk" />
 
                 <!-- Form card -->
-                <VBox spacing="16" styleClass="form-card">
-                    <Label styleClass="form-section-title" text="+ Tambah/Edit Produk" />
-                    <Region prefHeight="1" styleClass="form-divider" />
+                <HBox spacing="20" alignment="TOP_LEFT">
+                    <VBox spacing="16" styleClass="form-card" HBox.hgrow="ALWAYS">
+                        <Label styleClass="form-section-title" text="+ Tambah/Edit Produk" />
+                        <Region prefHeight="1" styleClass="form-divider" />
 
-                    <HBox spacing="16">
-                        <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label styleClass="field-label" text="Nama Produk" />
-                            <TextField fx:id="namaProdukField" promptText="cth: Laptop Asus" styleClass="input-dark-sm" />
-                        </VBox>
-                        <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label styleClass="field-label" text="Gender" />
-                            <TextField fx:id="genderProdukField" promptText="L/P" styleClass="input-dark-sm" />
-                        </VBox>
-                    </HBox>
-                    <HBox spacing="16">
-                        <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label styleClass="field-label" text="Harga (Rp)" />
-                            <TextField fx:id="hargaField" promptText="0" styleClass="input-dark-sm" />
-                        </VBox>
-                        <VBox spacing="6" HBox.hgrow="ALWAYS">
-                            <Label styleClass="field-label" text="Stok" />
-                            <TextField fx:id="stokField" promptText="0" styleClass="input-dark-sm" />
-                        </VBox>
-                    </HBox>
-                    <VBox spacing="6">
-                        <Label styleClass="field-label" text="Deskripsi" />
-                        <TextArea fx:id="deskripsiField" prefHeight="90" promptText="Deskripsi Produk" styleClass="textarea-dark" wrapText="true" />
-                    </VBox>
-                    
-                    <VBox spacing="6">
-                        <Label styleClass="field-label" text="Gambar Produk" />
-                        <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Button onAction="#handleChooseImage" styleClass="btn-gray" text="Pilih Gambar" />
-                            <Label fx:id="imageNameLabel" styleClass="text-gray" text="Belum ada gambar" />
+                        <HBox spacing="16">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="field-label" text="Nama Produk" />
+                                <TextField fx:id="namaProdukField" promptText="cth: Laptop Asus" styleClass="input-dark-sm" />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="field-label" text="Gender" />
+                                <TextField fx:id="genderProdukField" promptText="L/P" styleClass="input-dark-sm" />
+                            </VBox>
                         </HBox>
+                        <HBox spacing="16">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="field-label" text="Harga (Rp)" />
+                                <TextField fx:id="hargaField" promptText="0" styleClass="input-dark-sm" />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="field-label" text="Stok" />
+                                <TextField fx:id="stokField" promptText="0" styleClass="input-dark-sm" />
+                            </VBox>
+                        </HBox>
+                        <VBox spacing="6">
+                            <Label styleClass="field-label" text="Deskripsi" />
+                            <TextArea fx:id="deskripsiField" prefHeight="90" promptText="Deskripsi Produk" styleClass="textarea-dark" wrapText="true" />
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label styleClass="field-label" text="Gambar Produk" />
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Button onAction="#handleChooseImage" styleClass="btn-gray" text="Pilih Gambar" />
+                                <Label fx:id="imageNameLabel" styleClass="text-gray" text="Belum ada gambar" />
+                            </HBox>
+                        </VBox>
+
+                        <Button fx:id="saveButton" onAction="#handleSave" prefWidth="180" styleClass="btn-teal" text="Simpan Produk" />
                     </VBox>
 
-                    <Button fx:id="saveButton" onAction="#handleSave" prefWidth="180" styleClass="btn-teal" text="Simpan Produk" />
-                </VBox>
+                    <VBox alignment="TOP_CENTER" spacing="8" styleClass="form-card" prefWidth="250" minWidth="250">
+                        <Label styleClass="form-section-title" text="Preview Gambar" />
+                        <Region prefHeight="1" styleClass="form-divider" />
+                        <ImageView fx:id="productPreview" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                            <VBox.margin><Insets top="10" /></VBox.margin>
+                        </ImageView>
+                    </VBox>
+                </HBox>
 
                 <!-- Product list table -->
                 <VBox spacing="0" styleClass="table-card">
@@ -87,15 +98,17 @@
                     </TextField>
 
                     <HBox styleClass="table-header-row">
-                        <Label prefWidth="120" styleClass="table-col-label" text="ID" />
+                        <Label prefWidth="60" styleClass="table-col-label" text="ID" />
                         <Label prefWidth="200" styleClass="table-col-label" text="NAMA" />
                         <Label prefWidth="160" styleClass="table-col-label" text="HARGA" />
-                        <Label prefWidth="100" styleClass="table-col-label" text="STOK" />
-                        <Label prefWidth="120" styleClass="table-col-label" text="AKSI" />
-                  <Label layoutX="130.0" layoutY="10.0" prefWidth="200" styleClass="table-col-label" text="GENDER" />
+                        <Label prefWidth="140" styleClass="table-col-label" text="STOK" />
+                  <Label prefWidth="70" styleClass="table-col-label" text="GENDER" />
+                        <Label prefWidth="170" styleClass="table-col-label" text="AKSI" />
                     </HBox>
 
-                    <VBox fx:id="productRowsBox" />
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" maxHeight="310" styleClass="table-scroll">
+                        <VBox fx:id="productRowsBox" />
+                    </ScrollPane>
                 </VBox>
             </VBox>
         </content>
