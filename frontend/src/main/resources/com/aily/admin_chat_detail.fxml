@@ -9,7 +9,6 @@
       styleClass="root-bg"
       prefWidth="1920" prefHeight="1080">
 
-    <!-- Sidebar (admin) -->
     <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
         <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
         <HBox spacing="10" alignment="CENTER_LEFT">
@@ -31,10 +30,7 @@
         <Button text="[← Keluar" onAction="#handleLogout" styleClass="logout-btn"/>
     </VBox>
 
-    <!-- MAIN CHAT AREA -->
     <VBox HBox.hgrow="ALWAYS">
-
-        <!-- Top bar -->
         <HBox styleClass="chat-topbar" alignment="CENTER_LEFT" spacing="12">
             <Button text="←" onAction="#backToList" styleClass="clear-btn"/>
 
@@ -48,9 +44,7 @@
             </VBox>
 
             <Button text="Refresh" onAction="#refresh" styleClass="clear-btn"/>
-        </HBox>
-
-        <!-- Messages scroll area -->
+        </HBox>>
         <StackPane VBox.vgrow="ALWAYS">
             <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="chat-scroll"
                         vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
@@ -61,7 +55,6 @@
             <Label text="AILY" styleClass="watermark" mouseTransparent="true" opacity="0.12"/>
         </StackPane>
 
-        <!-- Input bar -->
         <HBox styleClass="input-bar" alignment="CENTER" spacing="10">
             <TextField fx:id="messageInput"
                        promptText="Ketik balasan sebagai bot..."

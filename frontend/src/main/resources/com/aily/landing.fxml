@@ -9,7 +9,6 @@
            styleClass="root-bg"
            prefWidth="1920" prefHeight="1080">
 
-    <!-- Center content -->
     <VBox alignment="CENTER" spacing="20">
         <Label text="AILY" styleClass="logo-giant"/>
 
@@ -39,7 +38,6 @@
         </VBox>
     </VBox>
 
-    <!-- Toast bottom-right (mouseTransparent agar tidak block klik) -->
     <StackPane alignment="BOTTOM_RIGHT" mouseTransparent="true">
         <padding><Insets bottom="30" right="30"/></padding>
         <VBox fx:id="toastBox" styleClass="toast" visible="false" managed="false">

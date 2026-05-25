@@ -27,8 +27,6 @@
             prefWidth="Infinity"
             spacing="0"
             styleClass="root-bg">
-
-        <!-- Panel Kiri -->
         <VBox
                 alignment="CENTER_LEFT"
                 maxWidth="Infinity"
@@ -66,7 +64,6 @@
             </HBox>
         </VBox>
 
-        <!-- Panel Kanan (Form Login) -->
         <VBox
                 alignment="CENTER_LEFT"
                 minWidth="100.0"

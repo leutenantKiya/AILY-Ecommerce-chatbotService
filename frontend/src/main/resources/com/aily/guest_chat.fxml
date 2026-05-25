@@ -9,7 +9,6 @@
       styleClass="root-bg"
       prefWidth="1920" prefHeight="1080">
 
-    <!-- Sidebar -->
     <VBox styleClass="sidebar" prefWidth="260" minWidth="260">
         <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
         <Label text="AILY" styleClass="logo-text"/>
@@ -27,7 +26,6 @@
         </Button>
     </VBox>
 
-    <!-- Main chat area -->
     <VBox HBox.hgrow="ALWAYS">
         <HBox styleClass="chat-topbar" alignment="CENTER_LEFT" spacing="12">
             <StackPane styleClass="bot-avatar">

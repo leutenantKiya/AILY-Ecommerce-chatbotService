@@ -7,7 +7,6 @@
 
 <HBox prefHeight="1080" prefWidth="1920" styleClass="root-bg" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aily.controller.AdminProductsController">
 
-    <!-- Sidebar -->
     <VBox minWidth="260" prefWidth="260" styleClass="sidebar">
         <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
         <HBox alignment="CENTER_LEFT" spacing="10">
@@ -25,13 +24,11 @@
         <Button onAction="#handleLogout" styleClass="logout-btn" text="[← Keluar" />
     </VBox>
 
-    <!-- Content -->
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-scroll" HBox.hgrow="ALWAYS">
         <content>
             <VBox spacing="24" styleClass="admin-content">
                 <Label styleClass="page-title" text="Kelola Produk" />
 
-                <!-- Form card -->
                 <HBox spacing="20" alignment="TOP_LEFT">
                     <VBox spacing="16" styleClass="form-card" HBox.hgrow="ALWAYS">
                         <Label styleClass="form-section-title" text="+ Tambah/Edit Produk" />
@@ -82,7 +79,6 @@
                     </VBox>
                 </HBox>
 
-                <!-- Product list table -->
                 <VBox spacing="0" styleClass="table-card">
                     <HBox alignment="CENTER_LEFT">
                         <Label styleClass="form-section-title" text="Daftar Produk" HBox.hgrow="ALWAYS" />
