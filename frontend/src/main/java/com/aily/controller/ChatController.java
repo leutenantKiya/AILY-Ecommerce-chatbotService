@@ -443,21 +443,32 @@ public class ChatController implements Initializable {
                 JsonObject action = asJsonObject(data.get("action_data"));
                 if (action != null) {
                     if (intent.equalsIgnoreCase("tanya_toko") || intent.equalsIgnoreCase("faq")) {
-                        JsonObject specificData = asJsonObject(action.get("data"));
-                        JsonArray pairResults = specificData == null ? null : asJsonArray(specificData.get("result"));
-                        if (pairResults != null) {
-                            if (pairResults.isEmpty()) {
-                                return "Info toko belum tersedia.";
-                            }
-                            return formatPairResults(pairResults, "Informasi Toko AILY:");
+                        // Cek apakah result langsung ada di dalam action_data (format baru)
+                        JsonArray resultsArray = null;
+                        if (action.has("result")) {
+                             resultsArray = asJsonArray(action.get("result"));
+                        } else if (action.has("data")) {
+                             JsonObject specificData = asJsonObject(action.get("data"));
+                             if (specificData != null && specificData.has("result")) {
+                                 resultsArray = asJsonArray(specificData.get("result"));
+                             }
                         }
 
-                        JsonArray qaResults = asJsonArray(action.get("result"));
-                        if (qaResults != null) {
-                            if (qaResults.isEmpty()) {
+                        if (resultsArray != null) {
+                            if (resultsArray.isEmpty()) {
                                 return "Info toko belum tersedia.";
                             }
-                            return formatQuestionAnswerResults(qaResults, "Informasi Toko AILY:");
+                            
+                            String header = intent.equalsIgnoreCase("faq") 
+                                    ? "Berikut Layanan Yang Kami Sediakan:" 
+                                    : "Berikut Informasi Toko Aily:";
+
+                            // Cek apakah formatnya Array of Arrays (tuple/pair) atau Array of Objects (qa)
+                            if (resultsArray.get(0).isJsonArray()) {
+                                return formatPairResults(resultsArray, header);
+                            } else if (resultsArray.get(0).isJsonObject()) {
+                                return formatQuestionAnswerResults(resultsArray, header);
+                            }
                         }
                     }
 
