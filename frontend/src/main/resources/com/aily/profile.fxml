@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -20,46 +19,50 @@
     <center>
         <ScrollPane fitToWidth="true" styleClass="chat-scroll" hbarPolicy="NEVER">
             <content>
-                <VBox styleClass="admin-content" spacing="24">
-                    <VBox styleClass="form-card" spacing="16" maxWidth="720">
-                        <Label text="Data Pribadi" styleClass="form-section-title"/>
-                        <Region styleClass="form-divider" prefHeight="1"/>
+                <VBox styleClass="admin-content" alignment="TOP_CENTER" spacing="24">
+                    <VBox styleClass="form-card" spacing="20" maxWidth="720" minWidth="600">
 
-                        <HBox spacing="16">
-                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <VBox spacing="8">
+                            <Label text="Data Pribadi" styleClass="form-section-title"/>
+                            <Region styleClass="form-divider" prefHeight="1"/>
+                        </VBox>
+
+                        <HBox spacing="16" alignment="CENTER_LEFT">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
                                 <Label text="Username" styleClass="field-label"/>
-                                <TextField fx:id="usernameField" promptText="Username" styleClass="input-dark-sm"/>
+                                <TextField fx:id="usernameField" promptText="Username" styleClass="input-dark-sm" maxWidth="Infinity"/>
                             </VBox>
-                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
                                 <Label text="Gender" styleClass="field-label"/>
-                                <TextField fx:id="genderField" promptText="L / P" styleClass="input-dark-sm"/>
+                                <TextField fx:id="genderField" promptText="L / P" styleClass="input-dark-sm" maxWidth="Infinity"/>
                             </VBox>
                         </HBox>
 
-                        <HBox spacing="16">
-                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <HBox spacing="16" alignment="CENTER_LEFT">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
                                 <Label text="Email" styleClass="field-label"/>
-                                <TextField fx:id="emailField" promptText="email@domain.com" styleClass="input-dark-sm"/>
+                                <TextField fx:id="emailField" promptText="email@domain.com" styleClass="input-dark-sm" maxWidth="Infinity"/>
                             </VBox>
-                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
                                 <Label text="No. Telepon" styleClass="field-label"/>
-                                <TextField fx:id="phoneField" promptText="08xxxxxxxxxx" styleClass="input-dark-sm"/>
+                                <TextField fx:id="phoneField" promptText="08xxxxxxxxxx" styleClass="input-dark-sm" maxWidth="Infinity"/>
                             </VBox>
                         </HBox>
 
                         <VBox spacing="6">
                             <Label text="Alamat" styleClass="field-label"/>
                             <TextArea fx:id="addressField" promptText="Alamat lengkap"
-                                      styleClass="textarea-dark" prefHeight="90" wrapText="true"/>
+                                      styleClass="textarea-dark" prefHeight="100" wrapText="true" maxWidth="Infinity"/>
                         </VBox>
 
-                        <Label fx:id="statusLabel" styleClass="error-label" wrapText="true"/>
+                        <Label fx:id="statusLabel" styleClass="error-label" wrapText="true" minHeight="20"/>
 
-                        <HBox spacing="12">
+                        <HBox spacing="12" alignment="CENTER_LEFT">
                             <Button fx:id="saveButton" text="Simpan Profil" onAction="#handleSave"
                                     styleClass="btn-teal" prefWidth="180"/>
                             <Button text="Kembali" onAction="#goBack" styleClass="btn-outline" prefWidth="140"/>
                         </HBox>
+
                     </VBox>
                 </VBox>
             </content>
