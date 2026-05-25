@@ -90,7 +90,7 @@
                 <Label styleClass="field-label" text="Password" />
                 <PasswordField
                         fx:id="passwordField"
-                        promptText="Minimal 8 karakter"
+                        promptText="Masukan Password"
                         styleClass="input-pill"
                         prefHeight="40.0" />
             </VBox>
