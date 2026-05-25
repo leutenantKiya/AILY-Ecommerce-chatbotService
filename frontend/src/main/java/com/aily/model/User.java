@@ -1,7 +1,7 @@
 package com.aily.model;
 
 public class User {
-    private String id;        // hashed password, dipakai sebagai session token
+    private String id;      
     private String username;
     private String email;
     private String phone;
