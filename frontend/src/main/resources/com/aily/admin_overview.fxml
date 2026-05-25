@@ -6,7 +6,6 @@
 
 <HBox prefHeight="1080" prefWidth="1920" styleClass="root-bg" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aily.controller.AdminOverviewController">
 
-    <!-- ═══ ADMIN SIDEBAR ═══ -->
     <VBox minWidth="260" prefWidth="260" styleClass="sidebar">
         <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
 
@@ -30,14 +29,11 @@
         <Button onAction="#handleLogout" styleClass="logout-btn" text="[← Keluar" />
     </VBox>
 
-    <!-- ═══ MAIN CONTENT ═══ -->
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-scroll" HBox.hgrow="ALWAYS">
         <content>
             <VBox spacing="28" styleClass="admin-content">
 
                 <Label styleClass="page-title" text="Overview" />
-
-                <!-- Stat cards -->
                 <HBox spacing="16">
                     <VBox spacing="6" styleClass="stat-card" HBox.hgrow="ALWAYS">
                         <Label styleClass="stat-title" text="Total Produk" />
@@ -58,7 +54,6 @@
                     </VBox>
                 </HBox>
 
-                <!-- Recent transactions table -->
                 <VBox spacing="0" styleClass="table-card">
                     <HBox alignment="CENTER_LEFT">
                         <Label styleClass="form-section-title" text="Transaksi Terbaru" HBox.hgrow="ALWAYS" />
@@ -68,7 +63,7 @@
                         <VBox.margin><Insets bottom="8" top="12" /></VBox.margin>
                     </Region>
 
-                    <!-- Table header -->
+
                     <HBox spacing="0" styleClass="table-header-row">
                         <Label prefWidth="100" styleClass="table-col-label" text="ID" />
                         <Label prefWidth="160" styleClass="table-col-label" text="PEMBELI" />
@@ -77,7 +72,6 @@
                         <Label prefWidth="120" styleClass="table-col-label" text="STATUS" />
                     </HBox>
 
-                    <!-- Rows -->
                     <VBox fx:id="txRowsBox" />
                 </VBox>
 
