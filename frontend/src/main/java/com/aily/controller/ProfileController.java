@@ -69,15 +69,13 @@ public class ProfileController implements Initializable {
         String address = addressField.getText().trim();
         String gender = normalizeGender(genderField.getText().trim());
 
-<<<<<<< Updated upstream
-=======
+
         if(phone == null || phone.length() < 11 ||  phone.matches("\\d+") == false) {
             statusLabel.setStyle("-fx-text-fill: #E05252;");
             statusLabel.setText("Tolong ini nomor telp yang valid");
             return;
         }
 
->>>>>>> Stashed changes
         if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
             statusLabel.setStyle("-fx-text-fill: #E05252;");
             statusLabel.setText("Semua field wajib diisi.");

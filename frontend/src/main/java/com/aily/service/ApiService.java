@@ -11,11 +11,8 @@ import java.net.http.HttpResponse;
 
 public class ApiService {
 
-<<<<<<< Updated upstream
-    private static final String BASE_URL = "http://localhost:8000";
-=======
     private static final String BASE_URL = "http://0.0.0.0:8000";
->>>>>>> Stashed changes
+
     private static final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .build();
