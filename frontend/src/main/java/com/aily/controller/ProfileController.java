@@ -69,42 +69,27 @@ public class ProfileController implements Initializable {
         String address = addressField.getText().trim();
         String gender = normalizeGender(genderField.getText().trim());
 
-
-        if(phone == null || phone.length() < 11 ||  phone.matches("\\d+") == false) {
-            statusLabel.setStyle("-fx-text-fill: #E05252;");
-            statusLabel.setText("Tolong ini nomor telp yang valid");
-            return;
-        }
+        statusLabel.setStyle("-fx-text-fill: #E05252;");
 
         if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-            statusLabel.setStyle("-fx-text-fill: #E05252;");
             statusLabel.setText("Semua field wajib diisi.");
             return;
         }
 
         if (gender.isEmpty()) {
-            statusLabel.setStyle("-fx-text-fill: #E05252;");
             statusLabel.setText("Gender harus L atau P.");
             return;
         }
 
-        if(!email.matches("@")){
-            statusLabel.setStyle("-fx-text-fill: #E05252;");
-            statusLabel.setText("Email tidak valid, Kurang @");
+        if (!email.matches("^.+@.+\\..+$")) {
+            statusLabel.setText("Email tidak valid. Pastikan ada @ dan titik.");
             return;
         }
 
-        if(!phone.matches("\\d{8,15}")){
-            statusLabel.setStyle("-fx-text-fill: #E05252;");
-            statusLabel.setText("Nomor Telephon harus berupa angka");
+        if (!phone.matches("\\d{8,15}")) {
+            statusLabel.setText("Nomor telepon harus angka. Panjang 8 sampai 15 digit.");
             return;
         }
-//        try {
-//            Integer.parseInt(phone);
-//        } catch (NumberFormatException e) {
-//            statusLabel.setText("Nomor Telephon harus berupa angka" + e.getMessage());
-//            return;
-//        }
 
         saveButton.setDisable(true);
         statusLabel.setText("");
@@ -130,14 +115,12 @@ public class ProfileController implements Initializable {
                         statusLabel.setStyle("-fx-text-fill: #00D4A3;");
                         statusLabel.setText("Profil berhasil diperbarui.");
                     } else {
-                        statusLabel.setStyle("-fx-text-fill: #E05252;");
                         statusLabel.setText(response.has("error") ? response.get("error").getAsString() : "Gagal menyimpan profil.");
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     saveButton.setDisable(false);
-                    statusLabel.setStyle("-fx-text-fill: #E05252;");
                     statusLabel.setText("Tidak dapat terhubung ke server.");
                 });
             }
