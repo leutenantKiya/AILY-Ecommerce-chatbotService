@@ -258,7 +258,8 @@ public class AdminChatController implements Initializable {
 
             try {
                 App.switchScene("admin_chat_detail");
-            } catch (Exception ignored) {
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         });
 

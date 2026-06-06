@@ -44,7 +44,7 @@
             </VBox>
 
             <Button text="Refresh" onAction="#refresh" styleClass="clear-btn"/>
-        </HBox>>
+        </HBox>
         <StackPane VBox.vgrow="ALWAYS">
             <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="chat-scroll"
                         vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
